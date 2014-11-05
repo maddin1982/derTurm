@@ -1,0 +1,33 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+
+body {
+	padding-top: 50px;
+	padding-bottom: 20px;
+}
+
+.frame{
+	height:20px;
+	clear:both;
+}
+.frame div{
+	height:20px;
+	width:6.25%;
+	float:left;
+	border:solid 2px #fff;
+}
+
+
+
+
+
+
+
+
+
+
+
