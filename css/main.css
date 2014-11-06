@@ -21,8 +21,13 @@ body {
 	border:solid 2px #fff;
 }
 
-
-
+#popUpMenu{
+	position:absolute;
+	height:200px;
+	width:200px;
+	display:none;
+	background:white;
+}
 
 
 
