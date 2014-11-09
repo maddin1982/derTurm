@@ -88,6 +88,9 @@ var framesObj = function(framesContainer){
 }
 var frames= new framesObj($("#storyboard"));
 
+
+
+
 var popUpMenuObj=function(popUpMenuDiv){
 	this.popUpMenuDiv=popUpMenuDiv;
 
