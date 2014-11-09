@@ -2,7 +2,51 @@
 $(document).ready(function() { 
 	init3DSceneOnElement($("#3DContainer"));
 	$("#addFrameBtn").on("click",frames.addFrame)
+	// fenster anzahl auswählen
+	$("#2_fenster").on("click",{count: 2},windowManager.setWindowAmount);
+	$("#4_fenster").on("click",{count: 4},windowManager.setWindowAmount);
+	$("#8_fenster").on("click",{count: 8},windowManager.setWindowAmount);
+	$("#16_fenster").on("click",{count: 16},windowManager.setWindowAmount);
+	// Fenster Modus auswählen
+	$("#wm_plain").on("click",{mode: 1},windowManager.setWindowMode);
+	$("#wm_mirror").on("click",{mode: 2},windowManager.setWindowMode);
+	$("#wm_wrap").on("click",{mode: 3},windowManager.setWindowMode);
+
 });
+
+var windowManagerObj = function(){
+	var windowCount = 16;
+	var windowMode = 0; //0-none 1-one color, 2-mirror, 3-wrap around
+	var that = this;
+	var c_str_ModeName = ["kein","einfarbig","gespiegelt","umlaufend"];
+
+	this.setWindowAmount=function(evt){
+		var newWindowCount = evt.data.count;		
+		$("#dd_WindowAmount").text(newWindowCount+" Fenster");
+		if( windowCount != newWindowCount)
+		{
+			if( newWindowCount == 16)
+			{
+				evt.data.mode = 0;
+				that.setWindowMode(evt);
+			}
+			//add function call for frames to handle the new situation
+			//something like: frames.setWindowsInactive(windowMode);	
+
+			windowCount = newWindowCount;
+		}
+	};
+	this.setWindowMode=function(evt){
+		var newWindowMode = evt.data.mode;
+		$("#dd_WindowMode").text("Modus: "+c_str_ModeName[newWindowMode]);
+		if( windowMode != newWindowMode && windowCount != 16)
+		{
+			//add function call for frames to handle the new mode
+			//something like: frames.setWindowsInactive(windowMode);
+			windowMode = newWindowMode;
+		}
+	};
+}
 
 var framesObj = function(framesContainer){
 	this.framesContainer=framesContainer;
@@ -31,7 +75,7 @@ var framesObj = function(framesContainer){
 	this.deleteFrame=function(id){
 		that.framesArray.splice(id, 1);
 	};
-	
+
 	this.getFrame=function(id){
 		if(that.framesArray[id])
 			return that.framesArray[id];
@@ -69,6 +113,7 @@ var framesObj = function(framesContainer){
 	}
 }
 var frames= new framesObj($("#storyboard"));
+var windowManager = new windowManagerObj();
 
 var popUpMenuObj=function(popUpMenuDiv){
 	this.popUpMenuDiv=popUpMenuDiv;

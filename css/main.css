@@ -29,10 +29,16 @@ body {
 	background:white;
 }
 
+.dropdown {
+	position: relative;
+	float:left;
+	margin-left: 5px;
+}
 
-
-
-
+.btn {
+	position: relative;
+	float:left;
+}
 
 
 

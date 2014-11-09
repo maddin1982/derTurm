@@ -48,6 +48,28 @@
 		<div id="storyBoardHeader" class="row">
 			<div class="col-md-12">
 				<button id="addFrameBtn" class="btn">add Frame</button>
+        <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+        Aktive Fenster
+        <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+          <li role="presentation"><a role="menuitem" tabindex="-1" id="2_fenster">2 Fenster</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" id="4_fenster">4 Fenster</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" id="8_fenster">8 Fenster</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" id="16_fenster">16 Fenster</a></li>
+        </ul>
+      </div>
+      <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
+        Fenster Modus
+        <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
+          <li role="presentation"><a role="menuitem" tabindex="-1" id="wm_plain">einfarbig</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" id="wm_mirror">gespiegelt</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" id="wm_wrap">umlaufend</a></li>
+        </ul>
 			</div>
 		</div>
 		<!--Storyboard -->
