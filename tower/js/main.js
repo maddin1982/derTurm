@@ -87,7 +87,7 @@ var windowManagerObj = function(){
 			{
 				for(var i=0;i < 16;i++)
 				{
-					if(i > windowAmount)
+					if(i > windowAmount-1)
 						data[j][i].color = "#000000";
 				}
 			}
