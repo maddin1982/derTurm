@@ -156,7 +156,7 @@ var windowManagerObj = function(){
 var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
-	this.framerate=5;
+	this.framerate=0.5;
 	this.currentframeId=0;
 	this.lastSelectedWindowDiv;
 	var that=this;
@@ -166,7 +166,16 @@ var framesManagerObj = function(framesContainer){
 	}	
 	
 	this.saveDataToBackend=function(){
-		io.emit("data",data)
+		//parse data for arduino
+		var formatedData=[];
+		$.each(data,function(i,frame){
+			var windows=[];
+			$.each(frame,function(i,window){
+				windows.push(colorGenerator.parseColor(window.color))
+			})
+			formatedData.push(windows);
+		})
+		io.emit("data",formatedData)
 		io.emit("frameRate",that.framerate)
 	}
 	

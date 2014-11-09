@@ -12,30 +12,48 @@ app.use(express.static(__dirname + '/tower'));
 
 //data Variables
 var frameData=[];
-var frameRate=[];
-
+var frameRate=1;
+var currentFrameId=0;
+var intervall;
 
 // get new data
 app.io.route('data', function(req) {
 	frameData=req.data;
-	console.log("new frameData")
-	sendFrameToArduino(0);
+	console.log("new frameData")		
 })
+
+var reStartInterval=function(){
+	clearInterval(intervall);
+	currentFrameId=0;
+	intervall= setInterval(function(){
+		if(frameData.length>0){
+			sendFrameToArduino(currentFrameId);
+			currentFrameId=(currentFrameId+1)%frameData.length;
+		}
+	}, 1000/frameRate); 
+}
 
 // get new framerate
 app.io.route('frameRate', function(req) {
-    frameRate=req.data;
+    console.log("new frameRate")	
+	frameRate=req.data;
+	reStartInterval();
 })
 
 var sendFrameToArduino=function(frameId){
-	var message="";
+	var messageString="";
 	for(var i =0; i<frameData[frameId].length;i++){
-		message+=frameData[frameId].color;
-		if(frameData[frameId].length>i+1)message+="|"
+		messageString+=frameData[frameId][i][0]+",";  	//r
+		messageString+=frameData[frameId][i][1]+",";	//g
+		messageString+=frameData[frameId][i][2];	//b
+		if(frameData[frameId].length>i+1)messageString+="|"
 	}
-	var message = new Buffer("Some bytes");
+	console.log(messageString)
+	var message = new Buffer(messageString);
+	
+	
 	var client = dgram.createSocket("udp4");
-	client.send(message, 0, message.length, 41234, "localhost", function(err, bytes) {
+	client.send(message, 0, message.length, 8888, "192.168.2.20", function(err, bytes) {
 	  client.close();
 	});
 }
