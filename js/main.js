@@ -149,7 +149,7 @@ var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	//this.framesArray=[];
 	var data=[];
-	this.framerate=10;
+	this.framerate=100;
 	this.currentframe=0;
 	this.lastFrameChange=new Date();
 	//last klicked frame
