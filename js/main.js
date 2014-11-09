@@ -3,10 +3,10 @@ $(document).ready(function() {
 	init3DSceneOnElement($("#3DContainer"));
 	$("#addFrameBtn").on("click",frames.addFrame)
 	// fenster anzahl auswählen
-	$("#2_fenster").on("click",{count: 2},windowManager.setWindowAmount);
-	$("#4_fenster").on("click",{count: 4},windowManager.setWindowAmount);
-	$("#8_fenster").on("click",{count: 8},windowManager.setWindowAmount);
-	$("#16_fenster").on("click",{count: 16},windowManager.setWindowAmount);
+	$("#2_fenster").on("click",{amount: 2},windowManager.setWindowAmount);
+	$("#4_fenster").on("click",{amount: 4},windowManager.setWindowAmount);
+	$("#8_fenster").on("click",{amount: 8},windowManager.setWindowAmount);
+	$("#16_fenster").on("click",{amount: 16},windowManager.setWindowAmount);
 	// Fenster Modus auswählen
 	$("#wm_plain").on("click",{mode: 1},windowManager.setWindowMode);
 	$("#wm_mirror").on("click",{mode: 2},windowManager.setWindowMode);
@@ -15,17 +15,25 @@ $(document).ready(function() {
 });
 
 var windowManagerObj = function(){
-	var windowCount = 16;
+	var windowAmount = 16;
 	var windowMode = 0; //0-none 1-one color, 2-mirror, 3-wrap around
 	var that = this;
 	var c_str_ModeName = ["kein","einfarbig","gespiegelt","umlaufend"];
 
+	this.getWindowAmount=function(){
+		return parseInt(windowAmount);
+	};
+
+	this.getWindowMode=function(){
+		return parseInt(windowMode);
+	};
+
 	this.setWindowAmount=function(evt){
-		var newWindowCount = evt.data.count;		
-		$("#dd_WindowAmount").text(newWindowCount+" Fenster");
-		if( windowCount != newWindowCount)
+		var newWindowAmount = evt.data.amount;		
+		$("#dd_WindowAmount").text(newWindowAmount+" Fenster");
+		if( windowAmount != newWindowAmount)
 		{
-			if( newWindowCount == 16)
+			if( newWindowAmount == 16)
 			{
 				evt.data.mode = 0;
 				that.setWindowMode(evt);
@@ -33,13 +41,13 @@ var windowManagerObj = function(){
 			//add function call for frames to handle the new situation
 			//something like: frames.setWindowsInactive(windowMode);	
 
-			windowCount = newWindowCount;
+			windowAmount = newWindowAmount;
 		}
 	};
 	this.setWindowMode=function(evt){
 		var newWindowMode = evt.data.mode;
 		$("#dd_WindowMode").text("Modus: "+c_str_ModeName[newWindowMode]);
-		if( windowMode != newWindowMode && windowCount != 16)
+		if( windowMode != newWindowMode && windowAmount != 16)
 		{
 			//add function call for frames to handle the new mode
 			//something like: frames.setWindowsInactive(windowMode);
@@ -60,7 +68,7 @@ var framesObj = function(framesContainer){
 		console.log(evt);
 		popUpMenu.moveToPosition(evt.clientX,evt.clientY);
 		popUpMenu.show();
-	}
+	};
 	
 	this.addFrame=function(){
 		var newFrame=["#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000"]
