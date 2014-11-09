@@ -1,7 +1,7 @@
 
 $(document).ready(function() { 
 	init3DSceneOnElement($("#3DContainer"));
-	$("#addFrameBtn").on("click",frames.addFrame)
+	$("#addFrameBtn").on("click",framesManager.addFrame)
 	// fenster anzahl auswählen
 	$("#2_fenster").on("click",{amount: 2},windowManager.setWindowAmount);
 	$("#4_fenster").on("click",{amount: 4},windowManager.setWindowAmount);
@@ -39,7 +39,7 @@ var windowManagerObj = function(){
 			}			
 			windowAmount = newWindowAmount;
 			//redraw updates data
-			frames.renderFrames();
+			framesManager.renderFrames();
 		}
 	};
 	this.setWindowMode=function(evt){
@@ -52,11 +52,13 @@ var windowManagerObj = function(){
 			$("#dd_WindowMode").text("Modus: "+c_str_ModeName[newWindowMode]);
 			windowMode = newWindowMode;
 
-			frames.renderFrames();
+			framesManager.renderFrames();
 		}
 	};
 
 	this.updateData=function(){
+		var data = framesManager.getData();
+	
 		//active or non-active divs
 		for(var j=0; j < data.length;j++)
 		{
@@ -141,11 +143,12 @@ var windowManagerObj = function(){
 		}
 	}
 }
-var data = [];
+//var data = [];
 
-var framesObj = function(framesContainer){
+var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
-	this.framesArray=[];
+	//this.framesArray=[];
+	var data=[];
 	this.framerate=10;
 	this.currentframe=0;
 	this.lastFrameChange=new Date();
@@ -153,29 +156,33 @@ var framesObj = function(framesContainer){
 	this.lastSelectedWindowDiv;
 	var that=this;
 
+	this.getData=function(){
+		return data;
+	}
+	
 	this.selectFrame=function(evt){
 		that.lastSelectedWindowDiv=evt.target;
 		popUpMenu.moveToPosition(evt.clientX,evt.clientY);
 		popUpMenu.show();
 	};
 
-	this.addFrame2 = function(){
+	this.addFrame = function(){
 		var newFramesArray = [];
-
 		for( var i=0;i < 16; i++)
 		{
 			var frame = {color:"#000000", active:1}; 
 			newFramesArray.push(frame);
 		}
 		data.push(newFramesArray);
+		that.renderFrames();
 	}
 
-	this.addFrame=function(){
-		that.addFrame2();
-		var newFrame=["#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000"]
-		that.framesArray.push(newFrame);
-		that.renderFrames();
-	};
+	// this.addFrame=function(){
+		// that.addFrame2();
+		// var newFrame=["#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000"]
+		// that.framesArray.push(newFrame);
+		// that.renderFrames();
+	// };
 	
 	this.setSingleWindowColor=function(color,frameId,windowId){
 		if(!frameId){
@@ -192,17 +199,17 @@ var framesObj = function(framesContainer){
 		}
 		data[frameId][windowId].color = color;
 		windowManager.updateData();
-		that.framesArray[frameId][windowId]=color;
+		//that.framesArray[frameId][windowId]=color;
 		that.renderFrames();
 	};
 	
 	this.deleteFrame=function(id){
-		that.framesArray.splice(id, 1);
+		data.splice(id, 1);
 	};
 
 	this.getFrame=function(id){
-		if(that.framesArray[id])
-			return that.framesArray[id];
+		if(data[id])
+			return data[id];
 		else
 			return null;
 	};
@@ -210,15 +217,15 @@ var framesObj = function(framesContainer){
 	//returns next frame depending on framerate
 	this.getNextFrame=function(){
 		var nextframe;
-		//return black windows if no frame exists
-		if(that.framesArray.length==0)
-			return["#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000","#000000"]
-		
+
+		if(data.length==0)
+			return [];
+			
 		if(new Date()-that.lastFrameChange>(1000/that.framerate)){
-			that.currentframe=(that.currentframe+1)%that.framesArray.length;	
+			that.currentframe=(that.currentframe+1)%data.length;	
 			that.lastFrameChange=new Date();
 		}
-		nextframe= that.framesArray[that.currentframe];
+		nextframe= data[that.currentframe];
 		return nextframe
 	};
 	
@@ -226,12 +233,12 @@ var framesObj = function(framesContainer){
 	this.renderFrames=function(){		
 		windowManager.updateData();
 		that.framesContainer.empty();
-		$.each(that.framesArray,function(j,frame){
+		$.each(data,function(j,frame){
 			var frameDiv=document.createElement('div')
 			$(frameDiv).attr("class","frame")
 			$(frameDiv).attr("frameId",j)
 			$.each(frame,function(i,frameWindowColor){
-				that.framesArray[j][i]=data[j][i].color; // hack to still show the data in the 3D model
+				//that.framesArray[j][i]=data[j][i].color; // hack to still show the data in the 3D model
 				console.log ();
 				var windowDiv=document.createElement('div')
 				$(windowDiv).attr("windowId",i);
@@ -246,10 +253,8 @@ var framesObj = function(framesContainer){
 		})
 	}
 }
-var frames= new framesObj($("#storyboard"));
+var framesManager= new framesManagerObj($("#storyboard"));
 var windowManager = new windowManagerObj();
-
-
 
 
 var popUpMenuObj=function(popUpMenuDiv){
@@ -273,8 +278,8 @@ var popUpMenuObj=function(popUpMenuDiv){
 		$(colorselectionDiv).find(".singleColor").on("click",function(evt){
 
 			var newColor=$(evt.target).css("backgroundColor");
-			$(frames.lastSelectedWindowDiv).css("backgroundColor",newColor)
-			frames.setSingleWindowColor(newColor);
+			$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
+			framesManager.setSingleWindowColor(newColor);
 			popUpMenu.hide();
 		})
 		that.popUpMenuDiv.append(colorselectionDiv);		

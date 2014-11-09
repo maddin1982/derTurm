@@ -100,8 +100,8 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate);
-	$.each(frames.getNextFrame(),function(i,windowColor){
-		setWindowToColor(i,windowColor)
+	$.each(framesManager.getNextFrame(),function(i,window){
+		setWindowToColor(i,window.color)
 	})
     render();
 }
