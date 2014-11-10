@@ -156,7 +156,7 @@ var windowManagerObj = function(){
 var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
-	this.framerate=0.5;
+	this.framerate=50;
 	this.currentframeId=0;
 	this.lastSelectedWindowDiv;
 	var that=this;

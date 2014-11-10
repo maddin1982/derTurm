@@ -4,6 +4,8 @@ var dgram = require("dgram");
 
 var udpServer = dgram.createSocket("udp4");
 
+var lastMessageSendToArduino="";
+
 var app = express()
 app.http().io()
 
@@ -48,14 +50,16 @@ var sendFrameToArduino=function(frameId){
 		messageString+=frameData[frameId][i][2];	//b
 		if(frameData[frameId].length>i+1)messageString+="|"
 	}
-	console.log(messageString)
+	//console.log(messageString)
 	var message = new Buffer(messageString);
-	
-	
 	var client = dgram.createSocket("udp4");
-	client.send(message, 0, message.length, 8888, "192.168.2.20", function(err, bytes) {
-	  client.close();
-	});
+
+	if(lastMessageSendToArduino!=messageString){
+		client.send(message, 0, message.length, 8888, "192.168.2.20", function(err, bytes) {
+		  client.close();
+		});
+	}
+	lastMessageSendToArduino=messageString;
 }
 
 var server = app.listen(3000, function () {
