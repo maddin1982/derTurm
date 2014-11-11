@@ -10,6 +10,16 @@
         <link rel="stylesheet" href="css/bootstrap-theme.min.css">
 		<!--<link rel="stylesheet" href="css/colpick.css">-->
         <link rel="stylesheet" href="css/main.css">
+
+		<script src="js/vendor/jquery-1.11.1.min.js"></script>
+		<script src="js/vendor/bootstrap.min.js"></script>
+
+		<script type="text/javascript">
+			$("#transitionBtn").click(function(){
+		    	$('#myModal').modal('show');
+			});
+		</script>
+
     </head>
     <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -74,6 +84,24 @@
 				  <li role="presentation"><a role="menuitem" tabindex="-1" id="wm_wrap">umlaufend</a></li>
 				</ul>
 				</div>
+				<a href="#myModal" id="transitionBtn" role="button" class="btn btn-default" data-toggle="modal">Transition</a>
+				<div id="myModal" class="modal fade">
+				    <div class="modal-dialog">
+				        <div class="modal-content">
+				            <div class="modal-header">
+				                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				                <h4 class="modal-title">Transitions</h4>
+				            </div>
+				            <div class="modal-body">
+				                <p>Slider für Zeit</p>
+				            </div>
+				            <div class="modal-footer">
+				                <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+				                <button type="button" class="btn btn-primary" id="saveTransition">Speichern</button>
+				            </div>
+				        </div>
+				    </div>
+				</div>
 			</div>
 		 </div>	
 		<!--Storyboard -->
@@ -86,8 +114,6 @@
 	<!--PopUp for colorPicker and so on -->
 	<div id="popUpMenu"></div>
 
-	<script src="js/vendor/jquery-1.11.1.min.js"></script>
-	<script src="js/vendor/bootstrap.min.js"></script>
 	<script src="js/vendor/three.min.js"></script>
 	<script src="js/vendor/three.orbitctrl.js"></script>
 	<script src="../socket.io/socket.io.js"></script>

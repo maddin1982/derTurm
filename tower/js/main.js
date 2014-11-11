@@ -6,7 +6,8 @@ $(document).ready(function() {
 	init3DSceneOnElement($("#3DContainer"));
 	$("#addFrameBtn").on("click",framesManager.addFrame)
 	$("#saveSceneBtn").on("click",framesManager.saveDataToBackend)
-	
+	$("#saveTransition").on("click",framesManager.saveDataToBackend);
+
 	// fenster anzahl auswählen
 	$("#2_fenster").on("click",{amount: 2},windowManager.setWindowAmount);
 	$("#4_fenster").on("click",{amount: 4},windowManager.setWindowAmount);
@@ -261,7 +262,6 @@ var framesManagerObj = function(framesContainer){
 }
 var framesManager= new framesManagerObj($("#storyboard"));
 var windowManager = new windowManagerObj();
-
 
 var popUpMenuObj=function(popUpMenuDiv){
 	this.popUpMenuDiv=popUpMenuDiv;
