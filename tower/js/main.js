@@ -17,6 +17,10 @@ $(document).ready(function() {
 	$("#wm_repeat").on("click",{mode: 2},windowManager.setWindowMode);
 	$("#wm_wrap").on("click",{mode: 3},windowManager.setWindowMode);
 
+	$(".fps_select").on("click",function(){	
+		framesManager.setFramerate(parseInt($(this).attr("fps")))
+	})
+	
 	io= io.connect()
 });
 
@@ -73,9 +77,9 @@ var windowManagerObj = function(){
 			for(var i=0;i < 16;i++)
 			{
 				if( i < windowAmount)
-					data[j][i].active = 1;
+					data[j].windows[i].active = 1;
 				else
-					data[j][i].active = 0;
+					data[j].windows[i].active = 0;
 			}
 		}
 		//colors
@@ -88,7 +92,7 @@ var windowManagerObj = function(){
 				for(var i=0;i < 16;i++)
 				{
 					if(i > windowAmount-1)
-						data[j][i].color = "#000000";
+						data[j].windows[i].color = "#000000";
 				}
 			}
 		}
@@ -98,7 +102,7 @@ var windowManagerObj = function(){
 			{
 				for(var i=0;i < 16;i++)
 				{
-					data[j][i].color = data[j][i%windowAmount].color;
+					data[j].windows[i].color = data[j].windows[i%windowAmount].color;
 				}
 			}
 		}
@@ -108,44 +112,44 @@ var windowManagerObj = function(){
 			{
 				for(var i=0;i < 16;i++)
 				{
-					data[j][i].color = data[j][i%windowAmount].color;					
+					data[j].windows[i].color = data[j].windows[i%windowAmount].color;					
 				}
 				if( windowAmount == 2)
 				{
-					data[j][2].color = data[j][1].color;
-					data[j][3].color = data[j][0].color;
+					data[j].windows[2].color = data[j].windows[1].color;
+					data[j].windows[3].color = data[j].windows[0].color;
 
-					data[j][6].color = data[j][1].color;
-					data[j][7].color = data[j][0].color;
+					data[j].windows[6].color = data[j].windows[1].color;
+					data[j].windows[7].color = data[j].windows[0].color;
 
-					data[j][10].color = data[j][1].color;
-					data[j][11].color = data[j][0].color;
+					data[j].windows[10].color = data[j].windows[1].color;
+					data[j].windows[11].color = data[j].windows[0].color;
 
-					data[j][14].color = data[j][1].color;
-					data[j][15].color = data[j][0].color;
+					data[j].windows[14].color = data[j].windows[1].color;
+					data[j].windows[15].color = data[j].windows[0].color;
 				}
 				if( windowAmount == 4)
 				{	
-					data[j][4].color = data[j][3].color;
-					data[j][5].color = data[j][2].color;
-					data[j][6].color = data[j][1].color;
-					data[j][7].color = data[j][0].color;
+					data[j].windows[4].color = data[j].windows[3].color;
+					data[j].windows[5].color = data[j].windows[2].color;
+					data[j].windows[6].color = data[j].windows[1].color;
+					data[j].windows[7].color = data[j].windows[0].color;
 
-					data[j][12].color = data[j][3].color;
-					data[j][13].color = data[j][2].color;
-					data[j][14].color = data[j][1].color;
-					data[j][15].color = data[j][0].color;
+					data[j].windows[12].color = data[j].windows[3].color;
+					data[j].windows[13].color = data[j].windows[2].color;
+					data[j].windows[14].color = data[j].windows[1].color;
+					data[j].windows[15].color = data[j].windows[0].color;
 				}
 				if( windowAmount == 8)
 				{	
-					data[j][8].color = data[j][7].color;
-					data[j][9].color = data[j][6].color;
-					data[j][10].color = data[j][5].color;
-					data[j][11].color = data[j][4].color;
-					data[j][12].color = data[j][3].color;
-					data[j][13].color = data[j][2].color;
-					data[j][14].color = data[j][1].color;
-					data[j][15].color = data[j][0].color;
+					data[j].windows[8].color = data[j].windows[7].color;
+					data[j].windows[9].color = data[j].windows[6].color;
+					data[j].windows[10].color = data[j].windows[5].color;
+					data[j].windows[11].color = data[j].windows[4].color;
+					data[j].windows[12].color = data[j].windows[3].color;
+					data[j].windows[13].color = data[j].windows[2].color;
+					data[j].windows[14].color = data[j].windows[1].color;
+					data[j].windows[15].color = data[j].windows[0].color;
 				}
 			}
 		}
@@ -156,32 +160,56 @@ var windowManagerObj = function(){
 var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
-	this.framerate=50;
+	//var framerate=24;
 	this.currentframeId=0;
 	this.lastSelectedWindowDiv;
+	this.frameAnimationRunning=false;
 	var that=this;
 
+	//go to next Frame if there is one
+	function goToNextFrame(){
+		if(data.length>1){
+			setTimeout(function () {goToNextFrame()},data[that.currentframeId].duration)
+			that.currentframeId=(that.currentframeId+1)%data.length;
+		}
+		else //animation stoped
+			that.frameAnimationRunning=false;
+	}
+	
+	//start framechange with timer if it isnt already running
+	function startAnimation(){
+		if(!that.frameAnimationRunning&&data.length>1){
+			goToNextFrame()
+			that.frameAnimationRunning=true;
+		}
+	}
+	
 	this.getData=function(){
 		return data;
 	}	
 	
+	this.setFramerate=function(fps){
+		$.each(data,function(i,frame){
+			frame.duration=1000/fps;
+		})
+	}
+	
 	this.saveDataToBackend=function(){
-		//parse data for arduino
+		//parse color to rgb values
 		var formatedData=[];
 		$.each(data,function(i,frame){
-			var windows=[];
-			$.each(frame,function(i,window){
-				windows.push(colorGenerator.parseColor(window.color))
+			var newframe={duration:frame.duration,windows:[]}
+			$.each(frame.windows,function(i,window){
+				newframe.windows.push(colorGenerator.parseColor(window.color))
 			})
-			formatedData.push(windows);
+			formatedData.push(newframe);
 		})
 		io.emit("data",formatedData)
-		io.emit("frameRate",that.framerate)
 	}
 	
 	this.getCurrentFrame=function(){
 		if(data.length==0)
-			return [];
+			return ;
 		return data[that.currentframeId];
 	}
 	
@@ -192,14 +220,15 @@ var framesManagerObj = function(framesContainer){
 	};
 
 	this.addFrame = function(){
-		var newFramesArray = [];
+		var newFrame = {duration:1000/24,windows:[]};
 		for( var i=0;i < 16; i++)
 		{
-			var frame = {color:"#000000", active:1}; 
-			newFramesArray.push(frame);
+			var window = {color:"#000000", active:1}; 
+			newFrame.windows.push(window);
 		}
-		data.push(newFramesArray);
+		data.push(newFrame);
 		that.renderFrames();
+		startAnimation();
 	}
 	
 	this.setSingleWindowColor=function(color,frameId,windowId){
@@ -215,7 +244,7 @@ var framesManagerObj = function(framesContainer){
 				else 
 					windowId=0;
 		}
-		data[frameId][windowId].color = color;
+		data[frameId].windows[windowId].color = color;
 		windowManager.updateData();
 		that.renderFrames();
 	};
@@ -231,11 +260,6 @@ var framesManagerObj = function(framesContainer){
 			return null;
 	};
 	
-	this.frameChageTimer=setInterval(function () {
-		if(data.length>0)
-			that.currentframeId=(that.currentframeId+1)%data.length;
-	}, 1000/that.framerate);
-	
 	//renders Frames after change
 	this.renderFrames=function(){		
 		windowManager.updateData();
@@ -244,12 +268,12 @@ var framesManagerObj = function(framesContainer){
 			var frameDiv=document.createElement('div')
 			$(frameDiv).attr("class","frame")
 			$(frameDiv).attr("frameId",j)
-			$.each(frame,function(i,frameWindowColor){
+			$.each(frame.windows,function(i,frameWindow){
 				console.log ();
 				var windowDiv=document.createElement('div')
 				$(windowDiv).attr("windowId",i);
-				$(windowDiv).attr("style","background-color:"+data[j][i].color);
-			    if(data[j][i].active!=1)
+				$(windowDiv).attr("style","background-color:"+frameWindow.color);
+			    if(frameWindow.active!=1)
 			    	$(windowDiv).css({opacity: 0.2});
 		
 				$(windowDiv).on("click",that.selectFrame)
