@@ -16,7 +16,7 @@ body {
 }
 .frame div{
 	height:20px;
-	width:6.25%;
+	width:6.1%;
 	float:left;
 	border:solid 2px #fff;
 }
@@ -38,4 +38,7 @@ body {
 	position: relative;
 	float:left;
 	margin-left: 5px;
+}
+a.btn-xs {
+	height: 18px;
 }
