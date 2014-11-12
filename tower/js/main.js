@@ -275,7 +275,6 @@ var framesManagerObj = function(framesContainer){
 			$(frameDiv).attr("class","frame")
 			$(frameDiv).attr("frameId",j)
 			$.each(frame.windows,function(i,frameWindow){
-				console.log ();
 				var windowDiv=document.createElement('div')
 				$(windowDiv).attr("windowId",i);
 				$(windowDiv).attr("style","background-color:"+frameWindow.color);
@@ -285,14 +284,17 @@ var framesManagerObj = function(framesContainer){
 				$(windowDiv).on("click",that.selectFrame)
 				$(frameDiv).append(windowDiv)
 			})
-			var transitionA=document.createElement('a')
-			$(transitionA).attr("href","#myModal")
-			$(transitionA).attr("id","transitionBtn"+j)
-			$(transitionA).attr("role","button")
-			$(transitionA).attr("class","btn btn-xs btn-default transitionBtn")
-			$(transitionA).attr("data-toggle","modal")
-			$(transitionA).text("+")
-			$(frameDiv).append(transitionA)
+			if( j < data.length-1)
+			{
+				var transitionA=document.createElement('a')
+				$(transitionA).attr("href","#myModal")
+				$(transitionA).attr("id","transitionBtn"+j)
+				$(transitionA).attr("role","button")
+				$(transitionA).attr("class","btn btn-xs btn-default transitionBtn")
+				$(transitionA).attr("data-toggle","modal")
+				$(transitionA).text("+")
+				$(frameDiv).append(transitionA)
+			}
 			that.framesContainer.append(frameDiv)
 
 		})

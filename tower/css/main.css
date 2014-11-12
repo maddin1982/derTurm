@@ -40,5 +40,9 @@ body {
 	margin-left: 5px;
 }
 a.btn-xs {
+	margin-top: 5px;
 	height: 18px;
+}
+.modal-body {
+	height: auto;
 }
