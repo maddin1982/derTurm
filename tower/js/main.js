@@ -21,7 +21,13 @@ $(document).ready(function() {
 	$(".fps_select").on("click",function(){	
 		framesManager.setFramerate(parseInt($(this).attr("fps")))
 	})
-	
+	$("#testSlider").slider() ;
+	$("#transitionBtn").click(function(){
+		$('#transitionBtn').modal('show');
+	});	
+	$("#testSlider").on('slide', function(ev){
+		console.log("Slider Test.");
+	});
 	io= io.connect()
 });
 
