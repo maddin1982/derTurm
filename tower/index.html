@@ -8,8 +8,26 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+
+        <link rel="stylesheet" href="css/slider.css">
 		<!--<link rel="stylesheet" href="css/colpick.css">-->
         <link rel="stylesheet" href="css/main.css">
+
+		<script src="js/vendor/jquery-1.11.1.min.js"></script>
+		<script src="js/vendor/bootstrap.min.js"></script>
+		<script src="js/vendor/bootstrap-slider.js"></script>
+
+		<script type="text/javascript">
+			$("#transitionBtn").click(function(){
+		    	$('#transitionBtn').modal('show');
+			});
+			
+			$("#testSlider").slider() // this doesnt work yet!
+			/*$("#testSlider").on('slide', function(ev){
+    			console.log("Slider Test.");
+  			});*/
+		</script>
+
     </head>
     <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -86,6 +104,30 @@
 					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
 					</ul>
 				</div>
+				<div id="myModal" class="modal fade">
+				    <div class="modal-dialog">
+				        <div class="modal-content">
+				            <div class="modal-header">
+				                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				                <h4 class="modal-title">Transitions</h4>
+				            </div>
+				            <div class="modal-body">
+				                <p>Zeit: </p>
+				                <div id="testSlider" class="slider slider-horizontal" style="width: 100%;">
+				                	<div class="slider-track"><div class="slider-selection" style="left: 0%; width: 100%;"></div>
+				                	<div class="slider-handle round" style="left: 100%;"></div>
+				                	<div class="slider-handle round hide" style="left: 0%;"></div>
+				                	</div>
+				              	</div>				            	
+				                <p></br>Todo: Get slider to work, Slider für delay & cutoff</p>
+				           		
+				            <div class="modal-footer">
+				                <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+				                <button type="button" class="btn btn-primary" id="saveTransition">Speichern</button>
+				            </div>
+				        </div>
+				    </div>
+				</div>
 			</div>
 		 </div>	
 		<!--Storyboard -->
@@ -98,8 +140,6 @@
 	<!--PopUp for colorPicker and so on -->
 	<div id="popUpMenu"></div>
 
-	<script src="js/vendor/jquery-1.11.1.min.js"></script>
-	<script src="js/vendor/bootstrap.min.js"></script>
 	<script src="js/vendor/three.min.js"></script>
 	<script src="js/vendor/three.orbitctrl.js"></script>
 	<script src="../socket.io/socket.io.js"></script>

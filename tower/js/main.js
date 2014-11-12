@@ -6,7 +6,8 @@ $(document).ready(function() {
 	init3DSceneOnElement($("#3DContainer"));
 	$("#addFrameBtn").on("click",framesManager.addFrame)
 	$("#saveSceneBtn").on("click",framesManager.saveDataToBackend)
-	
+	$("#saveTransition").on("click",framesManager.setTransition);
+
 	// fenster anzahl auswählen
 	$("#2_fenster").on("click",{amount: 2},windowManager.setWindowAmount);
 	$("#4_fenster").on("click",{amount: 4},windowManager.setWindowAmount);
@@ -166,6 +167,10 @@ var framesManagerObj = function(framesContainer){
 	this.frameAnimationRunning=false;
 	var that=this;
 
+	function setTransition(){
+		//BUG is not called yet from the modal dialog :(
+		//$('#myModal').modal('hide')
+	}
 	//go to next Frame if there is one
 	function goToNextFrame(){
 		if(data.length>1){
@@ -264,12 +269,12 @@ var framesManagerObj = function(framesContainer){
 	this.renderFrames=function(){		
 		windowManager.updateData();
 		that.framesContainer.empty();
+		var frameDiv = null;
 		$.each(data,function(j,frame){
-			var frameDiv=document.createElement('div')
+			frameDiv=document.createElement('div')
 			$(frameDiv).attr("class","frame")
 			$(frameDiv).attr("frameId",j)
 			$.each(frame.windows,function(i,frameWindow){
-				console.log ();
 				var windowDiv=document.createElement('div')
 				$(windowDiv).attr("windowId",i);
 				$(windowDiv).attr("style","background-color:"+frameWindow.color);
@@ -279,13 +284,24 @@ var framesManagerObj = function(framesContainer){
 				$(windowDiv).on("click",that.selectFrame)
 				$(frameDiv).append(windowDiv)
 			})
+			if( j < data.length-1)
+			{
+				var transitionA=document.createElement('a')
+				$(transitionA).attr("href","#myModal")
+				$(transitionA).attr("id","transitionBtn"+j)
+				$(transitionA).attr("role","button")
+				$(transitionA).attr("class","btn btn-xs btn-default transitionBtn")
+				$(transitionA).attr("data-toggle","modal")
+				$(transitionA).text("+")
+				$(frameDiv).append(transitionA)
+			}
 			that.framesContainer.append(frameDiv)
+
 		})
 	}
 }
 var framesManager= new framesManagerObj($("#storyboard"));
 var windowManager = new windowManagerObj();
-
 
 var popUpMenuObj=function(popUpMenuDiv){
 	this.popUpMenuDiv=popUpMenuDiv;
