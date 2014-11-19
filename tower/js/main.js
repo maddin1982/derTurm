@@ -22,11 +22,12 @@ $(document).ready(function() {
 		framesManager.setFramerate(parseInt($(this).attr("fps")))
 	});
 	// Modal Dialog
+	//save Settings
 	$("#saveModal").on("click", function() {
-		// save the data!
-			//$('#trans_duration').data('slider').getValue();
-		//for the current row
-			//console.log(currentModalDialogRow);
+		var currentFrameType = 0;
+		if( $('#ft_fade').parent().hasClass('active'))
+			currentFrameType = 1;
+		framesManager.setFrame(currentModalDialogRow,currentFrameType,parseFloat($('#trans_duration').data('slider').getValue()));
 		// hide the modal dialog 
 		$('#myModal').modal('hide')
 	});
@@ -34,6 +35,7 @@ $(document).ready(function() {
 	$('#myModal').on('hidden.bs.modal', function () {
 		//reset the current row when the modal dialog is hidden
 		currentModalDialogRow = null;
+		currentFrameType = null;
 	});
 	
 	// Slider - Transition Duration
@@ -46,25 +48,34 @@ $(document).ready(function() {
 	
 
 var currentModalDialogRow = null;
+var currentFrameType=null;
 // Modal Dialog
 function modalDialog(inthis){
 	if( currentModalDialogRow == null)
 	{
+		//save current Row for this Transition Dialog
+		currentModalDialogRow = (inthis.id).split("transitionBtn").pop();
+		var tmpdata = framesManager.getFrameById(currentModalDialogRow);
+
 		//show the Modal Dialog
 		$('#myModal').modal('show');
 		// set maximum duration to 10seconds
-		var maxSlidervalue = framesManager.getFramerate()*10;		
-		//firsttime init
-		$("#trans_duration").slider({ max: maxSlidervalue }) ;
-		//set distance-max manually
+		$("#trans_duration").slider({ max: 10000 }) ;
+		/*//set distance-max manually
 		$("#trans_duration").data('slider').max = maxSlidervalue;
 		$("#trans_duration").data('slider').diff = maxSlidervalue;
-		// set Values like this
-		//$('#trans_duration').data('slider').setValue(50);
-		//the caller Button if you need it: $("#"+inthis.id)
+		*/
 
-		//save current Row for this Transition Dialog
-		currentModalDialogRow = (inthis.id).split("transitionBtn").pop();
+		// set Slider Value correctly
+		$('#trans_duration').data('slider').setValue(tmpdata.duration);
+
+		// set Toggle-Buttons for Type correctly
+		$("#ft_still").parent().removeClass("active");
+		$("#ft_fade").parent().removeClass("active");
+		if( tmpdata.type == 0)
+			$("#ft_still").parent().addClass("active")
+		else if( tmpdata.type == 1)
+			$("#ft_fade").parent().addClass("active")
 	}
 };
 
@@ -256,7 +267,13 @@ var framesManagerObj = function(framesContainer){
 		})
 		io.emit("data",formatedData)
 	}
-	
+	this.getFrameById=function(inID){
+		if(data.length==0)
+			return ;
+		if( inID >= data.length-1)
+			return ;
+		return data[inID];
+	}
 	this.getCurrentFrame=function(){
 		if(data.length==0)
 			return ;
@@ -269,8 +286,13 @@ var framesManagerObj = function(framesContainer){
 		popUpMenu.show();
 	};
 
+	this.setFrame = function(inFrameID,inType,inDuration,inDelay,inCutoff){
+			data[inFrameID].type = inType;
+			data[inFrameID].duration = inDuration;
+	};
+
 	this.addFrame = function(){
-		var newFrame = {duration:1000/24,windows:[]};
+		var newFrame = {duration:1000/24,type:0,windows:[]}; //type 0=still, 1=fade, 2=shift
 		for( var i=0;i < 16; i++)
 		{
 			var window = {color:"#000000", active:1}; 
