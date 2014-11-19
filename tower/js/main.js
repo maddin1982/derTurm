@@ -227,6 +227,7 @@ var framesManagerObj = function(framesContainer){
 		if(data.length>1){
 			that.currentframeId=(that.currentframeId+1)%data.length;
 			setTimeout(function () {goToNextFrame()},data[that.currentframeId].duration)			
+
 		}
 		else //animation stoped
 			that.frameAnimationRunning=false;
@@ -277,6 +278,8 @@ var framesManagerObj = function(framesContainer){
 	this.getCurrentFrame=function(){
 		if(data.length==0)
 			return ;
+		if(data[that.currentframeId].type == 1)
+			console.log("animated Frame :)");
 		return data[that.currentframeId];
 	}
 	
@@ -351,7 +354,7 @@ var framesManagerObj = function(framesContainer){
 				$(windowDiv).on("click",that.selectFrame)
 				$(frameDiv).append(windowDiv)
 			})
-			if( j < data.length-1)
+			if( j < data.length)
 			{
 				var transitionA=document.createElement('a')
 				//$(transitionA).attr("href","#myModal")
