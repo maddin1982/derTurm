@@ -46,3 +46,7 @@ a.btn-xs {
 .modal-body {
 	height: auto;
 }
+
+.trans_duration {
+	width: 100%;
+}

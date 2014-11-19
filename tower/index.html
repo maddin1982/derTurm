@@ -66,6 +66,7 @@
 					<span class="caret"></span>
 					</button>
 					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+					  <li role="presentation"><a role="menuitem" tabindex="-1" id="1_fenster">1 Fenster</a></li>
 					  <li role="presentation"><a role="menuitem" tabindex="-1" id="2_fenster">2 Fenster</a></li>
 					  <li role="presentation"><a role="menuitem" tabindex="-1" id="4_fenster">4 Fenster</a></li>
 					  <li role="presentation"><a role="menuitem" tabindex="-1" id="8_fenster">8 Fenster</a></li>
@@ -95,6 +96,7 @@
 					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
 					</ul>
 				</div>
+				<!--Modal Window-->
 				<div id="myModal" class="modal fade">
 				    <div class="modal-dialog">
 				        <div class="modal-content">
@@ -103,18 +105,17 @@
 				                <h4 class="modal-title">Transitions</h4>
 				            </div>
 				            <div class="modal-body">
-				                <p>Zeit: </p>
-				                <div id="testSlider" class="slider slider-horizontal" style="width: 100%;">
-				                	<div class="slider-track"><div class="slider-selection" style="left: 0%; width: 100%;"></div>
-				                	<div class="slider-handle round" style="left: 100%;"></div>
-				                	<div class="slider-handle round hide" style="left: 0%;"></div>
-				                	</div>
+				                <p>Zeit in Frames (max. 10sekunden)</p>
+				                <div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
+				                	
+				                	<div class="slider-track"></div>
+				                	<div class="slider-selection" style="z-index: 1;"></div>
 				              	</div>				            	
-				                <p></br>Todo: Get slider to work, Slider für delay & cutoff</p>
+				                <p></br>Todo: Slider für delay & cutoff</p>
 				           		
 				            <div class="modal-footer">
-				                <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-				                <button type="button" class="btn btn-primary" id="saveTransition">Speichern</button>
+				                <button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+				                <button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
 				            </div>
 				        </div>
 				    </div>
