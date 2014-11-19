@@ -82,7 +82,7 @@ function init3DSceneOnElement(element) {
 
     element.append(renderer.domElement);
 
-	controls = new THREE.OrbitControls( camera );
+	controls = new THREE.OrbitControls( camera , renderer.domElement);
 				controls.target = new THREE.Vector3( 0, 10, 0 );
 				controls.update();
 	
