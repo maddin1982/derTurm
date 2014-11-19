@@ -6,9 +6,9 @@ $(document).ready(function() {
 	init3DSceneOnElement($("#3DContainer"));
 	$("#addFrameBtn").on("click",framesManager.addFrame)
 	$("#saveSceneBtn").on("click",framesManager.saveDataToBackend)
-	$("#saveTransition").on("click",framesManager.setTransition);
 
 	// fenster anzahl auswählen
+	$("#1_fenster").on("click",{amount: 1},windowManager.setWindowAmount);
 	$("#2_fenster").on("click",{amount: 2},windowManager.setWindowAmount);
 	$("#4_fenster").on("click",{amount: 4},windowManager.setWindowAmount);
 	$("#8_fenster").on("click",{amount: 8},windowManager.setWindowAmount);
@@ -20,16 +20,53 @@ $(document).ready(function() {
 
 	$(".fps_select").on("click",function(){	
 		framesManager.setFramerate(parseInt($(this).attr("fps")))
-	})
-	$("#testSlider").slider() ;
-	$("#transitionBtn").click(function(){
-		$('#transitionBtn').modal('show');
-	});	
-	$("#testSlider").on('slide', function(ev){
-		console.log("Slider Test.");
 	});
+	// Modal Dialog
+	$("#saveModal").on("click", function() {
+		// save the data!
+			//$('#trans_duration').data('slider').getValue();
+		//for the current row
+			//console.log(currentModalDialogRow);
+		// hide the modal dialog 
+		$('#myModal').modal('hide')
+	});
+
+	$('#myModal').on('hidden.bs.modal', function () {
+		//reset the current row when the modal dialog is hidden
+		currentModalDialogRow = null;
+	});
+	
+	// Slider - Transition Duration
+	$("#trans_duration").on('slide', function(ev){
+		//$('#trans_duration').data('slider').getValue());
+	});
+
 	io= io.connect()
 });
+	
+
+var currentModalDialogRow = null;
+// Modal Dialog
+function modalDialog(inthis){
+	if( currentModalDialogRow == null)
+	{
+		//show the Modal Dialog
+		$('#myModal').modal('show');
+		// set maximum duration to 10seconds
+		var maxSlidervalue = framesManager.getFramerate()*10;		
+		//firsttime init
+		$("#trans_duration").slider({ max: maxSlidervalue }) ;
+		//set distance-max manually
+		$("#trans_duration").data('slider').max = maxSlidervalue;
+		$("#trans_duration").data('slider').diff = maxSlidervalue;
+		// set Values like this
+		//$('#trans_duration').data('slider').setValue(50);
+		//the caller Button if you need it: $("#"+inthis.id)
+
+		//save current Row for this Transition Dialog
+		currentModalDialogRow = (inthis.id).split("transitionBtn").pop();
+	}
+};
 
 var windowManagerObj = function(){
 	var windowAmount = 16;
@@ -164,19 +201,16 @@ var windowManagerObj = function(){
 }
 
 
+
 var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
-	//var framerate=24;
+	var framerate=24;
 	this.currentframeId=0;
 	this.lastSelectedWindowDiv;
 	this.frameAnimationRunning=false;
 	var that=this;
 
-	function setTransition(){
-		//BUG is not called yet from the modal dialog :(
-		//$('#myModal').modal('hide')
-	}
 	//go to next Frame if there is one
 	function goToNextFrame(){
 		if(data.length>1){
@@ -198,11 +232,16 @@ var framesManagerObj = function(framesContainer){
 	this.getData=function(){
 		return data;
 	}	
-	
+
+	this.getFramerate=function(){
+		return framerate;
+	}
+
 	this.setFramerate=function(fps){
 		$.each(data,function(i,frame){
 			frame.duration=1000/fps;
 		})
+		framerate = fps;
 	}
 	
 	this.saveDataToBackend=function(){
@@ -293,11 +332,13 @@ var framesManagerObj = function(framesContainer){
 			if( j < data.length-1)
 			{
 				var transitionA=document.createElement('a')
-				$(transitionA).attr("href","#myModal")
+				//$(transitionA).attr("href","#myModal")
+				$(transitionA).attr("href","#")
 				$(transitionA).attr("id","transitionBtn"+j)
 				$(transitionA).attr("role","button")
 				$(transitionA).attr("class","btn btn-xs btn-default transitionBtn")
 				$(transitionA).attr("data-toggle","modal")
+				$(transitionA).attr("onclick","modalDialog(this);")
 				$(transitionA).text("+")
 				$(frameDiv).append(transitionA)
 			}
