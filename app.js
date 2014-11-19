@@ -10,13 +10,9 @@ var udpServer = dgram.createSocket("udp4");
 //serial communication
 var SerialPort = require("serialport").SerialPort;
 var serialport = new SerialPort("COM6", {
-    baudrate: 115200,
-    // defaults for Arduino serial communication
-     dataBits: 8,
-     parity: 'none',
-     stopBits: 1,
-     flowControl: false
-});
+    baudrate: 115200
+},false);
+openSerialPort();
 
 var app = express()
 
@@ -35,6 +31,8 @@ var frameAnimationRunning=false;
 //save last send message to avoid sending if nothing has changed
 var lastMessageSendToArduino="";
 
+
+
 // get new data
 app.io.route('data', function(req) {
 	frameData=req.data;
@@ -47,22 +45,22 @@ app.io.route('data', function(req) {
 	});
 	
 	// send data over serial port 
-	serialTest();
-	
 	startAnimation();
 })
 
-function serialTest(){
- console.log('serialTest');
- var SerialPortObj = require("serialport");
- SerialPortObj.list(function (err, ports) {
-  ports.forEach(function(port) {
-    console.log(port.comName);
-    console.log(port.pnpId);
-    console.log(port.manufacturer);
-  });
-  })
+function openSerialPort(){
+ console.log('openSerialPort');
  
+ //SHOW ALL PORTS
+ // var SerialPortObj = require("serialport");
+ // SerialPortObj.list(function (err, ports) {
+  // ports.forEach(function(port) {
+    // console.log(port.comName);
+    // console.log(port.pnpId);
+    // console.log(port.manufacturer);
+  // });
+  // })
+  
 	 serialport.open(function (error) {
 	  if ( error ) {
 		console.log('failed to open: '+error);
@@ -71,21 +69,15 @@ function serialTest(){
 		// serialPort.on('data', function(data) {
 		  // console.log('data received: ' + data);
 		// });
-		serialPort.write("test", function(err, results) {
-		  console.log('err ' + err);
-		  console.log('results ' + results);
-		});
+	
 	  }
 	})
- 
- 
-	// serialport.on('open', function(){
-	  // console.log('Serial Port Opend');
-	  // serialPort.write('test');
-	  // // serialport.on('data', function(data){
-		  // // console.log(data[0]);
-	  // // });
-	// });
+}
+
+function writeSerialMessage(colorArray){
+	serialport.write(colorArray, function(err, results) {
+		  //console.log('results ' + results);
+	});
 }
 
 //go to next Frame if there is one
@@ -109,6 +101,9 @@ function startAnimation(){
 }
 
 var sendFrameToArduino=function(frameId){
+	
+	/* 
+	//UDP Messages 
 	var messageString="";
 	for(var i =0; i<frameData[frameId].windows.length;i++){
 		messageString+=frameData[frameId].windows[i][0]+",";  	//r
@@ -126,6 +121,16 @@ var sendFrameToArduino=function(frameId){
 		});
 	}
 	lastMessageSendToArduino=messageString;
+	*/
+	
+	var allcolorsSerialized=[];
+	for(var i =0; i<frameData[frameId].windows.length;i++){
+		allcolorsSerialized.push(frameData[frameId].windows[i][0])
+		allcolorsSerialized.push(frameData[frameId].windows[i][1])
+		allcolorsSerialized.push(frameData[frameId].windows[i][2])
+	}
+	//Serial Messages
+	writeSerialMessage(allcolorsSerialized)
 }
 
 var server = app.listen(3000, function () {

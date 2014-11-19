@@ -20,8 +20,7 @@ void setup() {
 }
 
 char Comp(char* This) {
-    while (Serial.available() > 0) // Don't read unless
-                                   // there you know there is data
+    while (Serial.available() > 0) // Don't read unless there you know there is data
     {
         if(index < 19) // One less than the size of the array
         {

@@ -225,8 +225,8 @@ var framesManagerObj = function(framesContainer){
 	//go to next Frame if there is one
 	function goToNextFrame(){
 		if(data.length>1){
-			setTimeout(function () {goToNextFrame()},data[that.currentframeId].duration)
 			that.currentframeId=(that.currentframeId+1)%data.length;
+			setTimeout(function () {goToNextFrame()},data[that.currentframeId].duration)			
 		}
 		else //animation stoped
 			that.frameAnimationRunning=false;
