@@ -1,28 +1,92 @@
 var express = require('express.io')
-var bodyParser = require('body-parser')
-var dgram = require("dgram");
 
+//file operations
+var fs = require('fs');
+
+//udp communication
+var dgram = require("dgram");
 var udpServer = dgram.createSocket("udp4");
 
-var lastMessageSendToArduino="";
+//serial communication
+var SerialPort = require("serialport").SerialPort;
+var serialport = new SerialPort("COM6", {
+    baudrate: 115200,
+    // defaults for Arduino serial communication
+     dataBits: 8,
+     parity: 'none',
+     stopBits: 1,
+     flowControl: false
+});
 
 var app = express()
+
+//open socket
 app.http().io()
 
 //directory of frontend files
 app.use(express.static(__dirname + '/tower'));
 
-//data Variables
+//frames data
 var frameData=[];
+//id of current frame
 var currentFrameId=0;
+
 var frameAnimationRunning=false;
+//save last send message to avoid sending if nothing has changed
+var lastMessageSendToArduino="";
 
 // get new data
 app.io.route('data', function(req) {
 	frameData=req.data;
-	console.log("new frameData")	
+	
+	//save to file
+	filename=(new Date()).getTime();
+	fs.writeFile('savedAnimations/'+filename+'.txt', JSON.stringify(frameData), function (err) {
+	  if (err) throw err;
+	  console.log('It\'s saved!');
+	});
+	
+	// send data over serial port 
+	serialTest();
+	
 	startAnimation();
 })
+
+function serialTest(){
+ console.log('serialTest');
+ var SerialPortObj = require("serialport");
+ SerialPortObj.list(function (err, ports) {
+  ports.forEach(function(port) {
+    console.log(port.comName);
+    console.log(port.pnpId);
+    console.log(port.manufacturer);
+  });
+  })
+ 
+	 serialport.open(function (error) {
+	  if ( error ) {
+		console.log('failed to open: '+error);
+	  } else {
+		console.log('open');
+		// serialPort.on('data', function(data) {
+		  // console.log('data received: ' + data);
+		// });
+		serialPort.write("test", function(err, results) {
+		  console.log('err ' + err);
+		  console.log('results ' + results);
+		});
+	  }
+	})
+ 
+ 
+	// serialport.on('open', function(){
+	  // console.log('Serial Port Opend');
+	  // serialPort.write('test');
+	  // // serialport.on('data', function(data){
+		  // // console.log(data[0]);
+	  // // });
+	// });
+}
 
 //go to next Frame if there is one
 function goToNextFrame(){
@@ -43,24 +107,6 @@ function startAnimation(){
 		frameAnimationRunning=true;
 	}
 }
-
-// var reStartInterval=function(){
-	// clearInterval(intervall);
-	// currentFrameId=0;
-	// intervall= setInterval(function(){
-		// if(frameData.length>0){
-			// sendFrameToArduino(currentFrameId);
-			// currentFrameId=(currentFrameId+1)%frameData.length;
-		// }
-	// }, 1000/frameRate); 
-// }
-
-// get new framerate
-// app.io.route('frameRate', function(req) {
-    // console.log("new frameRate")	
-	// frameRate=req.data;
-	// reStartInterval();
-// })
 
 var sendFrameToArduino=function(frameId){
 	var messageString="";
