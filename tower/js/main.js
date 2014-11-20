@@ -326,6 +326,8 @@ var framesManagerObj = function(framesContainer){
 	
 	this.deleteFrame=function(id){
 		data.splice(id, 1);
+		that.renderFrames();
+		startAnimation();
 	};
 
 	this.getFrame=function(id){
@@ -366,6 +368,15 @@ var framesManagerObj = function(framesContainer){
 				$(transitionA).attr("onclick","modalDialog(this);")
 				$(transitionA).text("+")
 				$(frameDiv).append(transitionA)
+
+				var delFrame=document.createElement('a')
+				$(delFrame).attr("href","#")
+				$(delFrame).attr("id","deleteFrameBtn"+j)
+				$(delFrame).attr("role","button")
+				$(delFrame).attr("class","btn btn-xs btn-default deleteFrameBtn")
+				$(delFrame).attr("onclick","framesManager.deleteFrame("+j+")")
+				$(delFrame).text("-")
+				$(frameDiv).append(delFrame)
 			}
 			that.framesContainer.append(frameDiv)
 
