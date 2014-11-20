@@ -13,10 +13,19 @@
         <link rel="stylesheet" href="css/sortable.css">
 		<!--<link rel="stylesheet" href="css/colpick.css">-->
         <link rel="stylesheet" href="css/main.css">
-
+	
+		<!-- js includes -->
 		<script src="js/vendor/jquery-1.11.1.min.js"></script>
 		<script src="js/vendor/bootstrap.min.js"></script>
 		<script src="js/vendor/bootstrap-slider.js"></script>
+		<script src="js/vendor/three.min.js"></script>
+		<script src="js/vendor/three.orbitctrl.js"></script>
+		<script src="../socket.io/socket.io.js"></script>
+		<script src="js/colorGenerator.js"></script>
+		<script src="js/3DTower.js"></script>
+		<script src="js/main.js"></script>
+		<script src="js/vendor/jquery-sortable.js"></script>
+
 		<script type="text/javascript">
 			$(function  () {
 			 	 var oldIndex
@@ -41,114 +50,130 @@
 
     </head>
     <body>
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Turm</a>
-        </div>
-        <div class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right" role="form">
-            <div class="form-group">
-              <input type="text" placeholder="Email" class="form-control">
-            </div>
-            <div class="form-group">
-              <input type="password" placeholder="Password" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-success">Sign in</button>
-          </form>
-        </div><!--/.navbar-collapse -->
-      </div>
-    </div>
-	
-	<!--3D Window -->
-	 <div class="container">	
-		<div class="row">
-			<div class="col-md-12">
-			  <div id="3DContainer">	
-			  </div>
+		
+		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		  <div class="container">
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <a class="navbar-brand" href="#">Turm</a>
 			</div>
+			<div class="navbar-collapse collapse">
+			  <form class="navbar-form navbar-right" role="form">
+				<div class="form-group">
+				  <input type="text" placeholder="Email" class="form-control">
+				</div>
+				<div class="form-group">
+				  <input type="password" placeholder="Password" class="form-control">
+				</div>
+				<button type="submit" class="btn btn-success">Sign in</button>
+			  </form>
+			</div><!--/.navbar-collapse -->
+		  </div>
 		</div>
 		
-		<!--Button Bar -->
-		<div id="storyBoardHeader" class="row">
-			<div class="col-md-12">
-				<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
-				<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
-				<div class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-					Aktive Fenster
-					<span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-					  <li role="presentation"><a role="menuitem" tabindex="-1" id="1_fenster">1 Fenster</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" id="2_fenster">2 Fenster</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" id="4_fenster">4 Fenster</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" id="8_fenster">8 Fenster</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" id="16_fenster">16 Fenster</a></li>
-					</ul>
-				</div>
-			  <div class="dropdown">
-				<button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
-				Fenster Modus
-				<span class="caret"></span>
-				</button>
-				<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
-				  <li role="presentation"><a role="menuitem" tabindex="-1" id="wm_plain">einfarbig</a></li>
-				  <li role="presentation"><a role="menuitem" tabindex="-1" id="wm_repeat">wiederholen</a></li>
-				  <li role="presentation"><a role="menuitem" tabindex="-1" id="wm_wrap">umlaufend</a></li>
-				</ul>
-				</div>
-				<div class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-					Framerate
-					<span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
-					</ul>
-				</div>
-				<!--Modal Window-->
-				<div id="myModal" class="modal fade">
-				    <div class="modal-dialog">
-				        <div class="modal-content">
-				            <div class="modal-header">
-				                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				                <h4 class="modal-title">Transitions</h4>
-				            </div>
-				            <div class="modal-body">
-				            	<div class="btn-group" data-toggle="buttons">
-								  <label class="btn  btn-default active">
-								    <input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
-								  </label>
-								  <label class="btn  btn-default">
-								    <input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
-								  </label>
-								</div>
-				                <p>Zeit in Millisekunden</p>
-				                <div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
-				                	
-				                	<div class="slider-track"></div>
-				                	<div class="slider-selection" style="z-index: 1;"></div>
-				              	</div>				            	
-				                <p></br>Todo: Slider für delay & cutoff</p>
-				           		
-				            <div class="modal-footer">
-				                <button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-				                <button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
-				            </div>
-				        </div>
-				    </div>
+		
+		<div class="container">	
+		 
+			<!--3D Window -->
+			<div class="row">
+				<div class="col-md-12">
+				  <div id="3DContainer">	
+				  </div>
 				</div>
 			</div>
+			
+			<!--Button Bar -->
+			<div id="storyBoardHeader" class="row">
+				<div class="col-md-12">
+				
+					<!--Add Frame -->
+					<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
+					
+					<!--Save Scene -->
+					<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
+					
+					<!--Aktive Fenster dropdown -->
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+						Aktive Fenster
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
+						</ul>
+					</div>
+					
+					<!--Fenster Modus dropdown -->
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
+						Fenster Modus
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
+						</ul>
+					</div>
+					
+					<!--Framerate dropdown -->
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+						Framerate
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
+						</ul>
+					</div>
+					
+					<!--Modal Window-->
+					<div id="myModal" class="modal fade">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+									<h4 class="modal-title">Transitions</h4>
+								</div>
+								<div class="modal-body">
+									<div class="btn-group" data-toggle="buttons">
+									  <label class="btn  btn-default active">
+										<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
+									  </label>
+									  <label class="btn  btn-default">
+										<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
+									  </label>
+									</div>
+									<p>Zeit in Millisekunden</p>
+									<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
+										
+										<div class="slider-track"></div>
+										<div class="slider-selection" style="z-index: 1;"></div>
+									</div>				            	
+									<p></br>Todo: Slider für delay & cutoff</p>
+									
+								<div class="modal-footer">
+									<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+									<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
 		 </div>	
 		<!--Storyboard -->
 		<div class="row">
@@ -157,18 +182,9 @@
 		</div>
 
     </div>  
-	<!--PopUp for colorPicker and so on -->
-	<div id="popUpMenu"></div>
+	
+		<!--PopUp for colorPicker and so on -->
+		<div id="popUpMenu"></div>
 
-	<script src="js/vendor/three.min.js"></script>
-	<script src="js/vendor/three.orbitctrl.js"></script>
-	<script src="../socket.io/socket.io.js"></script>
-	<!--<script src="js/vendor/colpick.js"></script>-->
-	<script src="js/colorGenerator.js"></script>
-	<script src="js/3DTower.js"></script>
-	<script src="js/main.js"></script>
-	<script src="js/vendor/jquery-sortable.js"></script>
-
-		
     </body>
 </html>
