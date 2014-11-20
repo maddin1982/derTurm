@@ -1,26 +1,43 @@
 //socket.io data communication with backend
 var io;
+var framesManager;
+var windowManager;
+var popUpMenu;
 
+var currentModalDialogRow = null;
+var currentFrameType=null;
 
 $(document).ready(function() { 
-	init3DSceneOnElement($("#3DContainer"));
+	//initialize frameManager
+	framesManager= new framesManagerObj($("#storyboard"));
+	
+	//initialize windowManager 
+	windowManager = new windowManagerObj();
+	
+	//initialize color selection popup
+	popUpMenu= new popUpMenuObj($("#popUpMenu"));
+	//set color selection in colorpopup
+	popUpMenu.addColorSelection();
+	
+	init3DSceneOnElement($("#3DContainer"));	
 	$("#addFrameBtn").on("click",framesManager.addFrame)
 	$("#saveSceneBtn").on("click",framesManager.saveDataToBackend)
 
-	// fenster anzahl auswählen
-	$("#1_fenster").on("click",{amount: 1},windowManager.setWindowAmount);
-	$("#2_fenster").on("click",{amount: 2},windowManager.setWindowAmount);
-	$("#4_fenster").on("click",{amount: 4},windowManager.setWindowAmount);
-	$("#8_fenster").on("click",{amount: 8},windowManager.setWindowAmount);
-	$("#16_fenster").on("click",{amount: 16},windowManager.setWindowAmount);
-	// Fenster Modus auswählen
-	$("#wm_plain").on("click",{mode: 1},windowManager.setWindowMode);
-	$("#wm_repeat").on("click",{mode: 2},windowManager.setWindowMode);
-	$("#wm_wrap").on("click",{mode: 3},windowManager.setWindowMode);
-
+	// Klick auf dropdown für Fensteranzahl
+	$(".activeWindowsSelect").on("click",function(){	
+		windowManager.setWindowAmount(parseInt($(this).attr("activeWindows")))
+	});
+	
+	// Klick auf dropdown für Fenster Modus
+	$(".windowModeSelect").on("click",function(){	
+		windowManager.setWindowMode(parseInt($(this).attr("mode")))
+	});
+	
+	// Klick auf dropdown für FPS Select
 	$(".fps_select").on("click",function(){	
 		framesManager.setFramerate(parseInt($(this).attr("fps")))
 	});
+	
 	// Modal Dialog
 	//save Settings
 	$("#saveModal").on("click", function() {
@@ -38,17 +55,17 @@ $(document).ready(function() {
 		currentFrameType = null;
 	});
 	
-	// Slider - Transition Duration
-	$("#trans_duration").on('slide', function(ev){
-		//$('#trans_duration').data('slider').getValue());
-	});
+	// // Slider - Transition Duration
+	// $("#trans_duration").on('slide', function(ev){
+		// //$('#trans_duration').data('slider').getValue());
+	// });
 
 	io= io.connect()
+	
+
 });
 	
 
-var currentModalDialogRow = null;
-var currentFrameType=null;
 // Modal Dialog
 function modalDialog(inthis){
 	if( currentModalDialogRow == null)
@@ -79,137 +96,6 @@ function modalDialog(inthis){
 	}
 };
 
-var windowManagerObj = function(){
-	var windowAmount = 16;
-	var windowMode = 2; //0-none 1-one color, 2-repeat, 3-wrap around
-	var that = this;
-	var c_str_ModeName = ["kein","einfarbig","wiederholen","umlaufend"];
-
-	this.getWindowAmount=function(){
-		return parseInt(windowAmount);
-	};
-
-	this.getWindowMode=function(){
-		return parseInt(windowMode);
-	};
-	
-	this.setWindowAmount=function(evt){
-		var newWindowAmount = evt.data.amount;		
-		$("#dd_WindowAmount").text(newWindowAmount+" Fenster");
-		if( windowAmount != newWindowAmount)
-		{
-			if( newWindowAmount == 16)
-			{
-				evt.data.mode = 0;
-				that.setWindowMode(evt);
-			}			
-			windowAmount = newWindowAmount;
-			//redraw updates data
-			framesManager.renderFrames();
-		}
-	};
-	
-	this.setWindowMode=function(evt){
-		var newWindowMode = evt.data.mode;
-		
-		if( windowMode != newWindowMode && windowAmount != 16)
-		{
-			//add function call for frames to handle the new mode
-			//something like: frames.setWindowsInactive(windowMode);
-			$("#dd_WindowMode").text("Modus: "+c_str_ModeName[newWindowMode]);
-			windowMode = newWindowMode;
-
-			framesManager.renderFrames();
-		}
-	};
-
-	this.updateData=function(){
-		var data = framesManager.getData();
-	
-		//active or non-active divs
-		for(var j=0; j < data.length;j++)
-		{
-			for(var i=0;i < 16;i++)
-			{
-				if( i < windowAmount)
-					data[j].windows[i].active = 1;
-				else
-					data[j].windows[i].active = 0;
-			}
-		}
-		//colors
-		if(windowMode==0) // none
-		 return;
-		if(windowMode==1) // one color
-		{
-			for(var j=0; j < data.length;j++)
-			{
-				for(var i=0;i < 16;i++)
-				{
-					if(i > windowAmount-1)
-						data[j].windows[i].color = "#000000";
-				}
-			}
-		}
-		if(windowMode==2) // repeat
-		{
-			for(var j=0; j < data.length;j++)
-			{
-				for(var i=0;i < 16;i++)
-				{
-					data[j].windows[i].color = data[j].windows[i%windowAmount].color;
-				}
-			}
-		}
-		if(windowMode==3) // wrap 1234[432112344321] 12[211221122112]
- 		{
-			for(var j=0; j < data.length;j++)
-			{
-				for(var i=0;i < 16;i++)
-				{
-					data[j].windows[i].color = data[j].windows[i%windowAmount].color;					
-				}
-				if( windowAmount == 2)
-				{
-					data[j].windows[2].color = data[j].windows[1].color;
-					data[j].windows[3].color = data[j].windows[0].color;
-
-					data[j].windows[6].color = data[j].windows[1].color;
-					data[j].windows[7].color = data[j].windows[0].color;
-
-					data[j].windows[10].color = data[j].windows[1].color;
-					data[j].windows[11].color = data[j].windows[0].color;
-
-					data[j].windows[14].color = data[j].windows[1].color;
-					data[j].windows[15].color = data[j].windows[0].color;
-				}
-				if( windowAmount == 4)
-				{	
-					data[j].windows[4].color = data[j].windows[3].color;
-					data[j].windows[5].color = data[j].windows[2].color;
-					data[j].windows[6].color = data[j].windows[1].color;
-					data[j].windows[7].color = data[j].windows[0].color;
-
-					data[j].windows[12].color = data[j].windows[3].color;
-					data[j].windows[13].color = data[j].windows[2].color;
-					data[j].windows[14].color = data[j].windows[1].color;
-					data[j].windows[15].color = data[j].windows[0].color;
-				}
-				if( windowAmount == 8)
-				{	
-					data[j].windows[8].color = data[j].windows[7].color;
-					data[j].windows[9].color = data[j].windows[6].color;
-					data[j].windows[10].color = data[j].windows[5].color;
-					data[j].windows[11].color = data[j].windows[4].color;
-					data[j].windows[12].color = data[j].windows[3].color;
-					data[j].windows[13].color = data[j].windows[2].color;
-					data[j].windows[14].color = data[j].windows[1].color;
-					data[j].windows[15].color = data[j].windows[0].color;
-				}
-			}
-		}
-	}
-}
 
 
 
@@ -320,6 +206,8 @@ var framesManagerObj = function(framesContainer){
 					windowId=0;
 		}
 		data[frameId].windows[windowId].color = color;
+		
+		//change other windows depending on current windowmode
 		windowManager.updateData();
 		that.renderFrames();
 	};
@@ -372,8 +260,8 @@ var framesManagerObj = function(framesContainer){
 		})
 	}
 }
-var framesManager= new framesManagerObj($("#storyboard"));
-var windowManager = new windowManagerObj();
+
+
 
 var popUpMenuObj=function(popUpMenuDiv){
 	this.popUpMenuDiv=popUpMenuDiv;
@@ -403,6 +291,134 @@ var popUpMenuObj=function(popUpMenuDiv){
 		that.popUpMenuDiv.append(colorselectionDiv);		
 	}
 }
-var popUpMenu= new popUpMenuObj($("#popUpMenu"));
-popUpMenu.addColorSelection();
 
+
+
+
+var windowManagerObj = function(){
+	var windowAmount = 16;
+	var windowMode = 2; //0-none 1-one color, 2-repeat, 3-wrap around
+	var that = this;
+	var c_str_ModeName = ["kein","einfarbig","wiederholen","umlaufend"];
+
+	this.getWindowAmount=function(){
+		return parseInt(windowAmount);
+	};
+
+	this.getWindowMode=function(){
+		return parseInt(windowMode);
+	};
+	
+	this.setWindowAmount=function(newWindowAmount){	
+		$("#dd_WindowAmount").text(newWindowAmount+" Fenster");
+		if( windowAmount != newWindowAmount)
+		{
+			if( newWindowAmount == 16)
+			{
+				evt.data.mode = 0;
+				that.setWindowMode(evt);
+			}			
+			windowAmount = newWindowAmount;
+			//redraw updates data
+			framesManager.renderFrames();
+		}
+	};
+	
+	this.setWindowMode=function(newWindowMode){
+		if( windowMode != newWindowMode && windowAmount != 16)
+		{
+			//add function call for frames to handle the new mode
+			//something like: frames.setWindowsInactive(windowMode);
+			$("#dd_WindowMode").text("Modus: "+c_str_ModeName[newWindowMode]);
+			windowMode = newWindowMode;
+			framesManager.renderFrames();
+		}
+	};
+
+	this.updateData=function(){
+		var data = framesManager.getData();
+	
+		//active or non-active divs
+		for(var j=0; j < data.length;j++)
+		{
+			for(var i=0;i < 16;i++)
+			{
+				if( i < windowAmount)
+					data[j].windows[i].active = 1;
+				else
+					data[j].windows[i].active = 0;
+			}
+		}
+		//colors
+		if(windowMode==0) // none
+		 return;
+		if(windowMode==1) // one color
+		{
+			for(var j=0; j < data.length;j++)
+			{
+				for(var i=0;i < 16;i++)
+				{
+					if(i > windowAmount-1)
+						data[j].windows[i].color = "#000000";
+				}
+			}
+		}
+		if(windowMode==2) // repeat
+		{
+			for(var j=0; j < data.length;j++)
+			{
+				for(var i=0;i < 16;i++)
+				{
+					data[j].windows[i].color = data[j].windows[i%windowAmount].color;
+				}
+			}
+		}
+		if(windowMode==3) // wrap 1234[432112344321] 12[211221122112]
+ 		{
+			for(var j=0; j < data.length;j++)
+			{
+				for(var i=0;i < 16;i++)
+				{
+					data[j].windows[i].color = data[j].windows[i%windowAmount].color;					
+				}
+				if( windowAmount == 2)
+				{
+					data[j].windows[2].color = data[j].windows[1].color;
+					data[j].windows[3].color = data[j].windows[0].color;
+
+					data[j].windows[6].color = data[j].windows[1].color;
+					data[j].windows[7].color = data[j].windows[0].color;
+
+					data[j].windows[10].color = data[j].windows[1].color;
+					data[j].windows[11].color = data[j].windows[0].color;
+
+					data[j].windows[14].color = data[j].windows[1].color;
+					data[j].windows[15].color = data[j].windows[0].color;
+				}
+				if( windowAmount == 4)
+				{	
+					data[j].windows[4].color = data[j].windows[3].color;
+					data[j].windows[5].color = data[j].windows[2].color;
+					data[j].windows[6].color = data[j].windows[1].color;
+					data[j].windows[7].color = data[j].windows[0].color;
+
+					data[j].windows[12].color = data[j].windows[3].color;
+					data[j].windows[13].color = data[j].windows[2].color;
+					data[j].windows[14].color = data[j].windows[1].color;
+					data[j].windows[15].color = data[j].windows[0].color;
+				}
+				if( windowAmount == 8)
+				{	
+					data[j].windows[8].color = data[j].windows[7].color;
+					data[j].windows[9].color = data[j].windows[6].color;
+					data[j].windows[10].color = data[j].windows[5].color;
+					data[j].windows[11].color = data[j].windows[4].color;
+					data[j].windows[12].color = data[j].windows[3].color;
+					data[j].windows[13].color = data[j].windows[2].color;
+					data[j].windows[14].color = data[j].windows[1].color;
+					data[j].windows[15].color = data[j].windows[0].color;
+				}
+			}
+		}
+	}
+}
