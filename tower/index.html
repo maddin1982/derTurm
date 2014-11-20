@@ -10,14 +10,34 @@
         <link rel="stylesheet" href="css/bootstrap-theme.min.css">
 
         <link rel="stylesheet" href="css/slider.css">
+        <link rel="stylesheet" href="css/sortable.css">
 		<!--<link rel="stylesheet" href="css/colpick.css">-->
         <link rel="stylesheet" href="css/main.css">
 
 		<script src="js/vendor/jquery-1.11.1.min.js"></script>
 		<script src="js/vendor/bootstrap.min.js"></script>
 		<script src="js/vendor/bootstrap-slider.js"></script>
-
-	
+		<script type="text/javascript">
+			$(function  () {
+			 	 var oldIndex
+			 	 $("ol.sortableList").sortable({
+					vertical: false,
+					  onDragStart: function (item, group, _super) {
+					    oldIndex = item.index()
+					    item.appendTo(item.parent())
+					    _super(item)
+					  },
+					  onDrop: function  (item, container, _super) {
+					    var field,
+					    newIndex = item.index()
+					    if(newIndex != oldIndex) {
+					    	framesManager.moveFrame(oldIndex,newIndex)
+					    }
+					    _super(item)
+					  }
+					})
+			})// end of function
+		</script>
 
     </head>
     <body>
@@ -132,10 +152,10 @@
 		 </div>	
 		<!--Storyboard -->
 		<div class="row">
-			<div id="storyboard" class="col-md-12">
-			</div>
+			<ol class='sortableList col-md-12' id="storyboard" >
+			</ol>
 		</div>
-     
+
     </div>  
 	<!--PopUp for colorPicker and so on -->
 	<div id="popUpMenu"></div>
@@ -147,6 +167,8 @@
 	<script src="js/colorGenerator.js"></script>
 	<script src="js/3DTower.js"></script>
 	<script src="js/main.js"></script>
+	<script src="js/vendor/jquery-sortable.js"></script>
+
 		
     </body>
 </html>

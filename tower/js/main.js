@@ -255,6 +255,10 @@ var framesManagerObj = function(framesContainer){
 		})
 		framerate = fps;
 	}
+
+	this.moveFrame=function(oldIndex, newIndex){
+		data.splice(newIndex,0,data.splice(oldIndex,1)[0]);
+	}
 	
 	this.saveDataToBackend=function(){
 		//parse color to rgb values
@@ -343,7 +347,7 @@ var framesManagerObj = function(framesContainer){
 		that.framesContainer.empty();
 		var frameDiv = null;
 		$.each(data,function(j,frame){
-			frameDiv=document.createElement('div')
+			frameDiv=document.createElement('li')
 			$(frameDiv).attr("class","frame")
 			$(frameDiv).attr("frameId",j)
 			$.each(frame.windows,function(i,frameWindow){
