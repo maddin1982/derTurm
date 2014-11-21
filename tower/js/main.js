@@ -388,7 +388,7 @@ var windowManagerObj = function(){
 				}
 			}
 		}
-		if(windowMode==3) // wrap 1234[432112344321] 12[211221122112]
+		if(windowMode==3) // wrap 1234[432112344321] 12[211221122112] 123{3211233211233}
  		{
 			for(var j=0; j < data.length;j++)
 			{
@@ -409,6 +409,26 @@ var windowManagerObj = function(){
 
 					data[j].windows[14].color = data[j].windows[1].color;
 					data[j].windows[15].color = data[j].windows[0].color;
+				}
+				if( windowAmount == 3)
+				{
+					data[j].windows[3].color = data[j].windows[2].color;
+					data[j].windows[4].color = data[j].windows[1].color;
+					data[j].windows[5].color = data[j].windows[0].color;
+
+					data[j].windows[6].color = data[j].windows[0].color;
+					data[j].windows[7].color = data[j].windows[1].color;
+					data[j].windows[8].color = data[j].windows[2].color;
+
+					data[j].windows[9].color = data[j].windows[2].color;
+					data[j].windows[10].color = data[j].windows[1].color;
+					data[j].windows[11].color = data[j].windows[0].color;
+
+					data[j].windows[12].color = data[j].windows[0].color;
+					data[j].windows[13].color = data[j].windows[1].color;
+					data[j].windows[14].color = data[j].windows[2].color;
+					data[j].windows[15].color = data[j].windows[2].color;
+
 				}
 				if( windowAmount == 4)
 				{	
