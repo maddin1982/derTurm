@@ -11,8 +11,11 @@
 
         <link rel="stylesheet" href="css/slider.css">
         <link rel="stylesheet" href="css/sortable.css">
+        <link rel="stylesheet" href="css/resizable.css">
 		<!--<link rel="stylesheet" href="css/colpick.css">-->
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+
 	
 		<!-- js includes -->
 		<script src="js/vendor/jquery-1.11.1.min.js"></script>
@@ -25,9 +28,19 @@
 		<script src="js/3DTower.js"></script>
 		<script src="js/main.js"></script>
 		<script src="js/vendor/jquery-sortable.js"></script>
+		
+		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	    <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
 
 		<script type="text/javascript">
 			$(function  () {
+
+				 $( "#3DContainer" ).resizable({
+				  resize: function( event, ui ) {
+					onWindowResize()
+				  }
+				});
 			 	 var oldIndex
 			 	 $("ol.sortableList").sortable({
 					vertical: false,
@@ -75,14 +88,13 @@
 			</div><!--/.navbar-collapse -->
 		  </div>
 		</div>
-		
-		
+
 		<div class="container">	
 		 
 			<!--3D Window -->
 			<div class="row">
 				<div class="col-md-12">
-				  <div id="3DContainer">	
+				  <div id="3DContainer" class="ui-widget-content">	
 				  </div>
 				</div>
 			</div>

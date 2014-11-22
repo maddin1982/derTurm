@@ -92,9 +92,9 @@ function init3DSceneOnElement(element) {
 
 function onWindowResize() {
 
-	camera.aspect = $("#3DContainer").width() / 200;
+	camera.aspect = $("#3DContainer").width() / $("#3DContainer").height();
 	camera.updateProjectionMatrix();
-	renderer.setSize($("#3DContainer").width(), 200);
+	renderer.setSize($("#3DContainer").width(), $("#3DContainer").height());
 
 }
 
