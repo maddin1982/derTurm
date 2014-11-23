@@ -2,7 +2,7 @@
 var io;
 var framesManager;
 var windowManager;
-var popUpMenu;
+var myColorPicker;
 
 var currentModalDialogRow = null;
 var currentFrameType=null;
@@ -15,9 +15,10 @@ $(document).ready(function() {
 	windowManager = new windowManagerObj();
 	
 	//initialize color selection popup
-	popUpMenu= new popUpMenuObj($("#colorPicker"));
+	myColorPicker= new colorPickerObj($("#colorPicker"));
+	
 	//set color selection in colorpopup
-	popUpMenu.addColorSelection();
+	myColorPicker.addColorSelection();
 	
 	//initialize 3d Scene
 	init3DSceneOnElement($("#3DContainer"));	
@@ -105,6 +106,7 @@ function modalDialog(inthis){
 		*/
 
 		// set Slider Value correctly
+
 		$('#trans_duration').data('slider').setValue(tmpdata.duration);
 
 		// set Toggle-Buttons for Type correctly
@@ -278,8 +280,8 @@ var framesManagerObj = function(framesContainer){
 
 	this.selectFrame=function(evt){
 		that.lastSelectedWindowDiv=evt.target;
-		popUpMenu.moveToPosition(evt.clientX,evt.clientY);
-		popUpMenu.show();
+		myColorPicker.moveToPosition(evt.clientX,evt.clientY);
+		myColorPicker.show();
 	};
 
 	this.setFrame = function(inFrameID,inType,inDuration,inDelay,inCutoff){
@@ -379,38 +381,35 @@ var framesManagerObj = function(framesContainer){
 	}
 }
 
-
-
-var popUpMenuObj=function(popUpMenuDiv){
-	this.popUpMenuDiv=popUpMenuDiv;
+var colorPickerObj=function(colorPickerDiv){
+	this.colorPickerDiv=colorPickerDiv;
 
 	var that=this;
 	
 	this.show=function(){
-		that.popUpMenuDiv.show();
+		that.colorPickerDiv.show();
 	}
 	this.hide=function(){
-		that.popUpMenuDiv.hide();
+		that.colorPickerDiv.hide();
 	}
 	this.moveToPosition=function(x,y){
-		that.popUpMenuDiv.css("top",y)
-		that.popUpMenuDiv.css("left",x)
+		that.colorPickerDiv.css("top",y)
+		that.colorPickerDiv.css("left",x)
 	}
 	
 	this.addColorSelection=function(){
-		var colorselectionDiv=colorGenerator.getFullColorSelection(10,that.popUpMenuDiv.width(),that.popUpMenuDiv.height(),3)
+		var colorselectionDiv=colorGenerator.getFullColorSelection(10,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
 		$(colorselectionDiv).find(".singleColor").on("click",function(evt){
 
 			var newColor=$(evt.target).css("backgroundColor");
 			$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
 			framesManager.setSingleWindowColor(newColor);
-			popUpMenu.hide();
+			//myColorPicker.hide();
+			that.hide();
 		})
-		that.popUpMenuDiv.append(colorselectionDiv);		
+		that.colorPickerDiv.append(colorselectionDiv);		
 	}
 }
-
-
 
 
 var windowManagerObj = function(){

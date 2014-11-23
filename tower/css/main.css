@@ -1,10 +1,5 @@
 
 
-/* ==========================================================================
-   Author's custom styles
-   ========================================================================== */
-
-
 body {
 	padding-top: 50px;
 	padding-bottom: 20px;
@@ -21,13 +16,16 @@ body {
 	border:solid 2px #fff;
 }
 
-#colorPicker{
+.myPopUpMenue{
 	position:absolute;
-	height:150px;
-	width:200px;
 	display:none;
 	background:white;
 }
+#colorPicker{
+	height:150px;
+	width:200px;
+}
+
 
 .dropdown {
 	position: relative;
