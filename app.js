@@ -10,7 +10,11 @@ var udpServer = dgram.createSocket("udp4");
 //serial communication
 var SerialPort = require("serialport").SerialPort;
 var serialport = new SerialPort("COM6", {
-    baudrate: 115200
+    baudrate: 115200,
+	 dataBits: 8,
+     parity: 'none',
+     stopBits: 1,
+     flowControl: false 
 },false);
 openSerialPort();
 
@@ -31,9 +35,11 @@ var frameAnimationRunning=false;
 //save last send message to avoid sending if nothing has changed
 var lastMessageSendToArduino="";
 
+var bytesReceivedByArduino=1;
 
 // get new data
 app.io.route('showInModel', function(req) {
+	bytesReceivedByArduino=1;
 	frameData=req.data;
 	// send data over serial port 
 	startAnimation();
@@ -85,17 +91,19 @@ function openSerialPort(){
 		console.log('failed to open: '+error);
 	  } else {
 		console.log('open');
-		// serialPort.on('data', function(data) {
-		  // console.log('data received: ' + data);
-		// });
+		serialport.on('data', function(data) {
+		  console.log(data)
+		});
 	
 	  }
 	})
 }
 
 function writeSerialMessage(colorArray){
-	serialport.write(colorArray, function(err, results) {
-		  //console.log('results ' + results);
+	var buffer = new Buffer(colorArray);
+	serialport.write(buffer, function(err, results) {
+		  console.log('err ' + err);
+		  console.log('wrote bytes ' + results);
 	});
 }
 
@@ -103,7 +111,6 @@ function writeSerialMessage(colorArray){
 function goToNextFrame(){
 	if(frameData.length>1){
 		setTimeout(function () {goToNextFrame()},frameData[currentFrameId].duration)
-		
 		sendFrameToArduino(currentFrameId)
 		currentFrameId=(currentFrameId+1)%frameData.length;
 	}
@@ -149,6 +156,7 @@ var sendFrameToArduino=function(frameId){
 		allcolorsSerialized.push(frameData[frameId].windows[i][2])
 	}
 	//Serial Messages
+	
 	writeSerialMessage(allcolorsSerialized)
 }
 

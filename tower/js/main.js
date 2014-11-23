@@ -59,6 +59,8 @@ $(document).ready(function() {
 	// Modal Dialog
 	//save Settings
 	$("#saveModal").on("click", function() {
+		
+		//currentFrameType 0= static, 1 =fade 
 		var currentFrameType = 0;
 		if( $('#ft_fade').parent().hasClass('active'))
 			currentFrameType = 1;
@@ -228,7 +230,7 @@ var framesManagerObj = function(framesContainer){
 		//parse color to rgb values
 		var formatedData=[];
 		$.each(data,function(i,frame){
-			var newframe={duration:frame.duration,windows:[]}
+			var newframe={duration:frame.duration,type:frame.type,windows:[]}
 			$.each(frame.windows,function(i,window){
 				newframe.windows.push(colorGenerator.parseColor(window.color))
 			})
