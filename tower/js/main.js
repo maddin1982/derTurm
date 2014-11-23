@@ -70,11 +70,9 @@ $(document).ready(function() {
 	//io Server Responses
 	io.on('savedScenesLoaded', function(data) {
 		console.log("savedScenesLoaded")
-		console.log(data)
 	})
 	io.on('sceneDataLoaded', function(data) {
 		console.log("sceneDataLoaded")
-		console.log(data)
 	})	
 
 });
@@ -133,6 +131,15 @@ var framesManagerObj = function(framesContainer){
 			that.frameAnimationRunning=false;
 	}
 	
+	this.getNextFrameId=function(){
+		if(data.length>1)
+		{
+			return ((that.currentframeId+1)%data.length);
+		}
+		
+		return null;
+	}
+
 	//start framechange with timer if it isnt already running
 	function startAnimation(){
 		if(!that.frameAnimationRunning&&data.length>1){
@@ -175,6 +182,7 @@ var framesManagerObj = function(framesContainer){
 	
 	this.saveSceneToFile=function(){
 		io.emit("saveSceneToFile",data)
+
 	}
 	this.getSavedFiles=function(){
 		io.emit("getSavedScenes",[])
@@ -187,14 +195,58 @@ var framesManagerObj = function(framesContainer){
 			return ;
 		return data[inID];
 	}
-	this.getCurrentFrame=function(){
+
+	this.colorStrToArray=function(colorStr){
+		colorStr = colorStr.slice(colorStr.indexOf('(') + 1, colorStr.indexOf(')')); // "100, 0, 255, 0.5"
+		var colorArr = colorStr.split(','),
+		    i = colorArr.length;
+
+		while (i--)
+		{
+		    colorArr[i] = parseInt(colorArr[i], 10);
+		}
+
+		var colorObj = {
+		    r: colorArr[0],
+		    g: colorArr[1],
+		    b: colorArr[2],
+		    a: colorArr[3]
+		}
+		return colorObj;
+	};
+
+	this.getCurrentFrame=function(startTime,currTime){
 		if(data.length==0)
 			return ;
 		if(data[that.currentframeId].type == 1)
-			console.log("animated Frame :)");
+		{
+			mixValue = (currTime-startTime)/data[that.currentframeId].duration;
+			//var tmp = data.slice(0);
+			var tmp = jQuery.extend(true, {}, data[that.currentframeId]);
+			var nextFrameId = that.getNextFrameId();
+			if( nextFrameId !== null)
+			{
+				var next = that.getFrame(nextFrameId);
+				$.each(tmp.windows,function(i,win){
+					//FUCKING COLOR STRING AND OBJECT CONVERSION!
+					var c1 = that.colorStrToArray(win.color);
+					var c2 = that.colorStrToArray(next.windows[i].color);					
+					//FUCKEDUPBULLSHIT
+					var newMixedColor = {
+					    r: parseInt(c1.r*mixValue+c2.r*(1-mixValue)),
+					    g:  parseInt(c1.g*mixValue+c2.g*(1-mixValue)),
+					    b: parseInt( c1.b*mixValue+c2.b*(1-mixValue))
+					}
+					//AND RECONVERT TO FUCKING STRINGS
+					win.color = 'rgb('+newMixedColor.r+','+newMixedColor.g+','+newMixedColor.b+')';
+				})
+			}
+			return tmp;
+		}
 		return data[that.currentframeId];
 	}
 	
+
 	this.selectFrame=function(evt){
 		that.lastSelectedWindowDiv=evt.target;
 		popUpMenu.moveToPosition(evt.clientX,evt.clientY);
@@ -210,7 +262,7 @@ var framesManagerObj = function(framesContainer){
 		var newFrame = {duration:1000/24,type:0,windows:[]}; //type 0=still, 1=fade, 2=shift
 		for( var i=0;i < 16; i++)
 		{
-			var window = {color:"#000000", active:1}; 
+			var window = {color:"rgb(0, 0, 0)", active:1}; 
 			newFrame.windows.push(window);
 		}
 		data.push(newFrame);
