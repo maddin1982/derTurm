@@ -93,9 +93,9 @@ function modalDialog(inthis){
 	if( currentModalDialogRow == null)
 	{
 		//save current Row for this Transition Dialog
-		currentModalDialogRow = (inthis.id).split("transitionBtn").pop();
+		currentModalDialogRow = parseInt((inthis.id).split("transitionBtn").pop());
 		var tmpdata = framesManager.getFrameById(currentModalDialogRow);
-
+		
 		//show the Modal Dialog
 		$('#myModal').modal('show');
 		// set maximum duration to 10seconds
@@ -106,7 +106,6 @@ function modalDialog(inthis){
 		*/
 
 		// set Slider Value correctly
-
 		$('#trans_duration').data('slider').setValue(tmpdata.duration);
 
 		// set Toggle-Buttons for Type correctly
@@ -222,7 +221,7 @@ var framesManagerObj = function(framesContainer){
 	this.getFrameById=function(inID){
 		if(data.length==0)
 			return ;
-		if( inID >= data.length-1)
+		if( inID > data.length-1)
 			return ;
 		return data[inID];
 	}
@@ -264,9 +263,9 @@ var framesManagerObj = function(framesContainer){
 					var c2 = that.colorStrToArray(next.windows[i].color);					
 					//FUCKEDUPBULLSHIT
 					var newMixedColor = {
-					    r: parseInt(c1.r*mixValue+c2.r*(1-mixValue)),
-					    g:  parseInt(c1.g*mixValue+c2.g*(1-mixValue)),
-					    b: parseInt( c1.b*mixValue+c2.b*(1-mixValue))
+					    r: parseInt(c1.r*(1-mixValue)+c2.r*(mixValue)),
+					    g:  parseInt(c1.g*(1-mixValue)+c2.g*(mixValue)),
+					    b: parseInt( c1.b*(1-mixValue)+c2.b*(mixValue))
 					}
 					//AND RECONVERT TO FUCKING STRINGS
 					win.color = 'rgb('+newMixedColor.r+','+newMixedColor.g+','+newMixedColor.b+')';
