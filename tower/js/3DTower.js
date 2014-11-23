@@ -119,7 +119,7 @@ function animate() {
 		lastFrameStartTime = new Date().getTime();
 	}	
 
-	var currentFrame=framesManager.getCurrentFrame(lastFrameStartTime,new Date().getTime(););
+	var currentFrame=framesManager.getCurrentFrame(lastFrameStartTime,new Date().getTime());
 	if(!(currentFrame===undefined)){
 		$.each(currentFrame.windows,function(i,window){
 			setWindowToColor(i,window.color)
