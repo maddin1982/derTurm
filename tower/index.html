@@ -4,62 +4,31 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Tower</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/bootstrap-theme.min.css">
 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<!-- css includes -->
+        <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="css/bootstrap/bootstrap-theme.min.css">
         <link rel="stylesheet" href="css/slider.css">
         <link rel="stylesheet" href="css/sortable.css">
         <link rel="stylesheet" href="css/resizable.css">
-		<!--<link rel="stylesheet" href="css/colpick.css">-->
         <link rel="stylesheet" href="css/main.css">
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+        <link rel="stylesheet" href="css/jqueryUi/jquery-ui.min.css">
 
-	
 		<!-- js includes -->
 		<script src="js/vendor/jquery-1.11.1.min.js"></script>
+		<script src="js/vendor/jquery-sortable.js"></script>
+		<script src="js/vendor/jquery-ui.min.js"></script>
 		<script src="js/vendor/bootstrap.min.js"></script>
 		<script src="js/vendor/bootstrap-slider.js"></script>
 		<script src="js/vendor/three.min.js"></script>
 		<script src="js/vendor/three.orbitctrl.js"></script>
 		<script src="../socket.io/socket.io.js"></script>
+		
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
 		<script src="js/main.js"></script>
-		<script src="js/vendor/jquery-sortable.js"></script>
-		
-		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-	    <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
-
-
-		<script type="text/javascript">
-			$(function  () {
-
-				 $( "#3DContainer" ).resizable({
-				  resize: function( event, ui ) {
-					onWindowResize()
-				  }
-				});
-			 	 var oldIndex
-			 	 $("ol.sortableList").sortable({
-					vertical: false,
-					  onDragStart: function (item, group, _super) {
-					    oldIndex = item.index()
-					    item.appendTo(item.parent())
-					    _super(item)
-					  },
-					  onDrop: function  (item, container, _super) {
-					    var field,
-					    newIndex = item.index()
-					    if(newIndex != oldIndex) {
-					    	framesManager.moveFrame(oldIndex,newIndex)
-					    }
-					    _super(item)
-					  }
-					})
-			})// end of function
-		</script>
 
     </head>
     <body>
@@ -91,112 +60,155 @@
 
 		<div class="container">	
 		 
-			<!--3D Window -->
-			<div class="row">
-				<div class="col-md-12">
-				  <div id="3DContainer" class="ui-widget-content">	
-				  </div>
+		<!--3D Window -->
+		<div class="row">
+			<div class="col-md-12">
+			  <div id="3DContainer" class="ui-widget-content">	
+			  </div>
+			</div>
+		</div>
+		
+		<!--Button Bar -->
+		<div id="storyBoardHeader" class="row">
+			<div class="col-md-12">	
+			
+				<!--Add Frame -->
+				<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
+				
+				<!--show On Model -->
+				<button id="showInModelBtn" type="button" class="btn btn-default">show On Model</button>
+				
+				<!--Save Scene -->
+				<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
+				
+				<!--get Saved Files -->
+				<button id="loadSceneBtn" type="button" class="btn btn-default">load Scene</button>
+				
+				
+				<!--Aktive Fenster dropdown -->
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+					Aktive Fenster
+					<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
+					</ul>
 				</div>
+				
+				<!--Fenster Modus dropdown -->
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
+					Fenster Modus
+					<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
+					</ul>
+				</div>
+				
+				<!--Framerate dropdown -->
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+					Framerate
+					<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
+					</ul>
+				</div>
+			</div>	
+			<!--Frames Window -->
+			<div class="row">
+				<ol class='col-md-12' id="storyboard">
+				</ol>
 			</div>
 			
-			<!--Button Bar -->
-			<div id="storyBoardHeader" class="row">
-				<div class="col-md-12">
-				
-					<!--Add Frame -->
-					<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
-					
-					<!--Save Scene -->
-					<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
-					
-					<!--Aktive Fenster dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-						Aktive Fenster
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
-						</ul>
+		</div>  
+
+		<!--  
+			****************************************
+			POPUPS AND OVERLAYS
+			******************************************
+		 -->
+
+		<!--PopUp for colorPicker and so on -->
+		<div class="myPopUpMenue" id="colorPicker"></div>
+
+		<!--Modal Window-->
+		<div id="myModal" class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<!-- Header -->
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Transitions</h4>
 					</div>
 					
-					<!--Fenster Modus dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
-						Fenster Modus
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
-						</ul>
-					</div>
-					
-					<!--Framerate dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-						Framerate
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
-						</ul>
-					</div>
-					
-					<!--Modal Window-->
-					<div id="myModal" class="modal fade">
-						<div class="modal-dialog">
-							<div class="modal-content">
-								<div class="modal-header">
-									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-									<h4 class="modal-title">Transitions</h4>
-								</div>
-								<div class="modal-body">
-									<div class="btn-group" data-toggle="buttons">
-									  <label class="btn  btn-default active">
-										<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
-									  </label>
-									  <label class="btn  btn-default">
-										<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
-									  </label>
-									</div>
-									<p>Zeit in Millisekunden</p>
-									<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
-										
-										<div class="slider-track"></div>
-										<div class="slider-selection" style="z-index: 1;"></div>
-									</div>				            	
-									<p></br>Todo: Slider für delay & cutoff</p>
-									
-								<div class="modal-footer">
-									<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-									<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
-								</div>
-							</div>
+					<div class="modal-body">
+						<!-- Buttons -->
+						<div class="btn-group" data-toggle="buttons">
+						  <label class="btn  btn-default active">
+							<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
+						  </label>
+						  <label class="btn  btn-default">
+							<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
+						  </label>
+						</div>
+						
+						<!-- Slider -->
+						<p>Zeit in Millisekunden</p>
+						<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
+							<div class="slider-track"></div>
+							<div class="slider-selection" style="z-index: 1;"></div>
+						</div>				            	
+						<p></br>Todo: Slider für delay & cutoff</p>
+						
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
 						</div>
 					</div>
 				</div>
-
-		 </div>	
-		<!--Storyboard -->
-		<div class="row">
-			<ol class='sortableList col-md-12' id="storyboard" >
-			</ol>
+			</div>
 		</div>
-
-    </div>  
-	
-		<!--PopUp for colorPicker and so on -->
-		<div id="popUpMenu"></div>
-
+		
+		<!--loadScene Window-->
+		<div id="loadSceneDialog" class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">	
+					<!-- Header -->
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Verfügbare Szenen</h4>
+					</div>
+				
+					<div class="modal-body">
+						<p>Bitte Szene auswählen</p>
+						<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
+							<div class="slider-track"></div>
+							<div class="slider-selection" style="z-index: 1;"></div>
+						</div>				            	
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="loadSelectet" type="button" class="btn btn-primary">lade Szene</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>		
+		
     </body>
 </html>

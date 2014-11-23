@@ -2,7 +2,7 @@
 var io;
 var framesManager;
 var windowManager;
-var popUpMenu;
+var myColorPicker;
 
 var currentModalDialogRow = null;
 var currentFrameType=null;
@@ -15,14 +15,24 @@ $(document).ready(function() {
 	windowManager = new windowManagerObj();
 	
 	//initialize color selection popup
-	popUpMenu= new popUpMenuObj($("#popUpMenu"));
-	//set color selection in colorpopup
-	popUpMenu.addColorSelection();
+	myColorPicker= new colorPickerObj($("#colorPicker"));
 	
+	//set color selection in colorpopup
+	myColorPicker.addColorSelection();
+	
+	//initialize 3d Scene
 	init3DSceneOnElement($("#3DContainer"));	
+	
+	
+	/**************************
+	* Click Events
+	**************************/
+	
 	$("#addFrameBtn").on("click",framesManager.addFrame)
-	$("#saveSceneBtn").on("click",framesManager.saveDataToBackend)
-
+	$("#showInModelBtn").on("click",framesManager.showInModel)
+	$("#saveSceneBtn").on("click",framesManager.saveSceneToFile)
+	$("#loadSceneBtn").on("click",framesManager.getSavedFiles)
+	
 	// Klick auf dropdown für Fensteranzahl
 	$(".activeWindowsSelect").on("click",function(){	
 		windowManager.setWindowAmount(parseInt($(this).attr("activeWindows")))
@@ -60,10 +70,22 @@ $(document).ready(function() {
 		// //$('#trans_duration').data('slider').getValue());
 	// });
 
+	/**************************
+	* Backend Socket Events
+	**************************/
+	
 	io= io.connect()
 	
+	//io Server Responses
+	io.on('savedScenesLoaded', function(data) {
+		console.log("savedScenesLoaded")
+	})
+	io.on('sceneDataLoaded', function(data) {
+		console.log("sceneDataLoaded")
+	})	
 
 });
+	
 	
 
 // Modal Dialog
@@ -71,9 +93,9 @@ function modalDialog(inthis){
 	if( currentModalDialogRow == null)
 	{
 		//save current Row for this Transition Dialog
-		currentModalDialogRow = (inthis.id).split("transitionBtn").pop();
+		currentModalDialogRow = parseInt((inthis.id).split("transitionBtn").pop());
 		var tmpdata = framesManager.getFrameById(currentModalDialogRow);
-
+		
 		//show the Modal Dialog
 		$('#myModal').modal('show');
 		// set maximum duration to 10seconds
@@ -96,9 +118,6 @@ function modalDialog(inthis){
 	}
 };
 
-
-
-
 var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
@@ -107,6 +126,29 @@ var framesManagerObj = function(framesContainer){
 	this.lastSelectedWindowDiv;
 	this.frameAnimationRunning=false;
 	var that=this;
+	
+	var indexBeforeDrag;
+	makeFramesContainersortable();
+	
+	//add drag and drop functions 
+	function makeFramesContainersortable(){
+		framesContainer.sortable({
+			vertical: false,
+			  onDragStart: function (item, group, _super) {
+				indexBeforeDrag = item.index()
+				item.appendTo(item.parent())
+				_super(item)
+			},
+			  onDrop: function  (item, container, _super) {
+				var field,
+				newIndex = item.index()
+				if(newIndex != indexBeforeDrag) {
+					framesManager.moveFrame(indexBeforeDrag,newIndex)
+				}
+				_super(item)
+			}
+		})
+	}
 
 	//go to next Frame if there is one
 	function goToNextFrame(){
@@ -119,6 +161,15 @@ var framesManagerObj = function(framesContainer){
 			that.frameAnimationRunning=false;
 	}
 	
+	this.getNextFrameId=function(){
+		if(data.length>1)
+		{
+			return ((that.currentframeId+1)%data.length);
+		}
+		
+		return null;
+	}
+
 	//start framechange with timer if it isnt already running
 	function startAnimation(){
 		if(!that.frameAnimationRunning&&data.length>1){
@@ -146,7 +197,7 @@ var framesManagerObj = function(framesContainer){
 		data.splice(newIndex,0,data.splice(oldIndex,1)[0]);
 	}
 	
-	this.saveDataToBackend=function(){
+	this.showInModel=function(){
 		//parse color to rgb values
 		var formatedData=[];
 		$.each(data,function(i,frame){
@@ -156,27 +207,80 @@ var framesManagerObj = function(framesContainer){
 			})
 			formatedData.push(newframe);
 		})
-		io.emit("data",formatedData)
+		io.emit("showInModel",formatedData)
 	}
+	
+	this.saveSceneToFile=function(){
+		io.emit("saveSceneToFile",data)
+
+	}
+	this.getSavedFiles=function(){
+		io.emit("getSavedScenes",[])
+	}
+		
 	this.getFrameById=function(inID){
 		if(data.length==0)
 			return ;
-		if( inID >= data.length-1)
+		if( inID > data.length-1)
 			return ;
 		return data[inID];
 	}
-	this.getCurrentFrame=function(){
+
+	this.colorStrToArray=function(colorStr){
+		colorStr = colorStr.slice(colorStr.indexOf('(') + 1, colorStr.indexOf(')')); // "100, 0, 255, 0.5"
+		var colorArr = colorStr.split(','),
+		    i = colorArr.length;
+
+		while (i--)
+		{
+		    colorArr[i] = parseInt(colorArr[i], 10);
+		}
+
+		var colorObj = {
+		    r: colorArr[0],
+		    g: colorArr[1],
+		    b: colorArr[2],
+		    a: colorArr[3]
+		}
+		return colorObj;
+	};
+
+	this.getCurrentFrame=function(startTime,currTime){
 		if(data.length==0)
 			return ;
 		if(data[that.currentframeId].type == 1)
-			console.log("animated Frame :)");
+		{
+			mixValue = (currTime-startTime)/data[that.currentframeId].duration;
+			//var tmp = data.slice(0);
+			var tmp = jQuery.extend(true, {}, data[that.currentframeId]);
+			var nextFrameId = that.getNextFrameId();
+			if( nextFrameId !== null)
+			{
+				var next = that.getFrame(nextFrameId);
+				$.each(tmp.windows,function(i,win){
+					//FUCKING COLOR STRING AND OBJECT CONVERSION!
+					var c1 = that.colorStrToArray(win.color);
+					var c2 = that.colorStrToArray(next.windows[i].color);					
+					//FUCKEDUPBULLSHIT
+					var newMixedColor = {
+					    r: parseInt(c1.r*(1-mixValue)+c2.r*(mixValue)),
+					    g:  parseInt(c1.g*(1-mixValue)+c2.g*(mixValue)),
+					    b: parseInt( c1.b*(1-mixValue)+c2.b*(mixValue))
+					}
+					//AND RECONVERT TO FUCKING STRINGS
+					win.color = 'rgb('+newMixedColor.r+','+newMixedColor.g+','+newMixedColor.b+')';
+				})
+			}
+			return tmp;
+		}
 		return data[that.currentframeId];
 	}
 	
+
 	this.selectFrame=function(evt){
 		that.lastSelectedWindowDiv=evt.target;
-		popUpMenu.moveToPosition(evt.clientX,evt.clientY);
-		popUpMenu.show();
+		myColorPicker.moveToPosition(evt.clientX,evt.clientY);
+		myColorPicker.show();
 	};
 
 	this.setFrame = function(inFrameID,inType,inDuration,inDelay,inCutoff){
@@ -188,7 +292,7 @@ var framesManagerObj = function(framesContainer){
 		var newFrame = {duration:1000/24,type:0,windows:[]}; //type 0=still, 1=fade, 2=shift
 		for( var i=0;i < 16; i++)
 		{
-			var window = {color:"#000000", active:1}; 
+			var window = {color:"rgb(0, 0, 0)", active:1}; 
 			newFrame.windows.push(window);
 		}
 		data.push(newFrame);
@@ -276,38 +380,35 @@ var framesManagerObj = function(framesContainer){
 	}
 }
 
-
-
-var popUpMenuObj=function(popUpMenuDiv){
-	this.popUpMenuDiv=popUpMenuDiv;
+var colorPickerObj=function(colorPickerDiv){
+	this.colorPickerDiv=colorPickerDiv;
 
 	var that=this;
 	
 	this.show=function(){
-		that.popUpMenuDiv.show();
+		that.colorPickerDiv.show();
 	}
 	this.hide=function(){
-		that.popUpMenuDiv.hide();
+		that.colorPickerDiv.hide();
 	}
 	this.moveToPosition=function(x,y){
-		that.popUpMenuDiv.css("top",y)
-		that.popUpMenuDiv.css("left",x)
+		that.colorPickerDiv.css("top",y)
+		that.colorPickerDiv.css("left",x)
 	}
 	
 	this.addColorSelection=function(){
-		var colorselectionDiv=colorGenerator.getFullColorSelection(10,that.popUpMenuDiv.width(),that.popUpMenuDiv.height(),3)
+		var colorselectionDiv=colorGenerator.getFullColorSelection(10,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
 		$(colorselectionDiv).find(".singleColor").on("click",function(evt){
 
 			var newColor=$(evt.target).css("backgroundColor");
 			$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
 			framesManager.setSingleWindowColor(newColor);
-			popUpMenu.hide();
+			//myColorPicker.hide();
+			that.hide();
 		})
-		that.popUpMenuDiv.append(colorselectionDiv);		
+		that.colorPickerDiv.append(colorselectionDiv);		
 	}
 }
-
-
 
 
 var windowManagerObj = function(){

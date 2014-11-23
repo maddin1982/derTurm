@@ -1,13 +1,23 @@
 
 var camera, scene, renderer, geometry, material, mesh;
+var lastFrameId = 0;
+var lastFrameStartTime=0;
 
 var windowMeshes=[];
 
-function init3DSceneOnElement(element) {
+function init3DSceneOnElement(container) {
+
+	//make 3d container resizable
+	 container.resizable({
+	  resize: function( event, ui ) {
+		onWindowResize()
+	  }
+	});
+
 
     scene = new THREE.Scene();
     //scene.fog = new THREE.FogExp2( 0xcccccc, 0.02 );
-    camera = new THREE.PerspectiveCamera(70, element.width() / 200, 1, 10000);
+    camera = new THREE.PerspectiveCamera(70, container.width() / 200, 1, 10000);
     camera.position.z = 30;
     scene.add(camera);
 
@@ -127,11 +137,11 @@ function init3DSceneOnElement(element) {
 	//Renderer settings
 	renderer = new THREE.WebGLRenderer({ antialias: true });
 	//renderer.setClearColor( scene.fog.color, 1 );
-    renderer.setSize(element.width(), 200);
+    renderer.setSize(container.width(), 200);
 	renderer.shadowMapEnabled = true;
 	//renderer.shadowMapSoft = true;
 
-    element.append(renderer.domElement);
+    container.append(renderer.domElement);
 
 	controls = new THREE.OrbitControls( camera , renderer.domElement);
 				controls.target = new THREE.Vector3( 0, 10, 0 );
@@ -151,13 +161,23 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate);
-	var frame=framesManager.getCurrentFrame();
-	if(!(frame===undefined)){
-		$.each(frame.windows,function(i,window){
+
+	//get current FrameID
+	var currentFrameId=framesManager.currentframeId;
+
+	if( lastFrameId !== currentFrameId)  // new animation started
+	{
+		lastFrameStartTime = new Date().getTime();
+	}	
+
+	var currentFrame=framesManager.getCurrentFrame(lastFrameStartTime,new Date().getTime());
+	if(!(currentFrame===undefined)){
+		$.each(currentFrame.windows,function(i,window){
 			setWindowToColor(i,window.color)
 		})
 	}
     render();
+    lastFrameId=currentFrameId;
 }
 
 function setWindowToColor(i,newColor){

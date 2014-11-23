@@ -32,20 +32,36 @@ var frameAnimationRunning=false;
 var lastMessageSendToArduino="";
 
 
-
 // get new data
-app.io.route('data', function(req) {
+app.io.route('showInModel', function(req) {
 	frameData=req.data;
-	
+	// send data over serial port 
+	startAnimation();
+})
+
+//save scene to file
+app.io.route('saveSceneToFile', function(req) {
 	//save to file
 	filename=(new Date()).getTime();
-	fs.writeFile('savedAnimations/'+filename+'.txt', JSON.stringify(frameData), function (err) {
+	fs.writeFile('savedAnimations/'+filename, JSON.stringify(frameData), function (err) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});
-	
-	// send data over serial port 
-	startAnimation();
+})
+
+app.io.route('getSavedScenes', function(req) {
+	var scenes = fs.readdirSync('savedAnimations/');
+	req.io.emit('savedScenesLoaded', scenes)
+})
+
+app.io.route('getSceneData', function(req) {
+	var sceneName= req.sceneName;
+	var sceneData;
+	fs.readFile('savedAnimations/'+sceneName, function (err, data) {
+	  if (err) throw err;
+	  sceneData=JSON.parse(data);
+	});
+	req.io.emit('sceneDataLoaded', sceneData)
 })
 
 function openSerialPort(){
