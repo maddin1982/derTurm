@@ -19,14 +19,18 @@ $(document).ready(function() {
 	//set color selection in colorpopup
 	popUpMenu.addColorSelection();
 	
+	//initialize 3d Scene
 	init3DSceneOnElement($("#3DContainer"));	
+	
+	
+	/**************************
+	* Click Events
+	**************************/
+	
 	$("#addFrameBtn").on("click",framesManager.addFrame)
 	$("#showInModelBtn").on("click",framesManager.showInModel)
 	$("#saveSceneBtn").on("click",framesManager.saveSceneToFile)
 	$("#loadSceneBtn").on("click",framesManager.getSavedFiles)
-	
-	
-	
 	
 	// Klick auf dropdown für Fensteranzahl
 	$(".activeWindowsSelect").on("click",function(){	
@@ -65,6 +69,10 @@ $(document).ready(function() {
 		// //$('#trans_duration').data('slider').getValue());
 	// });
 
+	/**************************
+	* Backend Socket Events
+	**************************/
+	
 	io= io.connect()
 	
 	//io Server Responses
@@ -78,6 +86,7 @@ $(document).ready(function() {
 	})	
 
 });
+	
 	
 
 // Modal Dialog
@@ -110,9 +119,6 @@ function modalDialog(inthis){
 	}
 };
 
-
-
-
 var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
@@ -121,6 +127,29 @@ var framesManagerObj = function(framesContainer){
 	this.lastSelectedWindowDiv;
 	this.frameAnimationRunning=false;
 	var that=this;
+	
+	var indexBeforeDrag;
+	makeFramesContainersortable();
+	
+	//add drag and drop functions 
+	function makeFramesContainersortable(){
+		framesContainer.sortable({
+			vertical: false,
+			  onDragStart: function (item, group, _super) {
+				indexBeforeDrag = item.index()
+				item.appendTo(item.parent())
+				_super(item)
+			},
+			  onDrop: function  (item, container, _super) {
+				var field,
+				newIndex = item.index()
+				if(newIndex != indexBeforeDrag) {
+					framesManager.moveFrame(indexBeforeDrag,newIndex)
+				}
+				_super(item)
+			}
+		})
+	}
 
 	//go to next Frame if there is one
 	function goToNextFrame(){

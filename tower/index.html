@@ -4,8 +4,10 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Tower</title>
-        <meta name="description" content="">
+
         <meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<!-- css includes -->
         <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
         <link rel="stylesheet" href="css/bootstrap/bootstrap-theme.min.css">
         <link rel="stylesheet" href="css/slider.css">
@@ -14,7 +16,6 @@
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
 
-	
 		<!-- js includes -->
 		<script src="js/vendor/jquery-1.11.1.min.js"></script>
 		<script src="js/vendor/bootstrap.min.js"></script>
@@ -22,40 +23,11 @@
 		<script src="js/vendor/three.min.js"></script>
 		<script src="js/vendor/three.orbitctrl.js"></script>
 		<script src="js/vendor/jquery-sortable.js"></script>
-		<script src="js/vendor/jquery-ui.min.js.js"></script>
+		<script src="js/vendor/jquery-ui.min.js"></script>
 		<script src="../socket.io/socket.io.js"></script>
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
 		<script src="js/main.js"></script>
-		
-
-		<script type="text/javascript">
-			$(function  () {
-
-				 $( "#3DContainer" ).resizable({
-				  resize: function( event, ui ) {
-					onWindowResize()
-				  }
-				});
-			 	 var oldIndex
-			 	 $("ol.sortableList").sortable({
-					vertical: false,
-					  onDragStart: function (item, group, _super) {
-					    oldIndex = item.index()
-					    item.appendTo(item.parent())
-					    _super(item)
-					  },
-					  onDrop: function  (item, container, _super) {
-					    var field,
-					    newIndex = item.index()
-					    if(newIndex != oldIndex) {
-					    	framesManager.moveFrame(oldIndex,newIndex)
-					    }
-					    _super(item)
-					  }
-					})
-			})// end of function
-		</script>
 
     </head>
     <body>
@@ -192,12 +164,12 @@
 		 </div>	
 		<!--Storyboard -->
 		<div class="row">
-			<ol class='sortableList col-md-12' id="storyboard" >
+			<ol class='col-md-12' id="storyboard">
 			</ol>
 		</div>
 
     </div>  
-	
+
 		<!--PopUp for colorPicker and so on -->
 		<div id="popUpMenu"></div>
 
