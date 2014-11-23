@@ -59,119 +59,128 @@
 
 		<div class="container">	
 		 
-			<!--3D Window -->
-			<div class="row">
-				<div class="col-md-12">
-				  <div id="3DContainer" class="ui-widget-content">	
-				  </div>
+		<!--3D Window -->
+		<div class="row">
+			<div class="col-md-12">
+			  <div id="3DContainer" class="ui-widget-content">	
+			  </div>
+			</div>
+		</div>
+		
+		<!--Button Bar -->
+		<div id="storyBoardHeader" class="row">
+			<div class="col-md-12">	
+			
+				<!--Add Frame -->
+				<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
+				
+				<!--show On Model -->
+				<button id="showInModelBtn" type="button" class="btn btn-default">show On Model</button>
+				
+				<!--Save Scene -->
+				<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
+				
+				<!--get Saved Files -->
+				<button id="loadSceneBtn" type="button" class="btn btn-default">load Scene</button>
+				
+				
+				<!--Aktive Fenster dropdown -->
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+					Aktive Fenster
+					<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
+					</ul>
 				</div>
+				
+				<!--Fenster Modus dropdown -->
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
+					Fenster Modus
+					<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
+						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
+					</ul>
+				</div>
+				
+				<!--Framerate dropdown -->
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+					Framerate
+					<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
+					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
+					</ul>
+				</div>
+			</div>	
+			<!--Frames Window -->
+			<div class="row">
+				<ol class='col-md-12' id="storyboard">
+				</ol>
 			</div>
 			
-			<!--Button Bar -->
-			<div id="storyBoardHeader" class="row">
-				<div class="col-md-12">
-				
-					<!--Add Frame -->
-					<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
-					
-					<!--show On Model -->
-					<button id="showInModelBtn" type="button" class="btn btn-default">show On Model</button>
-					
-					<!--Save Scene -->
-					<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
-					
-					<!--get Saved Files -->
-					<button id="loadSceneBtn" type="button" class="btn btn-default">load Scene</button>
-					
-					
-					<!--Aktive Fenster dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-						Aktive Fenster
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
-						</ul>
+		</div>  
+
+		<!--  
+			****************************************
+			POPUPS AND OVERLAYS
+			******************************************
+		 -->
+
+		<!--PopUp for colorPicker and so on -->
+		<div id="colorPicker"></div>
+
+		<!--Modal Window-->
+		<div id="myModal" class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<!-- Header -->
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Transitions</h4>
 					</div>
 					
-					<!--Fenster Modus dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
-						Fenster Modus
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
-						</ul>
-					</div>
-					
-					<!--Framerate dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-						Framerate
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
-						</ul>
-					</div>
-					
-					<!--Modal Window-->
-					<div id="myModal" class="modal fade">
-						<div class="modal-dialog">
-							<div class="modal-content">
-								<div class="modal-header">
-									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-									<h4 class="modal-title">Transitions</h4>
-								</div>
-								<div class="modal-body">
-									<div class="btn-group" data-toggle="buttons">
-									  <label class="btn  btn-default active">
-										<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
-									  </label>
-									  <label class="btn  btn-default">
-										<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
-									  </label>
-									</div>
-									<p>Zeit in Millisekunden</p>
-									<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
-										
-										<div class="slider-track"></div>
-										<div class="slider-selection" style="z-index: 1;"></div>
-									</div>				            	
-									<p></br>Todo: Slider für delay & cutoff</p>
-									
-								<div class="modal-footer">
-									<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-									<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
-								</div>
-							</div>
+					<div class="modal-body">
+						<!-- Buttons -->
+						<div class="btn-group" data-toggle="buttons">
+						  <label class="btn  btn-default active">
+							<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
+						  </label>
+						  <label class="btn  btn-default">
+							<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
+						  </label>
+						</div>
+						
+						<!-- Slider -->
+						<p>Zeit in Millisekunden</p>
+						<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
+							<div class="slider-track"></div>
+							<div class="slider-selection" style="z-index: 1;"></div>
+						</div>				            	
+						<p></br>Todo: Slider für delay & cutoff</p>
+						
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
 						</div>
 					</div>
 				</div>
-
-		 </div>	
-		<!--Storyboard -->
-		<div class="row">
-			<ol class='col-md-12' id="storyboard">
-			</ol>
+			</div>
 		</div>
-
-    </div>  
-
-		<!--PopUp for colorPicker and so on -->
-		<div id="popUpMenu"></div>
-
     </body>
 </html>

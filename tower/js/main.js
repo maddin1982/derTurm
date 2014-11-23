@@ -15,7 +15,7 @@ $(document).ready(function() {
 	windowManager = new windowManagerObj();
 	
 	//initialize color selection popup
-	popUpMenu= new popUpMenuObj($("#popUpMenu"));
+	popUpMenu= new popUpMenuObj($("#colorPicker"));
 	//set color selection in colorpopup
 	popUpMenu.addColorSelection();
 	
