@@ -16,16 +16,63 @@ function init3DSceneOnElement(container) {
 
 
     scene = new THREE.Scene();
-
+    //scene.fog = new THREE.FogExp2( 0xcccccc, 0.02 );
     camera = new THREE.PerspectiveCamera(70, container.width() / 200, 1, 10000);
     camera.position.z = 30;
     scene.add(camera);
+
+
+	// Environment map: 
+	// urls of the images, one per half axis
+	var urls = [
+	  'img/env/0004.png', //pos x
+	  'img/env/0002.png', //neg-x
+	  'img/env/0005.png', //neg y
+	  'img/env/0006.png', //pos y  
+	  'img/env/0001.png', //pos z
+	  'img/env/0003.png'  //neg z
+	],
+
+	// wrap it up into the object that we need
+	cubemap = THREE.ImageUtils.loadTextureCube(urls);
+
+	// set the format, likely RGB unless you've gone crazy
+	cubemap.format = THREE.RGBFormat;
 
     group = new THREE.Object3D();
 	var material = new THREE.MeshLambertMaterial({
 	  color: 0x111111
 	});
-	
+
+    // following code from https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_cubemap.html
+    var shader = THREE.ShaderLib[ "cube" ];
+    shader.uniforms[ "tCube" ].texture = cubemap;
+
+    var env_material = new THREE.ShaderMaterial( {
+
+      fragmentShader: shader.fragmentShader,
+      vertexShader: shader.vertexShader,
+      uniforms: shader.uniforms,
+      depthWrite: false,
+      side: THREE.BackSide
+
+    });	var material = new THREE.MeshLambertMaterial({
+	  color: 0x111111
+	  //,envMap: cubemap
+	});
+
+    var material_env = new THREE.MeshLambertMaterial({
+	  color: 0x111111,
+	  envMap: cubemap,
+	  side: THREE.BackSide
+	});
+
+
+
+    var skybox = new THREE.Mesh( new THREE.CubeGeometry( 2000, 2000, 2000 ), material_env );
+    scene.add(skybox);
+
+
 	
     towerTopUpper = new THREE.CylinderGeometry( 7, 7, 3, 16 );	
 	towerTopUpperMesh = new THREE.Mesh(towerTopUpper, material);	
@@ -69,7 +116,7 @@ function init3DSceneOnElement(container) {
 	}
 	
     scene.add(group);
-	scene.add( new THREE.AmbientLight( 0x111111 ) );
+	scene.add( new THREE.AmbientLight( 0x222222 ) );
 	//scene.fog = new THREE.Fog( 0x0, 2000, 4000 );
 		
 	var light = new THREE.SpotLight(0xaaaaaa );
@@ -85,7 +132,11 @@ function init3DSceneOnElement(container) {
 	
 	camera.lookAt(towerBottomMesh.position);
 
+
+
+	//Renderer settings
 	renderer = new THREE.WebGLRenderer({ antialias: true });
+	//renderer.setClearColor( scene.fog.color, 1 );
     renderer.setSize(container.width(), 200);
 	renderer.shadowMapEnabled = true;
 	//renderer.shadowMapSoft = true;
