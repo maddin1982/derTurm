@@ -21,8 +21,13 @@ $(document).ready(function() {
 	
 	init3DSceneOnElement($("#3DContainer"));	
 	$("#addFrameBtn").on("click",framesManager.addFrame)
-	$("#saveSceneBtn").on("click",framesManager.saveDataToBackend)
-
+	$("#showInModelBtn").on("click",framesManager.showInModel)
+	$("#saveSceneBtn").on("click",framesManager.saveSceneToFile)
+	$("#loadSceneBtn").on("click",framesManager.getSavedFiles)
+	
+	
+	
+	
 	// Klick auf dropdown für Fensteranzahl
 	$(".activeWindowsSelect").on("click",function(){	
 		windowManager.setWindowAmount(parseInt($(this).attr("activeWindows")))
@@ -62,6 +67,15 @@ $(document).ready(function() {
 
 	io= io.connect()
 	
+	//io Server Responses
+	io.on('savedScenesLoaded', function(data) {
+		console.log("savedScenesLoaded")
+		console.log(data)
+	})
+	io.on('sceneDataLoaded', function(data) {
+		console.log("sceneDataLoaded")
+		console.log(data)
+	})	
 
 });
 	
@@ -146,7 +160,7 @@ var framesManagerObj = function(framesContainer){
 		data.splice(newIndex,0,data.splice(oldIndex,1)[0]);
 	}
 	
-	this.saveDataToBackend=function(){
+	this.showInModel=function(){
 		//parse color to rgb values
 		var formatedData=[];
 		$.each(data,function(i,frame){
@@ -156,8 +170,16 @@ var framesManagerObj = function(framesContainer){
 			})
 			formatedData.push(newframe);
 		})
-		io.emit("data",formatedData)
+		io.emit("showInModel",formatedData)
 	}
+	
+	this.saveSceneToFile=function(){
+		io.emit("saveSceneToFile",data)
+	}
+	this.getSavedFiles=function(){
+		io.emit("getSavedScenes",[])
+	}
+		
 	this.getFrameById=function(inID){
 		if(data.length==0)
 			return ;

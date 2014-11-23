@@ -6,13 +6,11 @@
         <title>Tower</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-
+        <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="css/bootstrap/bootstrap-theme.min.css">
         <link rel="stylesheet" href="css/slider.css">
         <link rel="stylesheet" href="css/sortable.css">
         <link rel="stylesheet" href="css/resizable.css">
-		<!--<link rel="stylesheet" href="css/colpick.css">-->
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
 
@@ -23,15 +21,13 @@
 		<script src="js/vendor/bootstrap-slider.js"></script>
 		<script src="js/vendor/three.min.js"></script>
 		<script src="js/vendor/three.orbitctrl.js"></script>
+		<script src="js/vendor/jquery-sortable.js"></script>
+		<script src="js/vendor/jquery-ui.min.js.js"></script>
 		<script src="../socket.io/socket.io.js"></script>
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
 		<script src="js/main.js"></script>
-		<script src="js/vendor/jquery-sortable.js"></script>
 		
-		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-	    <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
-
 
 		<script type="text/javascript">
 			$(function  () {
@@ -106,8 +102,15 @@
 					<!--Add Frame -->
 					<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
 					
+					<!--show On Model -->
+					<button id="showInModelBtn" type="button" class="btn btn-default">show On Model</button>
+					
 					<!--Save Scene -->
 					<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
+					
+					<!--get Saved Files -->
+					<button id="loadSceneBtn" type="button" class="btn btn-default">load Scene</button>
+					
 					
 					<!--Aktive Fenster dropdown -->
 					<div class="dropdown">
