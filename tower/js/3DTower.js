@@ -1,5 +1,7 @@
 
 var camera, scene, renderer, geometry, material, mesh;
+var lastFrameId = 0;
+var lastFrameStartTime=0;
 
 var windowMeshes=[];
 
@@ -108,13 +110,23 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate);
-	var frame=framesManager.getCurrentFrame();
-	if(!(frame===undefined)){
-		$.each(frame.windows,function(i,window){
+
+	//get current FrameID
+	var currentFrameId=framesManager.currentframeId;
+
+	if( lastFrameId !== currentFrameId)  // new animation started
+	{
+		lastFrameStartTime = new Date().getTime();
+	}	
+
+	var currentFrame=framesManager.getCurrentFrame(lastFrameStartTime,new Date().getTime());
+	if(!(currentFrame===undefined)){
+		$.each(currentFrame.windows,function(i,window){
 			setWindowToColor(i,window.color)
 		})
 	}
     render();
+    lastFrameId=currentFrameId;
 }
 
 function setWindowToColor(i,newColor){
