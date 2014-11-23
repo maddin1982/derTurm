@@ -30,8 +30,16 @@ $(document).ready(function() {
 	
 	$("#addFrameBtn").on("click",framesManager.addFrame)
 	$("#showInModelBtn").on("click",framesManager.showInModel)
-	$("#saveSceneBtn").on("click",framesManager.saveSceneToFile)
-	$("#loadSceneBtn").on("click",framesManager.getSavedFiles)
+	
+	//save dialog
+	$("#openSaveDialogBtn").on("click",showSaveDialog)
+	$("#saveSceneBtn").on("click",function(){
+		framesManager.saveSceneToFile($('#saveDialog_fileName').val())
+		$('#saveSceneModal').modal('hide');
+	})
+	
+	//load files button
+	$("#loadSceneFilesBtn").on("click",framesManager.getSavedScenes)
 	
 	// Klick auf dropdown für Fensteranzahl
 	$(".activeWindowsSelect").on("click",function(){	
@@ -78,15 +86,27 @@ $(document).ready(function() {
 	
 	//io Server Responses
 	io.on('savedScenesLoaded', function(data) {
+		//add selectable scenes to dropdown menue
+		$("#listOfFiles").empty();
+		$.each(data,function(i,sceneName){	
+			$("#listOfFiles").append("<li><a onclick='framesManager.getSavedSceneByName(this)'>"+sceneName+"</a></li>")
+		})
+		
 		console.log("savedScenesLoaded")
 	})
 	io.on('sceneDataLoaded', function(data) {
 		console.log("sceneDataLoaded")
+		framesManager.setData(JSON.parse(data));
 	})	
 
 });
 	
-	
+
+function showSaveDialog(){
+	$('#saveSceneModal').modal('show');
+	var date=new Date();
+	$('#saveDialog_fileName').val(date.getDate()+"_"+(date.getMonth()+1)+"_"+date.getFullYear()+"_"+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds());
+}
 
 // Modal Dialog
 function modalDialog(inthis){
@@ -181,6 +201,13 @@ var framesManagerObj = function(framesContainer){
 	this.getData=function(){
 		return data;
 	}	
+	
+	this.setData=function(newData){
+		data=newData;
+		that.currentframeId=0;
+		that.renderFrames();
+		startAnimation();
+	}	
 
 	this.getFramerate=function(){
 		return framerate;
@@ -210,12 +237,19 @@ var framesManagerObj = function(framesContainer){
 		io.emit("showInModel",formatedData)
 	}
 	
-	this.saveSceneToFile=function(){
-		io.emit("saveSceneToFile",data)
-
+	this.saveSceneToFile=function(filename){
+		io.emit("saveSceneToFile",{"frameData":data,"fileName":filename})
 	}
-	this.getSavedFiles=function(){
+	
+	//tell backend to look in saved files folder, load files and submit it to client
+	this.getSavedScenes=function(){
 		io.emit("getSavedScenes",[])
+	}
+	
+	//tell backend to read content of file and submit it to client
+	this.getSavedSceneByName=function(button){
+		//tell backend to look in saved files folder, load files and submit it to client
+		io.emit("getSceneData",$(button).html())
 	}
 		
 	this.getFrameById=function(inID){

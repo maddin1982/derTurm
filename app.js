@@ -42,8 +42,14 @@ app.io.route('showInModel', function(req) {
 //save scene to file
 app.io.route('saveSceneToFile', function(req) {
 	//save to file
-	filename=(new Date()).getTime();
-	fs.writeFile('savedAnimations/'+filename, JSON.stringify(frameData), function (err) {
+	if(req.data.fileName==""){
+		var date=new Date();
+		filename=date.getDate()+"_"+(date.getMonth()+1)+"_"+date.getFullYear()+"_"+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds();
+	}
+	else
+		filename=req.data.fileName;
+	
+	fs.writeFile('savedAnimations/'+filename, JSON.stringify(req.data.frameData), function (err) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});
@@ -55,13 +61,10 @@ app.io.route('getSavedScenes', function(req) {
 })
 
 app.io.route('getSceneData', function(req) {
-	var sceneName= req.sceneName;
-	var sceneData;
-	fs.readFile('savedAnimations/'+sceneName, function (err, data) {
+	fs.readFile('savedAnimations/'+req.data, "utf-8", function (err, data) {
 	  if (err) throw err;
-	  sceneData=JSON.parse(data);
+	  req.io.emit('sceneDataLoaded', data)
 	});
-	req.io.emit('sceneDataLoaded', sceneData)
 })
 
 function openSerialPort(){

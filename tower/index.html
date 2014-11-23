@@ -78,18 +78,22 @@
 			<div class="col-md-12">	
 			
 				<!--Add Frame -->
-				<button id="addFrameBtn" type="button" class="btn btn-default">add Frame</button>
+				<button id="addFrameBtn" type="button" class="btn btn-default">add frame</button>
 				
 				<!--show On Model -->
-				<button id="showInModelBtn" type="button" class="btn btn-default">show On Model</button>
+				<button id="showInModelBtn" type="button" class="btn btn-default">push to model</button>
 				
 				<!--Save Scene -->
-				<button id="saveSceneBtn" type="button" class="btn btn-default">save Scene</button>
+				<button id="openSaveDialogBtn" type="button" class="btn btn-default">save scene</button>
 				
-				<!--get Saved Files -->
-				<button id="loadSceneBtn" type="button" class="btn btn-default">load Scene</button>
-				
-				
+				<!--Load Scenes -->
+				<div class="dropdown">
+					<button id="loadSceneFilesBtn" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">load Scene <span class="caret"></span></button>
+					<ul id="listOfFiles" class="dropdown-menu scrollable-menu" role="menu">
+						<!--<li><a href="#">Action</a></li>-->
+					</ul>
+				</div>
+
 				<!--Aktive Fenster dropdown -->
 				<div class="dropdown">
 					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
@@ -188,32 +192,30 @@
 				</div>
 			</div>
 		</div>
-		
-		<!--loadScene Window-->
-		<div id="loadSceneDialog" class="modal fade">
+
+<!--Modal Window-->
+		<div id="saveSceneModal" class="modal fade">
 			<div class="modal-dialog">
-				<div class="modal-content">	
+				<div class="modal-content">
 					<!-- Header -->
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-						<h4 class="modal-title">Verfügbare Szenen</h4>
+						<h4 class="modal-title">Save</h4>
 					</div>
-				
+					
 					<div class="modal-body">
-						<p>Bitte Szene auswählen</p>
-						<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
-							<div class="slider-track"></div>
-							<div class="slider-selection" style="z-index: 1;"></div>
-						</div>				            	
-						<!-- Footer -->	
-						<div class="modal-footer">
-							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-							<button id="loadSelectet" type="button" class="btn btn-primary">lade Szene</button>
-						</div>
+						<input type="text" class="form-control" id="saveDialog_fileName" placeholder="enterFilename">
+					</div>
+						
+					<!-- Footer -->	
+					<div class="modal-footer">
+						<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+						<button id="saveSceneBtn" type="button" class="btn btn-primary">Speichern</button>
 					</div>
 				</div>
 			</div>
-		</div>		
-		
+		</div>
+
+
     </body>
 </html>
