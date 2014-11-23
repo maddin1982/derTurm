@@ -465,11 +465,11 @@ var windowManagerObj = function(){
 		$("#dd_WindowAmount").text(newWindowAmount+" Fenster");
 		if( windowAmount != newWindowAmount)
 		{
-			if( newWindowAmount == 16)
+			/*if( newWindowAmount == 16)
 			{
 				evt.data.mode = 0;
 				that.setWindowMode(evt);
-			}			
+			}		*/	//prevented 16Fenster from working
 			windowAmount = newWindowAmount;
 			//redraw updates data
 			framesManager.renderFrames();
