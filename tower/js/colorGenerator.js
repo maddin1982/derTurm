@@ -55,11 +55,11 @@ function colorGeneratorObj(){
 		var firstPart=Math.floor(numberOfSteps/2);
 		var secondPart=numberOfSteps-firstPart;
 		//from black to full Color
-		for(var i =1;i<firstPart;i++){
+		for(var i =0;i<firstPart;i++){
 			$(colorBarDiv).append("<div class='singleColor' style='height:"+height+"px;width:"+width+"px;float:left;background:"+_interpolateColor("#000000",color,firstPart,i)+"'></div>");
 		}
 		//from full Color to white
-		for(var i =0;i<secondPart+1;i++){
+		for(var i =1;i<secondPart+1;i++){
 			$(colorBarDiv).append("<div class='singleColor' style='height:"+height+"px;width:"+width+"px;float:left;background:"+_interpolateColor(color,"#ffffff",secondPart,i)+"'></div>");
 		}
 		$(colorBarDiv).append("<div style='clear:both'></div>");
