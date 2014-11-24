@@ -112,7 +112,15 @@ function init3DSceneOnElement(container) {
 	}
 	
     scene.add(group);
-    _ambientLight = new THREE.AmbientLight( 0x222222 ) 
+
+    //read the last used luminosity value from the cookie
+    var x = readCookie('luminosity')
+    var luminosity = 0x222222
+    if (x) {
+    	luminosity = rgbToHex(x, x, x)
+	}
+
+    _ambientLight = new THREE.AmbientLight( luminosity ) 
 	scene.add( _ambientLight );
 	//scene.fog = new THREE.Fog( 0x0, 2000, 4000 );
 		

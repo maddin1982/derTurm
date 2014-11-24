@@ -64,6 +64,11 @@ $(document).ready(function() {
 	// Slider for the 3D luminosity 
 	$("#luminosity").slider({ max: 255 }) ;
 
+    var value = readCookie('luminosity')
+    if (value) {
+    	$('#luminosity').slider('setValue', value);
+	}
+
 	var originalSliderVal;
 
 	$('#luminosity').slider().on('slideStart', function(ev){
@@ -74,6 +79,7 @@ $(document).ready(function() {
 	    var newVal = $('#luminosity').data('slider').getValue();
 	    if(originalSliderVal != newVal) {
 	        changeAmbientLight(newVal)
+	        createCookie("luminosity", newVal, 20 )
 	    }
 	});
 
