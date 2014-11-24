@@ -4,8 +4,11 @@ var lastFrameId = 0;
 var lastFrameStartTime=0;
 
 var windowMeshes=[];
+var materials=[];
 
 var _ambientLight;
+
+var _withGlowingWindows;
 
 function init3DSceneOnElement(container) {
 
@@ -65,16 +68,14 @@ function init3DSceneOnElement(container) {
 	  side: THREE.BackSide
 	});
 
-    var skybox = new THREE.Mesh( new THREE.CubeGeometry( 2000, 2000, 2000 ), material_env );
+    var skybox = new THREE.Mesh( new THREE.BoxGeometry( 2000, 2000, 2000 ), material_env );
     scene.add(skybox);
 
-
-	
     towerTopUpper = new THREE.CylinderGeometry( 7, 7, 3, 16 );	
 	towerTopUpperMesh = new THREE.Mesh(towerTopUpper, material);	
 	//towerTopUpperMesh.castShadow = true;
 	//towerTopUpperMesh.receiveShadow = true;
-	
+
 	towerTopLower = new THREE.CylinderGeometry( 7, 7, 5, 16);	
 	towerTopLowerMesh = new THREE.Mesh(towerTopLower, material);	
 	//towerTopLowerMesh.castShadow = true;
@@ -108,22 +109,66 @@ function init3DSceneOnElement(container) {
 		var plane = new THREE.Mesh(windowGlass,windowMaterial);
 		plane.rotation.y = ((360*i/16)+(360/34)) * Math.PI / 180;
 		windowMeshes[i]=plane;
+
+
+
+    var moon = new THREE.Mesh(sphereGeom, material);
+	moon.position.set(150,0,-150);
+	// create custom material from the shader code above
+	//   that is within specially labeled script tags
+	var customMaterial = new THREE.ShaderMaterial( 
+	{
+	    uniforms: 
+		{ 
+			"c":   { type: "f", value: 0 },
+			"p":   { type: "f", value: 1.9 },
+			glowColor: { type: "c", value: new THREE.Color(0x000000) },
+			viewVector: { type: "v3", value: camera.position }
+		},
+		vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+		fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+		side: THREE.FrontSide,
+		blending: THREE.AdditiveBlending,
+		transparent: true,
+		// side: THREE.BackSide
+	}   );
+
+	var sphereGeom = new THREE.SphereGeometry(1, 20, 20);
+
+	this.moonGlow = new THREE.Mesh( sphereGeom, customMaterial );
+    moonGlow.position.x = plane.position.x+7;
+    moonGlow.position.y = plane.position.y+5;
+
+	moonGlow.scale.multiplyScalar(1.2);
+	materials[i] = moonGlow;
+
+	plane.add( moonGlow );
+
+
+
 		group.add(plane);
-	}
-	
+		}
+
     scene.add(group);
 
     //read the last used luminosity value from the cookie
-    var x = readCookie('luminosity')
+    var cookieLum = readCookie('luminosity')
     var luminosity = 0x222222
-    if (x) {
-    	luminosity = rgbToHex(x, x, x)
+    if (cookieLum) {
+    	luminosity = rgbToHex(cookieLum, cookieLum, cookieLum)
+	}
+
+	//read the state of glowing windows
+	var cookieGlowing = readCookie('withGlowingWindows')
+    if (cookieGlowing) {
+    	_withGlowingWindows = cookieGlowing
+    	console.log(_withGlowingWindows)
 	}
 
     _ambientLight = new THREE.AmbientLight( luminosity ) 
 	scene.add( _ambientLight );
 	//scene.fog = new THREE.Fog( 0x0, 2000, 4000 );
-		
+
 	var light = new THREE.SpotLight(0x222222 );
 		light.position.set(50, 50, 0);
 		light.target.position.set(0,20,0)
@@ -136,8 +181,6 @@ function init3DSceneOnElement(container) {
 	scene.add(light);	
 	
 	camera.lookAt(towerBottomMesh.position);
-
-
 
 	//Renderer settings
 	renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -187,6 +230,9 @@ function animate() {
 
 function setWindowToColor(i,newColor){
 	windowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.FrontSide } ); 
+	if( _withGlowingWindows == true ){
+		materials[i].material.uniforms.glowColor.value.set( newColor );
+	}
 }
 
 function render() {
@@ -200,6 +246,16 @@ function changeAmbientLight(i){
 	var color = rgbToHex(i, i, i)
     _ambientLight = new THREE.AmbientLight( color )
 	scene.add( _ambientLight );
+}
+
+function switchGlowingWindows(value){
+	_withGlowingWindows = value
+
+	if(_withGlowingWindows == false){
+		for(var i =0; i<16;i++){
+			materials[i].material.uniforms.glowColor.value.set( 0 );
+		}
+	}
 }
 
 //Helper functions for converting numbers to hex

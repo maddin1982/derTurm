@@ -26,7 +26,7 @@
 		<script src="js/vendor/bootstrap-slider.js"></script>
 		<script src="js/vendor/three.min.js"></script>
 		<script src="js/vendor/three.orbitctrl.js"></script>
-		
+
 		<!-- socket io -->
 		<script src="../socket.io/socket.io.js"></script>
 		
@@ -35,6 +35,33 @@
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
 		<script src="js/main.js"></script>
+
+		<!-- ---------------- Custom Shader Code ------------------------ -->
+		<script id="vertexShader" type="x-shader/x-vertex">
+		uniform vec3 viewVector;
+		uniform float c;
+		uniform float p;
+		varying float intensity;
+		void main() 
+		{
+		    vec3 vNormal = normalize( normalMatrix * normal );
+			vec3 vNormel = normalize( normalMatrix * viewVector );
+			intensity = pow( c - dot(vNormal, vNormel), p );
+			
+		    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}
+		</script>
+
+		<!-- fragment shader a.k.a. pixel shader -->
+		<script id="fragmentShader" type="x-shader/x-vertex"> 
+		uniform vec3 glowColor;
+		varying float intensity;
+		void main() 
+		{
+			vec3 glow = glowColor * intensity;
+		    gl_FragColor = vec4( glow, 1.0 );
+		}
+		</script>
 
     </head>
     <body>
@@ -240,6 +267,12 @@
 							<div class="slider-selection" style="z-index: 1;"></div>
 						</div>
 
+						<div class="checkbox">
+						  <label>
+						    <input type="checkbox" id="GlowingWindowsCheck" value="true" aria-label="...">
+						    Glowing Windows
+						  </label>
+						</div>
 						<!-- Footer -->	
 						<div class="modal-footer">
 							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>

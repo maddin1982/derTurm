@@ -61,6 +61,24 @@ $(document).ready(function() {
 		$('#settings_window').modal('show');
 	});
 
+	$("#GlowingWindowsCheck").on("change",function(){
+		switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
+		console.log($('#GlowingWindowsCheck').is(':checked'))
+		createCookie("withGlowingWindows", $('#GlowingWindowsCheck').is(':checked'), 20 )
+	});
+
+   var valueGlowing = readCookie('withGlowingWindows')
+    if (valueGlowing) {
+    	if(valueGlowing == "true"){
+    		$('#GlowingWindowsCheck').prop('checked',  true);
+    		switchGlowingWindows( true )
+    	}
+    	else{
+    		$('#GlowingWindowsCheck').prop('checked',  false);
+    		switchGlowingWindows( false )
+    	}
+	}
+
 	// Slider for the 3D luminosity 
 	$("#luminosity").slider({ max: 255 }) ;
 
