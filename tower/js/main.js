@@ -195,6 +195,8 @@ var framesManagerObj = function(framesContainer){
 	this.frameAnimationRunning=false;
 	var that=this;
 	
+	this.currentWindowBrushColor="#000000";
+	
 	var indexBeforeDrag;
 	makeFramesContainersortable();
 	
@@ -361,6 +363,7 @@ var framesManagerObj = function(framesContainer){
 
 	this.selectFrame=function(evt){
 		that.lastSelectedWindowDiv=evt.target;
+		framesManager.setSingleWindowColor(that.currentWindowBrushColor);
 		myColorPicker.moveToPosition(evt.clientX,evt.clientY);
 		myColorPicker.show();
 	};
@@ -481,8 +484,9 @@ var colorPickerObj=function(colorPickerDiv){
 	this.addColorSelection=function(){
 		var colorselectionDiv=colorGenerator.getFullColorSelection(10,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
 		$(colorselectionDiv).find(".singleColor").on("click",function(evt){
-
+			
 			var newColor=$(evt.target).css("backgroundColor");
+			framesManager.currentWindowBrushColor=newColor;
 			$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
 			framesManager.setSingleWindowColor(newColor);
 			//myColorPicker.hide();
