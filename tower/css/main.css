@@ -8,7 +8,9 @@ body {
 .frame{
 	height:20px;
 	clear:both;
+	list-style-type: none;
 }
+
 .frame div{
 	height:20px;
 	width:5.8%;
