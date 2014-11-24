@@ -8,11 +8,13 @@ body.dragging, body.dragging * {
   z-index: 2000;
 }
 
-ol.example li.placeholder {
+ol.storyboard li.frame {
   position: relative;
+  list-style-type: none;
   /** More li styles **/
 }
-ol.example li.placeholder:before {
+ol.storyboard li.frame:before {
   position: absolute;
+  list-style-type: none;
   /** Define arrowhead **/
 }
