@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.10.1",
-    "express.io": "^1.1.13"
+    "express.io": "^1.1.13",
 	"serialport": "^1.4.6"
   }
 }
