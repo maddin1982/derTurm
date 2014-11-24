@@ -127,7 +127,12 @@
 					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
 					</ul>
 				</div>
-			</div>	
+			
+				<!--Settings -->
+				<button id="showSettingBtn" type="button" class="btn btn-default">Settings</button>
+
+			</div>
+				
 			<!--Frames Window -->
 			<div class="row">
 				<ol class='col-md-12' id="storyboard">
@@ -165,7 +170,7 @@
 							<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
 						  </label>
 						</div>
-						
+
 						<!-- Slider -->
 						<p>Zeit in Millisekunden</p>
 						<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
@@ -208,7 +213,35 @@
 					</div>
 				</div>
 			</div>
-		</div>		
-		
+		</div>
+
+<!--Settings Window-->
+		<div id="settings_window" class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<!-- Header -->
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Settings</h4>
+					</div>
+
+					<div class="modal-body">
+						<!-- Slider -->
+						<p>Luminosity</p>
+						<div id="luminosity" class="slider slider-horizontal" style="width: 520px;">
+							<div class="slider-track"></div>
+							<div class="slider-selection" style="z-index: 1;"></div>
+						</div>
+
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
     </body>
 </html>

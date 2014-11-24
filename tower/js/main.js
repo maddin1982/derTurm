@@ -47,6 +47,28 @@ $(document).ready(function() {
 	$(".fps_select").on("click",function(){	
 		framesManager.setFramerate(parseInt($(this).attr("fps")))
 	});
+
+	// Settings dialog
+	$("#showSettingBtn").on("click",function(){	
+		$('#settings_window').modal('show');
+	});
+
+	// Slider for the 3D luminosity 
+	$("#luminosity").slider({ max: 255 }) ;
+
+	var originalSliderVal;
+
+	$('#luminosity').slider().on('slideStart', function(ev){
+	    originalSliderVal = $('#luminosity').data('slider').getValue();
+	});
+
+	$('#luminosity').slider().on('slideStop', function(ev){
+	    var newVal = $('#luminosity').data('slider').getValue();
+	    if(originalSliderVal != newVal) {
+	        changeAmbientLight(newVal)
+	    }
+	});
+
 	
 	// Modal Dialog
 	//save Settings
@@ -82,7 +104,7 @@ $(document).ready(function() {
 	})
 	io.on('sceneDataLoaded', function(data) {
 		console.log("sceneDataLoaded")
-	})	
+	})
 
 });
 	

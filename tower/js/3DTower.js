@@ -5,6 +5,8 @@ var lastFrameStartTime=0;
 
 var windowMeshes=[];
 
+var _ambientLight;
+
 function init3DSceneOnElement(container) {
 
 	//make 3d container resizable
@@ -55,19 +57,13 @@ function init3DSceneOnElement(container) {
       uniforms: shader.uniforms,
       depthWrite: false,
       side: THREE.BackSide
-
-    });	var material = new THREE.MeshLambertMaterial({
-	  color: 0x111111
-	  //,envMap: cubemap
-	});
+    });
 
     var material_env = new THREE.MeshLambertMaterial({
 	  color: 0x111111,
 	  envMap: cubemap,
 	  side: THREE.BackSide
 	});
-
-
 
     var skybox = new THREE.Mesh( new THREE.CubeGeometry( 2000, 2000, 2000 ), material_env );
     scene.add(skybox);
@@ -116,10 +112,11 @@ function init3DSceneOnElement(container) {
 	}
 	
     scene.add(group);
-	scene.add( new THREE.AmbientLight( 0x222222 ) );
+    _ambientLight = new THREE.AmbientLight( 0x222222 ) 
+	scene.add( _ambientLight );
 	//scene.fog = new THREE.Fog( 0x0, 2000, 4000 );
 		
-	var light = new THREE.SpotLight(0xaaaaaa );
+	var light = new THREE.SpotLight(0x222222 );
 		light.position.set(50, 50, 0);
 		light.target.position.set(0,20,0)
 		//light.shadowCameraVisible = true;
@@ -188,4 +185,21 @@ function render() {
     //group.rotation.x += 0.001;
 	group.rotation.y += 0.001;
     renderer.render(scene, camera);
+}
+
+function changeAmbientLight(i){
+	scene.remove(_ambientLight)
+	var color = rgbToHex(i, i, i)
+    _ambientLight = new THREE.AmbientLight( color )
+	scene.add( _ambientLight );
+}
+
+//Helper functions for converting numbers to hex
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
