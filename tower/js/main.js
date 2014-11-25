@@ -106,9 +106,11 @@ $(document).ready(function() {
 	//save Settings
 	$("#resetToWhite").on("click",function(){	
 		framesManager.resetFrame(currentModalDialogRow,'white');
+		$('#myModal').modal('hide');
 	});
 	$("#resetToBlack").on("click",function(){
 		framesManager.resetFrame(currentModalDialogRow,'black');
+		$('#myModal').modal('hide');
 	});
 	$("#resetToAbove").on("click",function(){
 		framesManager.resetFrame(currentModalDialogRow,'above');
