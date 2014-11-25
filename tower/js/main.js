@@ -373,14 +373,17 @@ var framesManagerObj = function(framesContainer){
 			data[inFrameID].duration = inDuration;
 	};
 
-	this.addFrame = function(){
+	this.addFrame = function(inFrameID){
 		var newFrame = {duration:1000/24,type:0,windows:[]}; //type 0=still, 1=fade, 2=shift
 		for( var i=0;i < 16; i++)
 		{
 			var window = {color:"rgb(0, 0, 0)", active:1}; 
 			newFrame.windows.push(window);
 		}
-		data.push(newFrame);
+		if(inFrameID == null)
+			data.push(newFrame);
+		else
+			data.splice(inFrameID+1, 0,newFrame);
 		that.renderFrames();
 		startAnimation();
 	}
@@ -439,6 +442,16 @@ var framesManagerObj = function(framesContainer){
 			})
 			if( j < data.length)
 			{
+
+				var addFrame=document.createElement('a')
+				$(addFrame).attr("href","#")
+				$(addFrame).attr("id","deleteFrameBtn"+j)
+				$(addFrame).attr("role","button")
+				$(addFrame).attr("class","btn btn-xs btn-default addFrameBtn")
+				$(addFrame).attr("onclick","framesManager.addFrame("+j+")")
+				$(addFrame).text("+")
+				$(frameDiv).append(addFrame)
+
 				var transitionA=document.createElement('a')
 				//$(transitionA).attr("href","#myModal")
 				$(transitionA).attr("href","#")
@@ -447,7 +460,7 @@ var framesManagerObj = function(framesContainer){
 				$(transitionA).attr("class","btn btn-xs btn-default transitionBtn")
 				$(transitionA).attr("data-toggle","modal")
 				$(transitionA).attr("onclick","modalDialog(this);")
-				$(transitionA).text("+")
+				$(transitionA).text("T")
 				$(frameDiv).append(transitionA)
 
 				var delFrame=document.createElement('a')
