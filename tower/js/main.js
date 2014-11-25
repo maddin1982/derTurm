@@ -104,6 +104,17 @@ $(document).ready(function() {
 	
 	// Modal Dialog
 	//save Settings
+	$("#resetToWhite").on("click",function(){	
+		framesManager.resetFrame(currentModalDialogRow,'white');
+	});
+	$("#resetToBlack").on("click",function(){
+		framesManager.resetFrame(currentModalDialogRow,'black');
+	});
+	$("#resetToAbove").on("click",function(){
+		framesManager.resetFrame(currentModalDialogRow,'above');
+		$('#myModal').modal('hide');
+	});
+
 	$("#saveModal").on("click", function() {
 		
 		//currentFrameType 0= static, 1 =fade 
@@ -220,6 +231,31 @@ var framesManagerObj = function(framesContainer){
 		})
 	}
 
+	this.resetFrame=function(inID, inMode){
+		if(data.length==0)
+			return ;
+		if( inID > data.length-1)
+			return ;
+		if( inMode === 'white')
+		{
+			$.each(data[inID].windows,function(i,win){
+				win.color = 'rgb(FF,FF,FF)';
+			})
+		}
+		else if( inMode === 'black')
+		{
+			$.each(data[inID].windows,function(i,win){
+				win.color = 'rgb(00,00,00)';
+			})
+		}
+		else if( inMode === 'above' && inID > 0)
+		{
+			$.each(data[inID].windows,function(i,win){
+				win.color = data[inID-1].windows[i].color;
+			})
+		}
+		that.renderFrames();
+	}
 	//go to next Frame if there is one
 	function goToNextFrame(){
 		if(data.length>1){
