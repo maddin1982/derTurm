@@ -203,8 +203,10 @@ var framesManagerObj = function(framesContainer){
 	//add drag and drop functions 
 	function makeFramesContainersortable(){
 		framesContainer.sortable({
+			handle: 'i.icon-move',
 			vertical: false,
 			  onDragStart: function (item, group, _super) {
+
 				indexBeforeDrag = item.index()
 				item.appendTo(item.parent())
 				_super(item)
@@ -427,6 +429,9 @@ var framesManagerObj = function(framesContainer){
 			frameDiv=document.createElement('li')
 			$(frameDiv).attr("class","frame")
 			$(frameDiv).attr("frameId",j)
+			iIcon=document.createElement('i')
+			$(iIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s")
+			$(frameDiv).append(iIcon)
 			$.each(frame.windows,function(i,frameWindow){
 				var windowDiv=document.createElement('div')
 				$(windowDiv).attr("windowId",i);

@@ -18,3 +18,7 @@ ol.storyboard li.frame:before {
   list-style-type: none;
   /** Define arrowhead **/
 }
+
+.icon-move {
+  float:left;
+}
