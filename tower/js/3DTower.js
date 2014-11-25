@@ -121,7 +121,7 @@ function init3DSceneOnElement(container) {
 	    uniforms: 
 		{ 
 			"c":   { type: "f", value: 0 },
-			"p":   { type: "f", value: 1.9 },
+			"p":   { type: "f", value: 2.5 },
 			glowColor: { type: "c", value: new THREE.Color(0x000000) },
 			viewVector: { type: "v3", value: camera.position }
 		},
