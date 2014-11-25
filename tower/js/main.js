@@ -6,6 +6,7 @@ var myColorPicker;
 
 var currentModalDialogRow = null;
 var currentFrameType=null;
+var _shiftPressed;
 
 $(document).ready(function() { 
 	//initialize frameManager
@@ -66,6 +67,10 @@ $(document).ready(function() {
 		console.log($('#GlowingWindowsCheck').is(':checked'))
 		createCookie("withGlowingWindows", $('#GlowingWindowsCheck').is(':checked'), 20 )
 	});
+
+	// determine if shift is pressed. Used for several copy/move things
+	$(document).on('keyup keydown', function(e){_shiftPressed = e.shiftKey} );
+
 
    var valueGlowing = readCookie('withGlowingWindows')
     if (valueGlowing) {
@@ -227,8 +232,14 @@ var framesManagerObj = function(framesContainer){
 			  onDrop: function  (item, container, _super) {
 				var field,
 				newIndex = item.index()
-				if(newIndex != indexBeforeDrag) {
-					framesManager.moveFrame(indexBeforeDrag,newIndex)
+				//Copy frame instead of moving when shift is pressed.
+				if(_shiftPressed==true){
+					framesManager.copyFrame(indexBeforeDrag,newIndex)
+				}
+				else{
+					if(newIndex != indexBeforeDrag) {
+						framesManager.moveFrame(indexBeforeDrag,newIndex)
+					}
 				}
 				_super(item)
 			}
@@ -313,7 +324,13 @@ var framesManagerObj = function(framesContainer){
 	this.moveFrame=function(oldIndex, newIndex){
 		data.splice(newIndex,0,data.splice(oldIndex,1)[0]);
 	}
-	
+
+	this.copyFrame=function(origin, destination){
+		console.log(origin + " dest:" + destination)
+		data.splice(destination, 0, data[origin]);
+		that.renderFrames();
+	}
+
 	this.showInModel=function(){
 		//parse color to rgb values
 		var formatedData=[];
