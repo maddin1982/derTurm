@@ -56,3 +56,11 @@ a.btn-xs {
 .trans_duration {
 	width: 100%;
 }
+
+.hidden_div {
+     display:none;
+}
+
+.f_left{
+  float:left;
+}

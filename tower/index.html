@@ -34,6 +34,7 @@
 		<script src="js/cookie.js"></script>
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
+		<script src="js/sortable.js"></script>
 		<script src="js/main.js"></script>
 
 		<!-- ---------------- Custom Shader Code ------------------------ -->
@@ -165,6 +166,9 @@
 					</ul>
 				</div>
 			
+				<!--Switch between views -->
+				<!-- <button id="switchBtn" type="button" class="btn btn-default">Switch</button> -->
+
 				<!--Settings -->
 				<button id="showSettingBtn" type="button" class="btn btn-default">Settings</button>
 
@@ -174,7 +178,40 @@
 			<div class="row">
 				<ol class='col-md-12' id="storyboard">
 				</ol>
+
+
 			</div>
+
+				<div class='col-md-12 hidden_div' id="compositor">
+					<ol class="nested_with_switch vertical">
+		                <li>
+		                  Item 1
+		                </li>
+		                <li>
+		                  Item 2
+		                </li>
+		                <li>
+		                  Item 3
+		                </li>
+		                <li>
+		                  Item 4
+		                  <ol>
+		                    <li>Item 3.1</li>
+		                    <li>Item 3.2</li>
+		                    <li>Item 3.3</li>
+		                    <li>Item 3.4</li>
+		                    <li>Item 3.5</li>
+		                    <li>Item 3.6</li>
+		                  </ol>
+		                </li>
+		                <li>
+		                  Item 5
+		                </li>
+		                <li>
+		                  Item 6
+		                </li>
+	              	</ol>
+				</div>
 			
 		</div>  
 

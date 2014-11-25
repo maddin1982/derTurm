@@ -62,6 +62,15 @@ $(document).ready(function() {
 		$('#settings_window').modal('show');
 	});
 
+	// Settings dialog
+	$("#switchBtn").on("click",function(){	
+		$('#compositor').toggle();
+
+		$('#storyboard').toggle();
+	});
+
+
+
 	$("#GlowingWindowsCheck").on("change",function(){
 		switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
 		console.log($('#GlowingWindowsCheck').is(':checked'))
@@ -503,31 +512,22 @@ var framesManagerObj = function(framesContainer){
 			if( j < data.length)
 			{
 
-				var addFrame=document.createElement('a')
-				$(addFrame).attr("href","#")
+				var addFrame=document.createElement('i')
 				$(addFrame).attr("id","deleteFrameBtn"+j)
-				$(addFrame).attr("role","button")
-				$(addFrame).attr("class","btn btn-xs btn-default addFrameBtn")
+				$(addFrame).attr("class","ui-icon ui-icon-plus f_left")
 				$(addFrame).attr("onclick","framesManager.addFrame("+j+")")
-				$(addFrame).text("+")
 				$(frameDiv).append(addFrame)
 
-				var transitionA=document.createElement('a')
-				//$(transitionA).attr("href","#myModal")
-				$(transitionA).attr("href","#")
+				var transitionA=document.createElement('i')
 				$(transitionA).attr("id","transitionBtn"+j)
-				$(transitionA).attr("role","button")
-				$(transitionA).attr("class","btn btn-xs btn-default transitionBtn")
+				$(transitionA).attr("class","ui-icon ui-icon-shuffle f_left")
 				$(transitionA).attr("data-toggle","modal")
 				$(transitionA).attr("onclick","modalDialog(this);")
-				$(transitionA).text("T")
 				$(frameDiv).append(transitionA)
 
-				var delFrame=document.createElement('a')
-				$(delFrame).attr("href","#")
+				var delFrame=document.createElement('i')
 				$(delFrame).attr("id","deleteFrameBtn"+j)
-				$(delFrame).attr("role","button")
-				$(delFrame).attr("class","btn btn-xs btn-default deleteFrameBtn")
+				$(delFrame).attr("class","ui-icon  ui-icon-trash f_left")
 				$(delFrame).attr("onclick","framesManager.deleteFrame("+j+")")
 				$(delFrame).text("-")
 				$(frameDiv).append(delFrame)
