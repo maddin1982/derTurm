@@ -430,7 +430,8 @@ var framesManagerObj = function(framesContainer){
 	this.selectFrame=function(evt){
 		that.lastSelectedWindowDiv=evt.target;
 		framesManager.setSingleWindowColor(that.currentWindowBrushColor);
-		myColorPicker.moveToPosition(evt.clientX,evt.clientY);
+		
+		myColorPicker.moveToPosition(evt.pageX ,evt.pageY );
 		myColorPicker.show();
 	};
 
@@ -540,8 +541,16 @@ var framesManagerObj = function(framesContainer){
 
 var colorPickerObj=function(colorPickerDiv){
 	this.colorPickerDiv=colorPickerDiv;
-
+	this.isDragged=false;
 	var that=this;
+	colorPickerDiv.draggable({
+		start: function() {
+			that.isDragged=true;
+		},
+		stop: function() {
+			that.isDragged=false;		
+		}			
+	})
 	
 	this.show=function(){
 		that.colorPickerDiv.show();
@@ -550,20 +559,31 @@ var colorPickerObj=function(colorPickerDiv){
 		that.colorPickerDiv.hide();
 	}
 	this.moveToPosition=function(x,y){
+		var width=that.colorPickerDiv.width()
+		if(x>$( window ).width()/2)
+			x= x-width-20;
+		else
+			x+=20;	
+		
+		if(y>$( window ).height()-that.colorPickerDiv.height())
+			y= y-that.colorPickerDiv.height()-20;
+		else
+			x+=20;	
+		
 		that.colorPickerDiv.css("top",y)
 		that.colorPickerDiv.css("left",x)
 	}
 	
 	this.addColorSelection=function(){
-		var colorselectionDiv=colorGenerator.getFullColorSelection(10,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
-		$(colorselectionDiv).find(".singleColor").on("click",function(evt){
-			
-			var newColor=$(evt.target).css("backgroundColor");
-			framesManager.currentWindowBrushColor=newColor;
-			$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
-			framesManager.setSingleWindowColor(newColor);
-			//myColorPicker.hide();
-			that.hide();
+		var colorselectionDiv=colorGenerator.getFullColorSelection(20,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
+		$(colorselectionDiv).find(".singleColor").on("mouseup",function(evt){
+			if(!that.isDragged){
+				var newColor=$(evt.target).css("backgroundColor");
+				framesManager.currentWindowBrushColor=newColor;
+				$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
+				framesManager.setSingleWindowColor(newColor);
+				that.hide();
+			}
 		})
 		that.colorPickerDiv.append(colorselectionDiv);		
 	}
