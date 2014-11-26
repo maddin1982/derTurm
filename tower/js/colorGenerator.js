@@ -49,7 +49,7 @@ function colorGeneratorObj(){
 		//defaults
 		if(!width)width=20;
 		if(!height)height=20;
-		if(numberOfSteps)numberOfSteps=10;
+		if(!numberOfSteps)numberOfSteps=10;
 		
 		var colorBarDiv=document.createElement('div');
 		var firstPart=Math.floor(numberOfSteps/2);
