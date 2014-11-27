@@ -289,8 +289,7 @@ var framesManagerObj = function(framesContainer){
 				win.color = data[inID].windows[(i+k-inSteps)%16].color;				
 			})
 			//set the new Frame to the attributes (duration, animation-type) of the old one
-			console.log(that);
-			console.log(that.copyFrameAttributes(inID,nextFrameID));
+			that.copyFrameAttributes(inID,nextFrameID);
 			inCount--;
 			inID++;
 		}
