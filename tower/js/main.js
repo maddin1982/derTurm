@@ -73,8 +73,13 @@ $(document).ready(function() {
 
 	$("#GlowingWindowsCheck").on("change",function(){
 		switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
-		console.log($('#GlowingWindowsCheck').is(':checked'))
 		createCookie("withGlowingWindows", $('#GlowingWindowsCheck').is(':checked'), 20 )
+	});
+
+
+	$("#TopWindowsCheck").on("change",function(){
+		switchTopWindows($('#TopWindowsCheck').is(':checked'))
+		createCookie("withTopWindows", $('#TopWindowsCheck').is(':checked'), 20 )
 	});
 
 	// determine if shift is pressed. Used for several copy/move things
@@ -90,6 +95,19 @@ $(document).ready(function() {
     	else{
     		$('#GlowingWindowsCheck').prop('checked',  false);
     		switchGlowingWindows( false )
+    	}
+	}
+
+
+   var valueTopWindows = readCookie('withTopWindows')
+    if (valueTopWindows) {
+    	if(valueTopWindows == "true"){
+    		$('#TopWindowsCheck').prop('checked',  true);
+    		switchTopWindows( true )
+    	}
+    	else{
+    		$('#TopWindowsCheck').prop('checked',  false);
+    		switchTopWindows( false )
     	}
 	}
 

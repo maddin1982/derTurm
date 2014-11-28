@@ -4,11 +4,13 @@ var lastFrameId = 0;
 var lastFrameStartTime=0;
 
 var windowMeshes=[];
+var topWindowMeshes=[];
 var materials=[];
 
 var _ambientLight;
 
 var _withGlowingWindows;
+var _withTopWindows;
 
 function init3DSceneOnElement(container) {
 
@@ -45,10 +47,12 @@ function init3DSceneOnElement(container) {
 	cubemap.format = THREE.RGBFormat;
 
     group = new THREE.Object3D();
-	var material = new THREE.MeshLambertMaterial({
+	/*var material = new THREE.MeshLambertMaterial({
 	  color: 0x111111
-	});
+	});*/
 
+var material = new THREE.MeshPhongMaterial( { ambient: 0x050505, color: 0x666666, specular: 0x555555, shininess: 30 } );
+//var material = new THREE.MeshPhongMaterial( { map: THREE.ImageUtils.loadTexture('img/texture.jpg') } );
     // following code from https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_cubemap.html
     var shader = THREE.ShaderLib[ "cube" ];
     shader.uniforms[ "tCube" ].texture = cubemap;
@@ -71,17 +75,17 @@ function init3DSceneOnElement(container) {
     var skybox = new THREE.Mesh( new THREE.BoxGeometry( 2000, 2000, 2000 ), material_env );
     scene.add(skybox);
 
-    towerTopUpper = new THREE.CylinderGeometry( 7, 7, 3, 16 );	
+    towerTopUpper = new THREE.CylinderGeometry( 7, 7, 3, 64 );	
 	towerTopUpperMesh = new THREE.Mesh(towerTopUpper, material);	
 	//towerTopUpperMesh.castShadow = true;
 	//towerTopUpperMesh.receiveShadow = true;
 
-	towerTopLower = new THREE.CylinderGeometry( 7, 7, 5, 16);	
+	towerTopLower = new THREE.CylinderGeometry( 7, 7, 5, 64);	
 	towerTopLowerMesh = new THREE.Mesh(towerTopLower, material);	
 	//towerTopLowerMesh.castShadow = true;
 	 //towerTopLowerMesh.receiveShadow = true;
 
-    towerBottom = new THREE.CylinderGeometry( 10, 10, 50, 32 );
+    towerBottom = new THREE.CylinderGeometry( 10, 10, 50, 64 );
 	towerBottomMesh = new THREE.Mesh(towerBottom, material);	
 	towerBottomMesh.castShadow = true;
 	towerBottomMesh.receiveShadow = true;
@@ -102,7 +106,7 @@ function init3DSceneOnElement(container) {
 		mittelBalkenMesh.rotation.y = 360*i/16 * Math.PI / 180;
 		group.add( mittelBalkenMesh );
 
-		var windowMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, transparent: true, opacity: 0.7, side: THREE.FrontSide } );
+		var windowMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, transparent: true, opacity: 0.7, side: THREE.BackSide } );
 		var windowGlass= new THREE.PlaneGeometry(2, 2);
 		windowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0,1,0), 90* Math.PI / 180));	
 		windowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
@@ -110,7 +114,15 @@ function init3DSceneOnElement(container) {
 		plane.rotation.y = ((360*i/16)+(360/34)) * Math.PI / 180;
 		windowMeshes[i]=plane;
 
-
+		var topWindowGlass= new THREE.PlaneGeometry(2, 2);
+		topWindowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1,0,0), 90* Math.PI / 180));	
+	 	topWindowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
+		var topPlane = new THREE.Mesh(topWindowGlass,windowMaterial);
+		topPlane.rotation.y = ((360*i/16)+(360/34)) * Math.PI / 180;
+		topPlane.position.y = plane.position.y+8
+		topWindowMeshes[i] = topPlane
+		//topPlane.rotation.x = 90;
+ 		scene.add(topPlane);
 
     var moon = new THREE.Mesh(sphereGeom, material);
 	moon.position.set(150,0,-150);
@@ -162,7 +174,12 @@ function init3DSceneOnElement(container) {
 	var cookieGlowing = readCookie('withGlowingWindows')
     if (cookieGlowing) {
     	_withGlowingWindows = cookieGlowing
-    	console.log(_withGlowingWindows)
+	}
+
+	//read the state of the top windows
+	var cookieTopwindow = readCookie('withTopWindows')
+    if (cookieTopwindow) {
+    	_withTopWindows = cookieTopwindow
 	}
 
     _ambientLight = new THREE.AmbientLight( luminosity ) 
@@ -230,6 +247,11 @@ function animate() {
 
 function setWindowToColor(i,newColor){
 	windowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.FrontSide } ); 
+	
+	if( _withTopWindows == true ) {
+		topWindowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.BackSide } ); 
+	}
+
 	if( _withGlowingWindows == true ){
 		materials[i].material.uniforms.glowColor.value.set( newColor );
 	}
@@ -252,9 +274,22 @@ function switchGlowingWindows(value){
 	_withGlowingWindows = value
 
 	if(_withGlowingWindows == false){
-		for(var i =0; i<16;i++){
-			materials[i].material.uniforms.glowColor.value.set( 0 );
-		}
+		clearColors()
+	}
+}
+
+function switchTopWindows(value){
+	_withTopWindows = value
+
+	if(_withTopWindows == false){
+	for(var i =0; i<16;i++){
+		topWindowMeshes[i].material=new THREE.MeshBasicMaterial( {color: 0, transparent: true, opacity: 0.0, side: THREE.BackSide } ); 
+	}	}
+}
+
+function clearColors(){
+	for(var i =0; i<16;i++){
+		materials[i].material.uniforms.glowColor.value.set( 0 );
 	}
 }
 
