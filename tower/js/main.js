@@ -7,6 +7,7 @@ var myColorPicker;
 var currentModalDialogRow = null;
 var currentFrameType=null;
 var _shiftPressed;
+var _leftMouseDown;
 
 $(document).ready(function() { 
 	//initialize frameManager
@@ -188,10 +189,23 @@ $(document).ready(function() {
 	// Mouse handler 
 	// right mouse click: color change, left mouse click, color append
 
+	$('#storyboard').mouseup(function(event) {
+	    switch (event.which) {
+	        case 1:
+	        	// left mouse
+	        	_leftMouseDown = false
+	            break;
+	        case 2:
+	        	break;
+	        default:
+	        	;
+	    }
+	});
 	$('#storyboard').mousedown(function(event) {
 	    switch (event.which) {
 	        case 1:
 	        	// left mouse
+	        	_leftMouseDown = true
 	            break;
 	        case 2:
 	        	// middle mouse. 
@@ -573,7 +587,15 @@ var framesManagerObj = function(framesContainer){
 		else
 			return null;
 	};
-	
+
+	this.mouseMovedOverFrame=function(event){
+ 		var current = $(this);
+ 		if(_leftMouseDown == true) {
+			that.lastSelectedWindowDiv=event.target;
+			framesManager.setSingleWindowColor(that.currentWindowBrushColor);
+		}
+	}
+
 	//renders Frames after change
 	this.renderFrames=function(){		
 		windowManager.updateData();
@@ -582,6 +604,9 @@ var framesManagerObj = function(framesContainer){
 		$.each(data,function(j,frame){
 			frameDiv=document.createElement('li')
 			$(frameDiv).attr("class","frame")
+			$(frameDiv).mousemove(function( event ) {
+				that.mouseMovedOverFrame(event)
+				});
 			$(frameDiv).attr("frameId",j)
 			iIcon=document.createElement('i')
 			$(iIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s")
