@@ -1,11 +1,13 @@
-enableNestedSortableInSceneView();
-  
-    //add drag and drop functions 
-    function makeFramesContainersortable(){
-ćonsole.log("enableNestedSortable")
-  var oldContainer
-  $("ol.nested_with_switch").sortable({
-    group: 'nested'
-  })
+$(function  () {
+  $("ol.composition").sortable({
+  group: 'nested',
+    afterMove: function (placeholder, container) {
 
-}
+    },
+    onDrop: function (item, container, _super) {
+      _super(item)
+    }
+
+
+    })
+})
