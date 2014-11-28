@@ -604,15 +604,15 @@ var framesManagerObj = function(framesContainer){
 		$.each(data,function(j,frame){
 			frameDiv=document.createElement('li')
 			$(frameDiv).attr("class","frame")
-			$(frameDiv).mousemove(function( event ) {
-				that.mouseMovedOverFrame(event)
-				});
 			$(frameDiv).attr("frameId",j)
 			iIcon=document.createElement('i')
 			$(iIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s")
 			$(frameDiv).append(iIcon)
 			$.each(frame.windows,function(i,frameWindow){
 				var windowDiv=document.createElement('div')
+			$(windowDiv).mousemove(function( event ) {
+				that.mouseMovedOverFrame(event)
+				});
 				$(windowDiv).attr("windowId",i);
 				$(windowDiv).attr("style","background-color:"+frameWindow.color);
 			    if(frameWindow.active!=1)
