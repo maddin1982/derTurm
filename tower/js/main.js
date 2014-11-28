@@ -184,6 +184,27 @@ $(document).ready(function() {
 		currentFrameType = null;
 	});
 	
+
+	// Mouse handler 
+	// right mouse click: color change, left mouse click, color append
+
+	$('#storyboard').mousedown(function(event) {
+	    switch (event.which) {
+	        case 1:
+	        	// left mouse
+	            break;
+	        case 2:
+	        	// middle mouse. 
+	        case 3:
+	        	// right mouse 
+	            myColorPicker.moveToPosition(event.pageX ,event.pageY );
+				myColorPicker.show();
+	            break;
+	        default:
+	        	;
+	    }
+	});
+
 	// // Slider - Transition Duration
 	// $("#trans_duration").on('slide', function(ev){
 		// //$('#trans_duration').data('slider').getValue());
@@ -496,8 +517,8 @@ var framesManagerObj = function(framesContainer){
 		that.lastSelectedWindowDiv=evt.target;
 		framesManager.setSingleWindowColor(that.currentWindowBrushColor);
 		
-		myColorPicker.moveToPosition(evt.pageX ,evt.pageY );
-		myColorPicker.show();
+		//myColorPicker.moveToPosition(evt.pageX ,evt.pageY );
+		//myColorPicker.show();
 	};
 
 	this.setFrame = function(inFrameID,inType,inDuration,inDelay,inCutoff){
@@ -639,6 +660,7 @@ var colorPickerObj=function(colorPickerDiv){
 		that.colorPickerDiv.css("left",x)
 	}
 	
+
 	this.addColorSelection=function(){
 		var colorselectionDiv=colorGenerator.getFullColorSelection(20,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
 		$(colorselectionDiv).find(".singleColor").on("mouseup",function(evt){
@@ -646,7 +668,7 @@ var colorPickerObj=function(colorPickerDiv){
 				var newColor=$(evt.target).css("backgroundColor");
 				framesManager.currentWindowBrushColor=newColor;
 				$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
-				framesManager.setSingleWindowColor(newColor);
+				//framesManager.setSingleWindowColor(newColor);
 				that.hide();
 			}
 		})
