@@ -131,6 +131,24 @@ $(document).ready(function() {
 		$('#myModal').modal('hide');
 	});
 
+	$("#duplicateLeft").on("click",function(){
+		inSteps = -1; // you want to skip some spaces to the left? decrease the steps!
+		inCount = 1; // you want to create more Frames than just one? increase the count!
+		framesManager.duplicateFrameAndShift(currentModalDialogRow,inSteps,inCount);
+		$('#myModal').modal('hide');
+	});
+	$("#duplicate").on("click",function(){
+		inSteps = 0; // you want to skip some spaces to the left? decrease the steps!
+		inCount = 1; // you want to create more Frames than just one? increase the count!
+		framesManager.duplicateFrameAndShift(currentModalDialogRow,inSteps,inCount);
+		$('#myModal').modal('hide');
+	});
+	$("#duplicateRight").on("click",function(){
+		inSteps = 1; // you want to skip some spaces to the right? increase the steps!
+		inCount = 1; // you want to create more Frames than just one? increase the count!
+		framesManager.duplicateFrameAndShift(currentModalDialogRow,inSteps,inCount);
+		$('#myModal').modal('hide');
+	});
 	$("#saveModal").on("click", function() {
 		
 		//currentFrameType 0= static, 1 =fade 
@@ -254,6 +272,29 @@ var framesManagerObj = function(framesContainer){
 			}
 		})
 	}
+	this.duplicateFrameAndShift=function(inID, inSteps, inCount){
+		if(data.length==0)
+			return ;
+		if( inID > data.length-1)
+			return ;		
+		//prepare Variable for wraparound steps
+		var k=0;
+		while( k < inSteps)
+			k+=16;
+		while( inCount > 0)
+		{
+			that.addFrame(inID);
+			var nextFrameID = inID+1;
+			$.each(data[nextFrameID].windows,function(i,win){				
+				win.color = data[inID].windows[(i+k-inSteps)%16].color;				
+			})
+			//set the new Frame to the attributes (duration, animation-type) of the old one
+			that.copyFrameAttributes(inID,nextFrameID);
+			inCount--;
+			inID++;
+		}
+		that.renderFrames();
+	}
 
 	this.resetFrame=function(inID, inMode){
 		if(data.length==0)
@@ -300,6 +341,12 @@ var framesManagerObj = function(framesContainer){
 		return null;
 	}
 
+	this.copyFrameAttributes=function(inSrcID,inTargetID)
+	{
+		//TODO: do this automatically if there will be more attributes 
+		data[inTargetID].duration = data[inSrcID].duration;
+		data[inTargetID].type = data[inSrcID].type;
+	}
 	//start framechange with timer if it isnt already running
 	function startAnimation(){
 		if(!that.frameAnimationRunning&&data.length>1){
