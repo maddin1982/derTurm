@@ -68,6 +68,8 @@ $(document).ready(function() {
 		$('#compositor').toggle();
 
 		$('#storyboard').toggle();
+		$('#savedScenes').empty();
+		framesManager.getSavedScenes();
 	});
 
 
@@ -236,6 +238,8 @@ $(document).ready(function() {
 		$("#listOfFiles").empty();
 		$.each(data,function(i,sceneName){	
 			$("#listOfFiles").append("<li><a onclick='framesManager.getSavedSceneByName(this)'>"+sceneName+"</a></li>")
+			$("#savedScenes").append("<li>"+sceneName+"</li>")
+
 		})
 		
 		console.log("savedScenesLoaded")

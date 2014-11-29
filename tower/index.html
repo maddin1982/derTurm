@@ -14,6 +14,7 @@
         <link rel="stylesheet" href="css/sortable.css">
         <link rel="stylesheet" href="css/resizable.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/composition.css">
         <link rel="stylesheet" href="css/jqueryUi/jquery-ui.min.css">
 
 		<!-- jQuery includes, include before bootstrap!!!-->
@@ -186,9 +187,15 @@
 
 				<div class='col-md-12 hidden_div' id="compositor">
 
-					<ol class="composition vertical">
+<div id="wrapper">
+  <div id="content">					
+  		Runlist:
+  		<ol class="composition vertical">
 		                <li>
-		                  Item 1
+		                	<div>
+		                 	 Item 1
+							<i class="icon-move ui-icon ui-icon-carat-2-n-s"> </i>
+		                  </div>
 		                </li>
 		                <li>
 		                  Item 2
@@ -214,6 +221,44 @@
 		                  Item 6
 		                </li>
 	              	</ol>
+	</div>
+  <div id="sidebar">
+
+	  <div id="sceneModules">
+	  		Helpers:
+	  		<ol id="sceneHelpers" class="sceneHelpers vertical">
+		  		<li>
+		  			<ol>
+			  			<li>
+			  				Container
+			  			</li>
+			  		</ol>
+		  		</li>
+	            <li>
+	              Loop
+	            </li>
+	            <li>
+	              Transition
+	            </li>
+	            <li>
+	              Fade
+	            </li>
+	            <li>
+	              Pause
+	            </li>
+	  		</ol>
+	  </div>
+
+  		Saved Scenes:
+  		<ol id="savedScenes" class="savedScenes vertical">
+  		</ol>
+  </div>
+
+
+
+  <div id="cleared"></div>
+</div>
+
 				</div>
 
 		</div>
