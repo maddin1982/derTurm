@@ -222,8 +222,11 @@ function init3DSceneOnElement(container) {
     container.append(renderer.domElement);
 
 	controls = new THREE.OrbitControls( camera , renderer.domElement);
-				controls.target = new THREE.Vector3( 10, 40, -10 );
-				controls.update();
+	if(showFullModel)
+		controls.target = new THREE.Vector3( 10, 40, -10 );
+	else
+		controls.target = new THREE.Vector3( 0, 10, 0 );
+	controls.update();
 	
 	animate();
 	window.addEventListener( 'resize', onWindowResize, false );
