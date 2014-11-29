@@ -174,32 +174,21 @@ function init3DSceneOnElement(container) {
 	/**********
 	* SKYBOX
 	***********/
-	//urls of the images, one per half axis
-	var skyUrls = [
-	  'img/env/posx.png', //pos x
-	  'img/env/negx.png', //neg-x
-	  'img/env/posy.png', //neg y
-	  'img/env/negy.png', //pos y  
-	  'img/env/posz.png', //pos z
-	  'img/env/negz.png'  //neg z
-	],
-
+	var imagePrefix = "img/env/";
+	var directions  = ["negx", "posx", "negy", "posy", "posz", "negz"];
+	var imageSuffix = ".png";
+	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );	
 	
-	// wrap it up into the object that we need
-	skyMap = THREE.ImageUtils.loadTextureCube(skyUrls);
-	// set the format, likely RGB unless you've gone crazy
-	skyMap.format = THREE.RGBFormat;
-
-	var skyMaterial = new THREE.MeshLambertMaterial({
-	  color: 0x111111,
-	  envMap: skyMap,
-	  side: THREE.BackSide
-	});
-    var skybox = new THREE.Mesh( new THREE.BoxGeometry( 10000, 10000,10000, 1, 1, 1, null, true ), skyMaterial );
-
-    scene.add(skybox);	
-
-
+	var materialArray = [];
+	for (var i = 0; i < 6; i++)
+		materialArray.push( new THREE.MeshBasicMaterial({
+			map: THREE.ImageUtils.loadTexture( imagePrefix + directions[i] + imageSuffix ),
+			side: THREE.BackSide
+		}));
+	var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
+	var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
+	scene.add( skyBox );
+	
 	/**********
 	* SETTINGS
 	**********/
