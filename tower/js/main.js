@@ -7,6 +7,7 @@ var myColorPicker;
 var currentModalDialogRow = null;
 var currentFrameType=null;
 var _shiftPressed;
+var _leftMouseDown;
 
 $(document).ready(function() { 
 	//initialize frameManager
@@ -67,14 +68,21 @@ $(document).ready(function() {
 		$('#compositor').toggle();
 
 		$('#storyboard').toggle();
+		$('#savedScenes').empty();
+		framesManager.getSavedScenes();
 	});
 
 
 
 	$("#GlowingWindowsCheck").on("change",function(){
 		switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
-		console.log($('#GlowingWindowsCheck').is(':checked'))
 		createCookie("withGlowingWindows", $('#GlowingWindowsCheck').is(':checked'), 20 )
+	});
+
+
+	$("#TopWindowsCheck").on("change",function(){
+		switchTopWindows($('#TopWindowsCheck').is(':checked'))
+		createCookie("withTopWindows", $('#TopWindowsCheck').is(':checked'), 20 )
 	});
 
 	// determine if shift is pressed. Used for several copy/move things
@@ -90,6 +98,19 @@ $(document).ready(function() {
     	else{
     		$('#GlowingWindowsCheck').prop('checked',  false);
     		switchGlowingWindows( false )
+    	}
+	}
+
+
+   var valueTopWindows = readCookie('withTopWindows')
+    if (valueTopWindows) {
+    	if(valueTopWindows == "true"){
+    		$('#TopWindowsCheck').prop('checked',  true);
+    		switchTopWindows( true )
+    	}
+    	else{
+    		$('#TopWindowsCheck').prop('checked',  false);
+    		switchTopWindows( false )
     	}
 	}
 
@@ -166,6 +187,40 @@ $(document).ready(function() {
 		currentFrameType = null;
 	});
 	
+
+	// Mouse handler 
+	// right mouse click: color change, left mouse click, color append
+
+	$('#storyboard').mouseup(function(event) {
+	    switch (event.which) {
+	        case 1:
+	        	// left mouse
+	        	_leftMouseDown = false
+	            break;
+	        case 2:
+	        	break;
+	        default:
+	        	;
+	    }
+	});
+	$('#storyboard').mousedown(function(event) {
+	    switch (event.which) {
+	        case 1:
+	        	// left mouse
+	        	_leftMouseDown = true
+	            break;
+	        case 2:
+	        	// middle mouse. 
+	        case 3:
+	        	// right mouse 
+	            myColorPicker.moveToPosition(event.pageX ,event.pageY );
+				myColorPicker.show();
+	            break;
+	        default:
+	        	;
+	    }
+	});
+
 	// // Slider - Transition Duration
 	// $("#trans_duration").on('slide', function(ev){
 		// //$('#trans_duration').data('slider').getValue());
@@ -183,6 +238,8 @@ $(document).ready(function() {
 		$("#listOfFiles").empty();
 		$.each(data,function(i,sceneName){	
 			$("#listOfFiles").append("<li><a onclick='framesManager.getSavedSceneByName(this)'>"+sceneName+"</a></li>")
+			$("#savedScenes").append("<li>"+sceneName+"</li>")
+
 		})
 		
 		console.log("savedScenesLoaded")
@@ -478,8 +535,8 @@ var framesManagerObj = function(framesContainer){
 		that.lastSelectedWindowDiv=evt.target;
 		framesManager.setSingleWindowColor(that.currentWindowBrushColor);
 		
-		myColorPicker.moveToPosition(evt.pageX ,evt.pageY );
-		myColorPicker.show();
+		//myColorPicker.moveToPosition(evt.pageX ,evt.pageY );
+		//myColorPicker.show();
 	};
 
 	this.setFrame = function(inFrameID,inType,inDuration,inDelay,inCutoff){
@@ -534,7 +591,15 @@ var framesManagerObj = function(framesContainer){
 		else
 			return null;
 	};
-	
+
+	this.mouseMovedOverFrame=function(event){
+ 		var current = $(this);
+ 		if(_leftMouseDown == true) {
+			that.lastSelectedWindowDiv=event.target;
+			framesManager.setSingleWindowColor(that.currentWindowBrushColor);
+		}
+	}
+
 	//renders Frames after change
 	this.renderFrames=function(){		
 		windowManager.updateData();
@@ -549,6 +614,9 @@ var framesManagerObj = function(framesContainer){
 			$(frameDiv).append(iIcon)
 			$.each(frame.windows,function(i,frameWindow){
 				var windowDiv=document.createElement('div')
+			$(windowDiv).mousemove(function( event ) {
+				that.mouseMovedOverFrame(event)
+				});
 				$(windowDiv).attr("windowId",i);
 				$(windowDiv).attr("style","background-color:"+frameWindow.color);
 			    if(frameWindow.active!=1)
@@ -621,6 +689,7 @@ var colorPickerObj=function(colorPickerDiv){
 		that.colorPickerDiv.css("left",x)
 	}
 	
+
 	this.addColorSelection=function(){
 		var colorselectionDiv=colorGenerator.getFullColorSelection(20,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
 		$(colorselectionDiv).find(".singleColor").on("mouseup",function(evt){
@@ -628,7 +697,7 @@ var colorPickerObj=function(colorPickerDiv){
 				var newColor=$(evt.target).css("backgroundColor");
 				framesManager.currentWindowBrushColor=newColor;
 				$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
-				framesManager.setSingleWindowColor(newColor);
+				//framesManager.setSingleWindowColor(newColor);
 				that.hide();
 			}
 		})
