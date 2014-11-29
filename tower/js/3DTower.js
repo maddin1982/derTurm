@@ -4,14 +4,21 @@ var lastFrameId = 0;
 var lastFrameStartTime=0;
 
 var windowMeshes=[];
-var materials=[];
+var windowMaterials=[];
+var glowingBubbles=[];
+
 
 var _ambientLight;
-
+var fullModelObject;
 var _withGlowingWindows;
 
-function init3DSceneOnElement(container) {
+//if url parameter showFullModel is true show full model ;)
+if(gup("showFullModel")=="true")
+	showFullModel=true;
+else
+	showFullModel=false;
 
+function init3DSceneOnElement(container) {
 	//make 3d container resizable
 	 container.resizable({
 	  resize: function( event, ui ) {
@@ -19,15 +26,138 @@ function init3DSceneOnElement(container) {
 	  }
 	});
 
-
+	//add scene
     scene = new THREE.Scene();
-    //scene.fog = new THREE.FogExp2( 0xcccccc, 0.02 );
-    camera = new THREE.PerspectiveCamera(70, container.width() / 200, 1, 10000);
+	
+	//add camera
+    camera = new THREE.PerspectiveCamera(50, container.width() / 200, 1, 10000);
     camera.position.z = 30;
     scene.add(camera);
 
+	var material = new THREE.MeshLambertMaterial({
+	  color: 0x111111
+	});
+	
+	group = new THREE.Object3D();
+	//add full model of building
+	if(showFullModel){
+		function modelToScene( geometry, materials ) {
+				var material = new THREE.MeshFaceMaterial( materials );
+				fullModelObject = new THREE.Mesh( geometry, material );
+				fullModelObject.scale.set(1,1,1);
+				scene.add( fullModelObject );
+				
+				//add windowmaterials to array
+				function getMaterialByName(materialName){
+					var materials=fullModelObject.material.materials;
+					var returnMaterial={};
+					$.each(materials,function(i,material){
+						if(material.name==materialName)
+							returnMaterial=material;
+					})
+					return returnMaterial;
+				}
+				
+				for(var i =0; i<16;i++){
+					windowMaterials[i]=getMaterialByName("window_"+(i+1))
+				}	
+		}
+		var loader = new THREE.JSONLoader();
+		loader.load( "js/3dModels/ernemannturm.json", modelToScene );
+		
+		function getMaterialByName(materialName){
+			var materials=fullModelObject.material.materials;
+			var returnMaterial={};
+			$.each(materials,function(i,material){
+				if(material.name==materialName)
+					returnMaterial=material;
+			})
+			return returnMaterial;
+		}
+		
+	}
+	else{
+		towerTopUpper = new THREE.CylinderGeometry( 7, 7, 3, 16 );	
+		towerTopUpperMesh = new THREE.Mesh(towerTopUpper, material);	
+		//towerTopUpperMesh.castShadow = true;
+		//towerTopUpperMesh.receiveShadow = true;
 
-	// Environment map: 
+		towerTopLower = new THREE.CylinderGeometry( 7, 7, 5, 16);	
+		towerTopLowerMesh = new THREE.Mesh(towerTopLower, material);	
+		//towerTopLowerMesh.castShadow = true;
+		 //towerTopLowerMesh.receiveShadow = true;
+
+		towerBottom = new THREE.CylinderGeometry( 10, 10, 50, 32 );
+		towerBottomMesh = new THREE.Mesh(towerBottom, material);	
+		towerBottomMesh.castShadow = true;
+		towerBottomMesh.receiveShadow = true;
+		
+		towerBottomMesh.position.y = - 25;
+		towerTopUpperMesh.position.y =  7.5;
+		towerTopLowerMesh.position.y =  1.5;
+		
+		group.add( towerTopUpperMesh );
+		group.add( towerTopLowerMesh );
+		group.add( towerBottomMesh );
+		
+		for(var i =0; i<16;i++){
+			var mittelBalken = new THREE.BoxGeometry( 0.2,2,1.4);
+			//window.applyMatrix( new THREE.Matrix4().makeTranslation( 6.5, 5, 0 ) );
+			mittelBalken.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );
+			var mittelBalkenMesh = new THREE.Mesh(mittelBalken, material);
+			mittelBalkenMesh.rotation.y = 360*i/16 * Math.PI / 180;
+			group.add( mittelBalkenMesh );
+
+			var windowMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, transparent: true, opacity: 0.7, side: THREE.FrontSide } );
+			var windowGlass= new THREE.PlaneGeometry(2, 2);
+			windowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0,1,0), 90* Math.PI / 180));	
+			windowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
+			
+			//windlow plane 
+			var plane = new THREE.Mesh(windowGlass,windowMaterial);
+			plane.rotation.y = ((360*i/16)+(360/34)) * Math.PI / 180;
+			windowMeshes[i]=plane;
+
+			//var moon = new THREE.Mesh(sphereGeom, material);
+			//moon.position.set(150,0,-150);
+			
+			// create custom material from the shader code above
+			// that is within specially labeled script tags
+			var customMaterial = new THREE.ShaderMaterial( 
+			{
+				uniforms: 
+				{ 
+					"c":   { type: "f", value: 0 },
+					"p":   { type: "f", value: 2.5 },
+					glowColor: { type: "c", value: new THREE.Color(0x000000) },
+					viewVector: { type: "v3", value: camera.position }
+				},
+				vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+				fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+				side: THREE.FrontSide,
+				blending: THREE.AdditiveBlending,
+				transparent: true,
+				// side: THREE.BackSide
+			}   );
+			//sphere for glow 
+			var sphereGeom = new THREE.SphereGeometry(1, 20, 20);
+			//add glow to shere
+			this.moonGlow = new THREE.Mesh( sphereGeom, customMaterial );
+			moonGlow.position.x = plane.position.x+7;
+			moonGlow.position.y = plane.position.y+5;
+			moonGlow.scale.multiplyScalar(1.2);
+			glowingBubbles[i] = moonGlow;
+
+			plane.add( moonGlow );
+			group.add(plane);
+		}
+
+		scene.add(group);
+	}
+	
+	/**********
+	* SKYBOX
+	***********/
 	// urls of the images, one per half axis
 	var urls = [
 	  'img/env/0004.png', //pos x
@@ -40,117 +170,21 @@ function init3DSceneOnElement(container) {
 
 	// wrap it up into the object that we need
 	cubemap = THREE.ImageUtils.loadTextureCube(urls);
-
 	// set the format, likely RGB unless you've gone crazy
 	cubemap.format = THREE.RGBFormat;
 
-    group = new THREE.Object3D();
-	var material = new THREE.MeshLambertMaterial({
-	  color: 0x111111
-	});
-
-    // following code from https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_cubemap.html
-    var shader = THREE.ShaderLib[ "cube" ];
-    shader.uniforms[ "tCube" ].texture = cubemap;
-
-    var env_material = new THREE.ShaderMaterial( {
-
-      fragmentShader: shader.fragmentShader,
-      vertexShader: shader.vertexShader,
-      uniforms: shader.uniforms,
-      depthWrite: false,
-      side: THREE.BackSide
-    });
-
-    var material_env = new THREE.MeshLambertMaterial({
+	var material_env = new THREE.MeshLambertMaterial({
 	  color: 0x111111,
 	  envMap: cubemap,
 	  side: THREE.BackSide
 	});
-
     var skybox = new THREE.Mesh( new THREE.BoxGeometry( 2000, 2000, 2000 ), material_env );
-    scene.add(skybox);
-
-    towerTopUpper = new THREE.CylinderGeometry( 7, 7, 3, 16 );	
-	towerTopUpperMesh = new THREE.Mesh(towerTopUpper, material);	
-	//towerTopUpperMesh.castShadow = true;
-	//towerTopUpperMesh.receiveShadow = true;
-
-	towerTopLower = new THREE.CylinderGeometry( 7, 7, 5, 16);	
-	towerTopLowerMesh = new THREE.Mesh(towerTopLower, material);	
-	//towerTopLowerMesh.castShadow = true;
-	 //towerTopLowerMesh.receiveShadow = true;
-
-    towerBottom = new THREE.CylinderGeometry( 10, 10, 50, 32 );
-	towerBottomMesh = new THREE.Mesh(towerBottom, material);	
-	towerBottomMesh.castShadow = true;
-	towerBottomMesh.receiveShadow = true;
+    scene.add(skybox);	
 	
-    towerBottomMesh.position.y = - 25;
-	towerTopUpperMesh.position.y =  7.5;
-	towerTopLowerMesh.position.y =  1.5;
 	
-	group.add( towerTopUpperMesh );
-	group.add( towerTopLowerMesh );
-    group.add( towerBottomMesh );
-	
-	for(var i =0; i<16;i++){
-		var mittelBalken = new THREE.BoxGeometry( 0.2,2,1.4);
-		//window.applyMatrix( new THREE.Matrix4().makeTranslation( 6.5, 5, 0 ) );
-		mittelBalken.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );
-		var mittelBalkenMesh = new THREE.Mesh(mittelBalken, material);
-		mittelBalkenMesh.rotation.y = 360*i/16 * Math.PI / 180;
-		group.add( mittelBalkenMesh );
-
-		var windowMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, transparent: true, opacity: 0.7, side: THREE.FrontSide } );
-		var windowGlass= new THREE.PlaneGeometry(2, 2);
-		windowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0,1,0), 90* Math.PI / 180));	
-		windowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
-		var plane = new THREE.Mesh(windowGlass,windowMaterial);
-		plane.rotation.y = ((360*i/16)+(360/34)) * Math.PI / 180;
-		windowMeshes[i]=plane;
-
-
-
-    var moon = new THREE.Mesh(sphereGeom, material);
-	moon.position.set(150,0,-150);
-	// create custom material from the shader code above
-	//   that is within specially labeled script tags
-	var customMaterial = new THREE.ShaderMaterial( 
-	{
-	    uniforms: 
-		{ 
-			"c":   { type: "f", value: 0 },
-			"p":   { type: "f", value: 2.5 },
-			glowColor: { type: "c", value: new THREE.Color(0x000000) },
-			viewVector: { type: "v3", value: camera.position }
-		},
-		vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
-		fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-		side: THREE.FrontSide,
-		blending: THREE.AdditiveBlending,
-		transparent: true,
-		// side: THREE.BackSide
-	}   );
-
-	var sphereGeom = new THREE.SphereGeometry(1, 20, 20);
-
-	this.moonGlow = new THREE.Mesh( sphereGeom, customMaterial );
-    moonGlow.position.x = plane.position.x+7;
-    moonGlow.position.y = plane.position.y+5;
-
-	moonGlow.scale.multiplyScalar(1.2);
-	materials[i] = moonGlow;
-
-	plane.add( moonGlow );
-
-
-
-		group.add(plane);
-		}
-
-    scene.add(group);
-
+	/**********
+	* SETTINGS
+	**********/
     //read the last used luminosity value from the cookie
     var cookieLum = readCookie('luminosity')
     var luminosity = 0x222222
@@ -167,27 +201,11 @@ function init3DSceneOnElement(container) {
 
     _ambientLight = new THREE.AmbientLight( luminosity ) 
 	scene.add( _ambientLight );
-	//scene.fog = new THREE.Fog( 0x0, 2000, 4000 );
-
-	var light = new THREE.SpotLight(0x222222 );
-		light.position.set(50, 50, 0);
-		light.target.position.set(0,20,0)
-		//light.shadowCameraVisible = true;
-		light.castShadow = true;
-		light.shadowDarkness = 0.6;
-		light.shadowCameraNear = 10;
-		light.shadowCameraFar = 200;
-		
-	scene.add(light);	
-	
-	camera.lookAt(towerBottomMesh.position);
 
 	//Renderer settings
 	renderer = new THREE.WebGLRenderer({ antialias: true });
-	//renderer.setClearColor( scene.fog.color, 1 );
     renderer.setSize(container.width(), 200);
 	renderer.shadowMapEnabled = true;
-	//renderer.shadowMapSoft = true;
 
     container.append(renderer.domElement);
 
@@ -229,15 +247,21 @@ function animate() {
 }
 
 function setWindowToColor(i,newColor){
-	windowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.FrontSide } ); 
-	if( _withGlowingWindows == true ){
-		materials[i].material.uniforms.glowColor.value.set( newColor );
+	if(showFullModel){
+		windowMaterials[i].color=new THREE.Color(newColor)
 	}
+	else{
+		 windowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.FrontSide } ); 
+		 if( _withGlowingWindows == true ){
+			 glowingBubbles[i].material.uniforms.glowColor.value.set( newColor );
+		 }
+	 }
 }
 
 function render() {
-    //group.rotation.x += 0.001;
-	group.rotation.y += 0.001;
+	if(!showFullModel)
+		group.rotation.y += 0.001;
+		
     renderer.render(scene, camera);
 }
 
