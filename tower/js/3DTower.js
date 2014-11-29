@@ -37,7 +37,7 @@ function init3DSceneOnElement(container) {
 	
 	//add camera
     camera = new THREE.PerspectiveCamera(50, container.width() / 200, 1, 10000);
-    camera.position.z = 30;
+    camera.position.set(-30,30,-60)
     scene.add(camera);
 
 	var material = new THREE.MeshLambertMaterial({
@@ -181,7 +181,7 @@ function init3DSceneOnElement(container) {
 	
 	var materialArray = [];
 	for (var i = 0; i < 6; i++)
-		materialArray.push( new THREE.MeshBasicMaterial({
+		materialArray.push( new THREE.MeshLambertMaterial({
 			map: THREE.ImageUtils.loadTexture( imagePrefix + directions[i] + imageSuffix ),
 			side: THREE.BackSide
 		}));
@@ -222,7 +222,7 @@ function init3DSceneOnElement(container) {
     container.append(renderer.domElement);
 
 	controls = new THREE.OrbitControls( camera , renderer.domElement);
-				controls.target = new THREE.Vector3( 0, 10, 0 );
+				controls.target = new THREE.Vector3( 10, 40, -10 );
 				controls.update();
 	
 	animate();
