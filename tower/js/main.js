@@ -152,24 +152,6 @@ $(document).ready(function() {
 		$('#myModal').modal('hide');
 	});
 
-	$("#duplicateLeft").on("click",function(){
-		inSteps = -1; // you want to skip some spaces to the left? decrease the steps!
-		inCount = 1; // you want to create more Frames than just one? increase the count!
-		framesManager.duplicateFrameAndShift(currentModalDialogRow,inSteps,inCount);
-		$('#myModal').modal('hide');
-	});
-	$("#duplicate").on("click",function(){
-		inSteps = 0; // you want to skip some spaces to the left? decrease the steps!
-		inCount = 1; // you want to create more Frames than just one? increase the count!
-		framesManager.duplicateFrameAndShift(currentModalDialogRow,inSteps,inCount);
-		$('#myModal').modal('hide');
-	});
-	$("#duplicateRight").on("click",function(){
-		inSteps = 1; // you want to skip some spaces to the right? increase the steps!
-		inCount = 1; // you want to create more Frames than just one? increase the count!
-		framesManager.duplicateFrameAndShift(currentModalDialogRow,inSteps,inCount);
-		$('#myModal').modal('hide');
-	});
 	$("#saveModal").on("click", function() {
 		
 		//currentFrameType 0= static, 1 =fade 
@@ -187,7 +169,28 @@ $(document).ready(function() {
 		currentFrameType = null;
 	});
 	
+	$("#saveCreateModal").on("click", function() {
+		
+		//currentFrameType 0= static, 1 =fade 
+		var shifts = 0;
+		$( ".cm_shift" ).each(function( index ) {
+			if( $( this ).parent().hasClass('active')) 
+		  		shifts = parseInt($( this ).attr('name'));//.innerHTML);
+		  //
+		});
+		var lines = 1;
+		lines = parseInt($('#create_lines').data('slider').getValue());
 
+		// hide the modal dialog 
+		framesManager.duplicateFrameAndShift(currentModalDialogRow,shifts,lines);
+		$('#createModal').modal('hide')
+	});
+
+	$('#createModal').on('hidden.bs.modal', function () {
+		//reset the current row when the modal dialog is hidden
+		currentModalDialogRow = null;
+		currentFrameType = null;
+	});
 	// Mouse handler 
 	// right mouse click: color change, left mouse click, color append
 
@@ -257,7 +260,19 @@ function showSaveDialog(){
 	var date=new Date();
 	$('#saveDialog_fileName').val(date.getDate()+"_"+(date.getMonth()+1)+"_"+date.getFullYear()+"_"+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds());
 }
-
+function createModal(inthis) {
+	if( currentModalDialogRow == null)
+	{
+		//save current Row for this Transition Dialog
+		currentModalDialogRow = parseInt((inthis.id).split("transitionBtn").pop());
+		
+		//show the Create Modal Dialog
+		$('#createModal').modal('show');
+		// set maximum duration to 10seconds
+		$("#create_lines").slider({min:1, max: 16 }) ;
+		$('#create_lines').data('slider').setValue(1);
+	}
+}
 // Modal Dialog
 function modalDialog(inthis){
 	if( currentModalDialogRow == null)
@@ -439,7 +454,6 @@ var framesManagerObj = function(framesContainer){
 	}
 
 	this.copyFrame=function(origin, destination){
-		console.log(origin + " dest:" + destination)
 		data.splice(destination, 0, data[origin]);
 		that.renderFrames();
 	}
@@ -640,6 +654,13 @@ var framesManagerObj = function(framesContainer){
 				$(transitionA).attr("data-toggle","modal")
 				$(transitionA).attr("onclick","modalDialog(this);")
 				$(frameDiv).append(transitionA)
+
+				var createModal=document.createElement('i')
+				$(createModal).attr("id","transitionBtn"+j)
+				$(createModal).attr("class","ui-icon ui-icon-signal f_left")
+				$(createModal).attr("data-toggle","modal")
+				$(createModal).attr("onclick","createModal(this);")
+				$(frameDiv).append(createModal)
 
 				var delFrame=document.createElement('i')
 				$(delFrame).attr("id","deleteFrameBtn"+j)

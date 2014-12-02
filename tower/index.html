@@ -258,12 +258,7 @@
 						<p>Setz die Farben dieser Zeile:</p>
 						<button id="resetToWhite" type="button" class="btn btn-default">auf Weiß</button>
 						<button id="resetToBlack" type="button" class="btn btn-default">auf Schwarz</button>
-						<button id="resetToAbove" type="button" class="btn btn-default">auf Drüberliegende</button></br></br>
-						<p>Neue Frames aus dieser Zeile erstellen</p>
-						<button id="duplicateLeft" type="button" class="btn btn-default">Links verschoben</button>
-						<button id="duplicate" type="button" class="btn btn-default">Kopieren</button>
-						<button id="duplicateRight" type="button" class="btn btn-default">Rechts verschoben</button></br></br>
-						<!-- Buttons -->
+						<button id="resetToAbove" type="button" class="btn btn-default">auf Drüberliegende</button></br></br>						
 						<p></br>Übergangsart</p>
 						<div class="btn-group" data-toggle="buttons">
 						  <label class="btn  btn-default active">
@@ -286,6 +281,71 @@
 						<div class="modal-footer">
 							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
 							<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--Modal Window-->
+		<div id="createModal" class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<!-- Header -->
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Erstellen</h4>
+					</div>
+					
+					<div class="modal-body">
+						<!-- Buttons -->
+						<p></br>Verschieben um Schritte:</p>
+						<div class="btn-group" data-toggle="buttons">
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-5" autocomplete="off"> -5
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-4" autocomplete="off"> -4
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-3" autocomplete="off"> -3
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-2" autocomplete="off"> -2
+						 </label>
+						  <label class="btn  btn-default ">
+							<input class="cm_shift" type="radio" name="-1" autocomplete="off"> -1
+						  </label>
+						  <label class="btn  btn-default" >
+							<input class="cm_shift" type="radio" name="0" autocomplete="off"> 0
+						  </label>
+						  <label class="btn  btn-default active">
+							<input class="cm_shift" type="radio" name="1" autocomplete="off"> 1
+						  </label>
+						   <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="2" autocomplete="off"> 2
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="3" autocomplete="off"> 3
+						  </label>
+						   <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="4" autocomplete="off"> 4
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="5" autocomplete="off"> 5
+						  </label>
+						</div>
+
+						<!-- Slider -->
+						<p></br>Anzahl Zeilen</p>
+						<div id="create_lines" class="slider slider-horizontal" style="width: 520px;">
+							<div class="slider-track"></div>
+							<div class="slider-selection" style="z-index: 1;"></div>
+						</div>	          	
+
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelCreateModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="saveCreateModal" type="button" class="btn btn-primary">Erstellen</button>
 						</div>
 					</div>
 				</div>
