@@ -12,7 +12,6 @@ var topWindowMeshes=[];
 // var materials=[];
 
 
-
 var _ambientLight;
 var fullModelObject;
 var _withGlowingWindows;
@@ -243,25 +242,26 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate);
 
-	//get current FrameID
-	var currentFrameId=framesManager.currentframeId;
+	// //get current FrameID
+	// var currentFrameId=framesManager.currentframeId;
 
-	if( lastFrameId !== currentFrameId)  // new animation started
-	{
-		lastFrameStartTime = new Date().getTime();
-	}	
+	// if( lastFrameId !== currentFrameId)  // new animation started
+	// {
+		// lastFrameStartTime = new Date().getTime();
+	// }	
 
-	var currentFrame=framesManager.getCurrentFrame(lastFrameStartTime,new Date().getTime());
-	if(!(currentFrame===undefined)){
+	var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
+	if(!(currentFrame.windows===undefined)){
 		$.each(currentFrame.windows,function(i,window){
 			setWindowToColor(i,window.color)
 		})
 	}
     render();
-    lastFrameId=currentFrameId;
+    //lastFrameId=currentFrameId;
 }
 
 function setWindowToColor(i,newColor){
+	newColor="rgb("+newColor[0]+","+newColor[1]+","+newColor[2]+")";
 	if(showFullModel){
 		windowMaterials[i].color=new THREE.Color(newColor)
 	}

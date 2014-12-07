@@ -39,7 +39,7 @@ var colorPickerObj=function(colorPickerDiv){
 		$(colorselectionDiv).find(".singleColor").on("mouseup",function(evt){
 			if(!that.isDragged){
 				var newColor=$(evt.target).css("backgroundColor");
-				framesManager.currentWindowBrushColor=newColor;
+				framesManager.currentWindowBrushColor=colorGenerator.parseColor(newColor);
 				$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
 				//framesManager.setSingleWindowColor(newColor);
 				that.hide();

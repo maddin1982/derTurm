@@ -84,6 +84,7 @@ function colorGeneratorObj(){
 		$(colorSelection).css("class","colorSelector")
 		return colorSelection;
 	}
+	
 	this.parseColor = function(color) {	 
 		var cache
 		, p = parseInt // Use p as a byte saving reference to parseInt

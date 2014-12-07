@@ -63,7 +63,7 @@ var windowManagerObj = function(){
 				for(var i=0;i < 16;i++)
 				{
 					if(i > windowAmount-1)
-						data[j].windows[i].color = "#000000";
+						data[j].windows[i].color = [0,0,0];
 				}
 			}
 		}

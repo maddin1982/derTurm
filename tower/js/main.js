@@ -3,6 +3,7 @@ var io;
 var framesManager;
 var windowManager;
 var myColorPicker;
+var player;
 
 var currentModalDialogRow = null;
 var currentFrameType=null;
@@ -10,16 +11,19 @@ var _shiftPressed;
 var _leftMouseDown;
 
 $(document).ready(function() { 
+	
 	//initialize frameManager
 	framesManager= new framesManagerObj($("#storyboard"));
+	
+	//initialize player
+	player= new PlayerObj(framesManager);
+	player.start();
 	
 	//initialize windowManager 
 	windowManager = new windowManagerObj();
 	
 	//initialize color selection popup
 	myColorPicker= new colorPickerObj($("#colorPicker"));
-	
-	//set color selection in colorpopup
 	myColorPicker.addColorSelection();
 	
 	//initialize 3d Scene

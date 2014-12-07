@@ -1,14 +1,11 @@
 
 var framesManagerObj = function(framesContainer){
+	var that=this;
+
 	this.framesContainer=framesContainer;
 	var data=[];
-	var framerate=24;
-	this.currentframeId=0;
 	this.lastSelectedWindowDiv;
-	this.frameAnimationRunning=false;
-	var that=this;
-	
-	this.currentWindowBrushColor="#000000";
+	this.currentWindowBrushColor=[0,0,0];
 	
 	var indexBeforeDrag;
 	makeFramesContainersortable();
@@ -40,6 +37,7 @@ var framesManagerObj = function(framesContainer){
 			}
 		})
 	}
+	
 	this.duplicateFrameAndShift=function(inID, inSteps, inCount){
 		if(data.length==0)
 			return ;
@@ -72,13 +70,13 @@ var framesManagerObj = function(framesContainer){
 		if( inMode === 'white')
 		{
 			$.each(data[inID].windows,function(i,win){
-				win.color = 'rgb(FF,FF,FF)';
+				win.color = [255,255,255];
 			})
 		}
 		else if( inMode === 'black')
 		{
 			$.each(data[inID].windows,function(i,win){
-				win.color = 'rgb(00,00,00)';
+				win.color = [0,0,0];
 			})
 		}
 		else if( inMode === 'above' && inID > 0)
@@ -89,25 +87,6 @@ var framesManagerObj = function(framesContainer){
 		}
 		that.renderFrames();
 	}
-	//go to next Frame if there is one
-	function goToNextFrame(){
-		if(data.length>1){
-			that.currentframeId=(that.currentframeId+1)%data.length;
-			setTimeout(function () {goToNextFrame()},data[that.currentframeId].duration)			
-
-		}
-		else //animation stoped
-			that.frameAnimationRunning=false;
-	}
-	
-	this.getNextFrameId=function(){
-		if(data.length>1)
-		{
-			return ((that.currentframeId+1)%data.length);
-		}
-		
-		return null;
-	}
 
 	this.copyFrameAttributes=function(inSrcID,inTargetID)
 	{
@@ -115,13 +94,7 @@ var framesManagerObj = function(framesContainer){
 		data[inTargetID].duration = data[inSrcID].duration;
 		data[inTargetID].type = data[inSrcID].type;
 	}
-	//start framechange with timer if it isnt already running
-	function startAnimation(){
-		if(!that.frameAnimationRunning&&data.length>1){
-			goToNextFrame()
-			that.frameAnimationRunning=true;
-		}
-	}
+
 	
 	this.getData=function(){
 		return data;
@@ -131,12 +104,8 @@ var framesManagerObj = function(framesContainer){
 		data=newData;
 		that.currentframeId=0;
 		that.renderFrames();
-		startAnimation();
+		player.start();
 	}	
-
-	this.getFramerate=function(){
-		return framerate;
-	}
 
 	this.setFramerate=function(fps){
 		$.each(data,function(i,frame){
@@ -160,7 +129,7 @@ var framesManagerObj = function(framesContainer){
 		$.each(data,function(i,frame){
 			var newframe={duration:frame.duration,type:frame.type,windows:[]}
 			$.each(frame.windows,function(i,window){
-				newframe.windows.push(colorGenerator.parseColor(window.color))
+				newframe.windows.push(window.color)
 			})
 			formatedData.push(newframe);
 		})
@@ -190,56 +159,6 @@ var framesManagerObj = function(framesContainer){
 		return data[inID];
 	}
 
-	this.colorStrToArray=function(colorStr){
-		colorStr = colorStr.slice(colorStr.indexOf('(') + 1, colorStr.indexOf(')')); // "100, 0, 255, 0.5"
-		var colorArr = colorStr.split(','),
-		    i = colorArr.length;
-
-		while (i--)
-		{
-		    colorArr[i] = parseInt(colorArr[i], 10);
-		}
-
-		var colorObj = {
-		    r: colorArr[0],
-		    g: colorArr[1],
-		    b: colorArr[2],
-		    a: colorArr[3]
-		}
-		return colorObj;
-	};
-
-	this.getCurrentFrame=function(startTime,currTime){
-		if(data.length==0)
-			return ;
-		if(data[that.currentframeId].type == 1)
-		{
-			mixValue = (currTime-startTime)/data[that.currentframeId].duration;
-			//var tmp = data.slice(0);
-			var tmp = jQuery.extend(true, {}, data[that.currentframeId]);
-			var nextFrameId = that.getNextFrameId();
-			if( nextFrameId !== null)
-			{
-				var next = that.getFrame(nextFrameId);
-				$.each(tmp.windows,function(i,win){
-					//FUCKING COLOR STRING AND OBJECT CONVERSION!
-					var c1 = that.colorStrToArray(win.color);
-					var c2 = that.colorStrToArray(next.windows[i].color);					
-					//FUCKEDUPBULLSHIT
-					var newMixedColor = {
-					    r: parseInt(c1.r*(1-mixValue)+c2.r*(mixValue)),
-					    g:  parseInt(c1.g*(1-mixValue)+c2.g*(mixValue)),
-					    b: parseInt( c1.b*(1-mixValue)+c2.b*(mixValue))
-					}
-					//AND RECONVERT TO FUCKING STRINGS
-					win.color = 'rgb('+newMixedColor.r+','+newMixedColor.g+','+newMixedColor.b+')';
-				})
-			}
-			return tmp;
-		}
-		return data[that.currentframeId];
-	}
-
 	this.selectFrame=function(evt){
 		that.lastSelectedWindowDiv=evt.target;
 		framesManager.setSingleWindowColor(that.currentWindowBrushColor);	
@@ -254,7 +173,7 @@ var framesManagerObj = function(framesContainer){
 		var newFrame = {duration:1000/24,type:0,windows:[]}; //type 0=still, 1=fade, 2=shift
 		for( var i=0;i < 16; i++)
 		{
-			var window = {color:"rgb(0, 0, 0)", active:1}; 
+			var window = {color:[0,0,0], active:1}; 
 			newFrame.windows.push(window);
 		}
 		if(inFrameID == null)
@@ -262,7 +181,7 @@ var framesManagerObj = function(framesContainer){
 		else
 			data.splice(inFrameID+1, 0,newFrame);
 		that.renderFrames();
-		startAnimation();
+		player.start();
 	}
 	
 	this.setSingleWindowColor=function(color,frameId,windowId){
@@ -324,7 +243,7 @@ var framesManagerObj = function(framesContainer){
 				that.mouseMovedOverFrame(event)
 				});
 				$(windowDiv).attr("windowId",i);
-				$(windowDiv).attr("style","background-color:"+frameWindow.color);
+				$(windowDiv).attr("style","background-color: rgb("+frameWindow.color[0]+","+frameWindow.color[1]+","+frameWindow.color[2]+")");
 			    if(frameWindow.active!=1)
 			    	$(windowDiv).css({opacity: 0.2});
 		
