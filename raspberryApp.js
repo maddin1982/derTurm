@@ -1,143 +1,162 @@
-var express = require('express.io')
 
 //file operations
 var fs = require('fs');
 
 //serial communication
 var SerialPort = require("serialport").SerialPort;
-var serialport = new SerialPort("COM6", {
-    baudrate: 115200,
-	 dataBits: 8,
-     parity: 'none',
-     stopBits: 1,
-     flowControl: false 
-},false);
-openSerialPort();
 
-var app = express()
 
-//open socket
-app.http().io()
-
-//directory of frontend files
-app.use(express.static(__dirname + '/tower'));
-
-//frames data
-var frameData=[];
-//id of current frame
-var currentFrameId=0;
-
-var frameAnimationRunning=false;
-//save last send message to avoid sending if nothing has changed
-var lastMessageSendToArduino="";
-
-var bytesReceivedByArduino=1;
-
-// get new data
-app.io.route('showInModel', function(req) {
-	bytesReceivedByArduino=1;
-	frameData=req.data;
-	// send data over serial port 
-	startAnimation();
-})
-
-//save scene to file
-app.io.route('saveSceneToFile', function(req) {
-	//save to file
-	if(req.data.fileName==""){
-		var date=new Date();
-		filename=date.getDate()+"_"+(date.getMonth()+1)+"_"+date.getFullYear()+"_"+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds();
-	}
-	else
-		filename=req.data.fileName;
+var serialManager =function(){
+	var that=this;
 	
-	fs.writeFile('savedAnimations/'+filename, JSON.stringify(req.data.frameData), function (err) {
-	  if (err) throw err;
-	  console.log('It\'s saved!');
-	});
-})
-
-app.io.route('getSavedScenes', function(req) {
-	var scenes = fs.readdirSync('savedAnimations/');
-	req.io.emit('savedScenesLoaded', scenes)
-})
-
-app.io.route('getSceneData', function(req) {
-	fs.readFile('savedAnimations/'+req.data, "utf-8", function (err, data) {
-	  if (err) throw err;
-	  req.io.emit('sceneDataLoaded', data)
-	});
-})
-
-function openSerialPort(){
- console.log('openSerialPort');
- 
- //SHOW ALL PORTS
- // var SerialPortObj = require("serialport");
- // SerialPortObj.list(function (err, ports) {
-  // ports.forEach(function(port) {
-    // console.log(port.comName);
-    // console.log(port.pnpId);
-    // console.log(port.manufacturer);
-  // });
-  // })
-  
-	 serialport.open(function (error) {
-	  if ( error ) {
-		console.log('failed to open: '+error);
-	  } else {
-		console.log('open');
-		serialport.on('data', function(data) {
-		  console.log(data)
+	this.openSerialport=function(){
+		var serialport = new SerialPort("COM6", {
+			baudrate: 115200,
+			dataBits: 8,
+			parity: 'none',
+			stopBits: 1,
+			flowControl: false 
+			},false);
+		
+		serialport.open(function (error) {
+			if ( error ) {
+				console.log('failed to open: '+error);
+			} else {
+				console.log('open');
+				serialport.on('data', function(data) {
+				  console.log(data)
+				});
+			}
+		})
+	}
+	
+	this.sendFrameToArduino=function(frame){
+		var allcolorsSerialized=[];
+		for(var i =0; i<frame.windows.length;i++){
+			allcolorsSerialized.push(frame.windows[i][0])
+			allcolorsSerialized.push(frame.windows[i][1])
+			allcolorsSerialized.push(frame.windows[i][2])
+		}
+		//Serial Messages
+		var buffer = new Buffer(allcolorsSerialized);
+		serialport.write(buffer, function(err, results) {
+			  console.log('err ' + err);
+			  console.log('wrote bytes ' + results);
 		});
-	  }
-	})
-}
-
-function writeSerialMessage(colorArray){
-	var buffer = new Buffer(colorArray);
-	serialport.write(buffer, function(err, results) {
-		  console.log('err ' + err);
-		  console.log('wrote bytes ' + results);
-	});
-}
-
-//go to next Frame if there is one
-function goToNextFrame(){
-	if(frameData.length>1){
-		setTimeout(function () {goToNextFrame()},frameData[currentFrameId].duration)
-		sendFrameToArduino(currentFrameId)
-		currentFrameId=(currentFrameId+1)%frameData.length;
 	}
-	else //animation stoped
-		frameAnimationRunning=false;
-}
-
-//start framechange with timer if it isnt already running
-function startAnimation(){
-	if(!frameAnimationRunning&&frameData.length>1){
-		goToNextFrame()
-		frameAnimationRunning=true;
-	}
-}
-
-var sendFrameToArduino=function(frameId){
-	var allcolorsSerialized=[];
-	for(var i =0; i<frameData[frameId].windows.length;i++){
-		allcolorsSerialized.push(frameData[frameId].windows[i][0])
-		allcolorsSerialized.push(frameData[frameId].windows[i][1])
-		allcolorsSerialized.push(frameData[frameId].windows[i][2])
-	}
-	//Serial Messages
 	
-	writeSerialMessage(allcolorsSerialized)
+	this.showSerialPorts=function(){
+		 //SHOW ALL PORTS
+		 var SerialPortObj = require("serialport");
+		 SerialPortObj.list(function (err, ports) {
+			  ports.forEach(function(port) {
+				console.log(port.comName);
+				console.log(port.pnpId);
+				console.log(port.manufacturer);
+			  });
+		  })
+	}
 }
 
-var server = app.listen(3000, function () {
 
-  var host = server.address().address
-  var port = server.address().port
+var sceneManagerObj = function(){
+	var data=[];
+	
+	
+	this.getData=function(){
+		return data;
+	}
+	
+	this.getSavedScenes=function(){
+		var scenes = fs.readdirSync('savedAnimations/');
+	})
+	
+	this.getSceneData=function(sceneName) {
+		fs.readFile('savedAnimations/'+sceneName, "utf-8", function (err, data) {
+		  if (err) throw err;
+		  //do sth with data
+		});
+	})
 
-  console.log('tower app listening at http://%s:%s', host, port)
+	
+}
 
-})
+
+var PlayerObj = function(DataManager){
+	var dataManager=DataManager;
+	
+	var that=this;
+	
+	var fps=24;
+	
+	this.lastFrameId;
+	this.currentframeId=0;
+	this.frameAnimationRunning=false;
+	
+	this.currentFrame=[];
+	this.lastFrameStartTime=new Date().getTime();
+	var data=[];
+
+	//start framechange with timer if it isnt already running
+	this.start=function(){
+		//update data
+		data=dataManager.getData();
+		if(!that.frameAnimationRunning&&data.length>1){
+			that.goToNextFrame()
+			that.frameAnimationRunning=true;
+		}
+		setInterval(this.playerTick,1000/fps);
+	}
+
+	//go to next Frame if there is one
+	this.goToNextFrame=function(){
+		//update data 
+		data=dataManager.getData();
+		if(data.length>1){
+			that.lastFrameStartTime=new Date().getTime();
+			that.currentframeId=that.getNextFrameId();
+			setTimeout(function () {that.goToNextFrame()},data[that.currentframeId].duration)			
+		}
+		else //animation stoped
+			that.frameAnimationRunning=false;
+	}
+	
+	this.getNextFrameId=function(){
+		if(data.length>1)
+			return ((that.currentframeId+1)%data.length);
+		return null;
+	}
+
+	this.playerTick=function(){
+		currTime=new Date().getTime();
+		startTime=that.lastFrameStartTime;
+		
+		if(data.length==0){
+			that.currentFrame=[];
+			return;
+		}
+		if(data[that.currentframeId].type == 1)
+		{
+			mixValue = (currTime-startTime)/data[that.currentframeId].duration;
+
+			var tmp = jQuery.extend(true, {}, data[that.currentframeId]);
+			var nextFrameId = that.getNextFrameId();
+			if( nextFrameId !== null)
+			{
+				var next = data[nextFrameId];
+				$.each(tmp.windows,function(i,win){
+					var c1 = win.color;
+					var c2 = next.windows[i].color;					
+					win.color = [parseInt(c1[0]*(1-mixValue)+c2[0]*(mixValue)),parseInt(c1[1]*(1-mixValue)+c2[1]*(mixValue)),parseInt( c1[2]*(1-mixValue)+c2[2]*(mixValue))]
+				})
+			}
+			that.currentFrame=tmp;
+			return;
+		}
+		that.currentFrame=data[that.currentframeId];
+	}
+	
+	this.getCurrentFrame=function(){
+		return that.currentFrame;
+	}	
+}
