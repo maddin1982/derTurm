@@ -5,7 +5,6 @@ var fs = require('fs');
 //serial communication
 var SerialPort = require("serialport").SerialPort;
 
-
 var serialManager =function(){
 	var that=this;
 	
@@ -58,13 +57,37 @@ var serialManager =function(){
 	}
 }
 
-
 var sceneManagerObj = function(){
+	var sceneName="";
 	var data=[];
-	
+	var storyboard=[];
 	
 	this.getData=function(){
+		//look for new dataset in storyboard
+		if(storyboard.length>0){
+		  var currTime=new Date().getTime();
+		  var nextStartTime;
+		  var nextSceneName;
+		  for(var i=0;i<storyboard.length;i++){
+			 if(storyboard[i].startTime<currTime&&(!nextStartTime||nextStartTime>storyboard[i].startTime)){
+				nextStartTime=storyboard[i].startTime;
+				nextSceneName=storyboard[i].sceneName;
+			}
+		  }
+		  if(nextSceneName!=sceneName){
+			getSceneData(nextSceneName);
+		  }
+		}	
 		return data;
+	}
+	
+	//loads json object holding scenenames and time [{startTime:DateObj1,sceneName:name1},{startTime:DateObj2,sceneName:name2}]
+	this.loadStoryboard=function(){
+		fs.readFile('savedAnimations/'+stroyboard, "utf-8", function (err, data) {
+		  if (err) throw err;
+		  storyboard=JSON.parse(data);
+		  //do sth with data
+		});
 	}
 	
 	this.getSavedScenes=function(){
@@ -72,13 +95,13 @@ var sceneManagerObj = function(){
 	})
 	
 	this.getSceneData=function(sceneName) {
+		this.sceneName=sceneName
 		fs.readFile('savedAnimations/'+sceneName, "utf-8", function (err, data) {
 		  if (err) throw err;
-		  //do sth with data
+		  //todo: add default animation if file could not be loaded
+		  data=JSON.parse(data);
 		});
-	})
-
-	
+	})	
 }
 
 
