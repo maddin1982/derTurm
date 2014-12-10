@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Tower</title>
-
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		
 		<!-- css includes -->
@@ -14,30 +13,39 @@
         <link rel="stylesheet" href="css/sortable.css">
         <link rel="stylesheet" href="css/resizable.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/composition.css">
         <link rel="stylesheet" href="css/jqueryUi/jquery-ui.min.css">
 
 		<!-- jQuery includes, include before bootstrap!!!-->
 		<script src="js/vendor/jquery-1.11.1.min.js"></script>
-		<script src="js/vendor/jquery-sortable.js"></script>
 		<script src="js/vendor/jquery-ui.min.js"></script>
-		
+		<script src="js/vendor/jquery-sortable.js"></script>
+
 		<!-- Bootstrap includes -->
 		<script src="js/vendor/bootstrap.min.js"></script>
 		<script src="js/vendor/bootstrap-slider.js"></script>
 		<script src="js/vendor/three.min.js"></script>
 		<script src="js/vendor/three.orbitctrl.js"></script>
-		
+
 		<!-- socket io -->
 		<script src="../socket.io/socket.io.js"></script>
 		
 		<!-- own js files -->
+		<script src="js/helpers.js"></script>
+		<script src="js/sortable.js"></script>
+		<script src="js/cookie.js"></script>
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
+		<script src="js/eventHandling.js"></script>
+		<script src="js/framesManager.js"></script>
+		<script src="js/windowManager.js"></script>
+		<script src="js/colorPicker.js"></script>
+		<script src="js/player.js"></script>
 		<script src="js/main.js"></script>
 
+
     </head>
-    <body>
-		
+    <body oncontextmenu="return false;">
 		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 		  <div class="container">
 			<div class="navbar-header">
@@ -137,6 +145,9 @@
 					</ul>
 				</div>
 			
+				<!--Switch between views -->
+				<button id="switchBtn" type="button" class="btn btn-default">Switch</button>
+
 				<!--Settings -->
 				<button id="showSettingBtn" type="button" class="btn btn-default">Settings</button>
 
@@ -147,8 +158,86 @@
 				<ol class='col-md-12' id="storyboard">
 				</ol>
 			</div>
-			
-		</div>  
+
+
+
+				<div class='col-md-12 hidden_div' id="compositor">
+
+<div id="wrapper">
+  <div id="content">					
+  		Runlist:
+  		<ol class="composition vertical">
+		                <li>
+		                	<div>
+		                 	 Item 1
+							<i class="icon-move ui-icon ui-icon-carat-2-n-s"> </i>
+		                  </div>
+		                </li>
+		                <li>
+		                  Item 2
+		                </li>
+		                <li>
+		                  Item 3
+		                </li>
+		                <li>
+		                  Item 4
+		                  <ol>
+		                    <li>Item 3.1</li>
+		                    <li>Item 3.2</li>
+		                    <li>Item 3.3</li>
+		                    <li>Item 3.4</li>
+		                    <li>Item 3.5</li>
+		                    <li>Item 3.6</li>
+		                  </ol>
+		                </li>
+		                <li>
+		                  Item 5
+		                </li>
+		                <li>
+		                  Item 6
+		                </li>
+	              	</ol>
+	</div>
+  <div id="sidebar">
+
+	  <div id="sceneModules">
+	  		Helpers:
+	  		<ol id="sceneHelpers" class="sceneHelpers vertical">
+		  		<li>
+		  			<ol>
+			  			<li>
+			  				Container
+			  			</li>
+			  		</ol>
+		  		</li>
+	            <li>
+	              Loop
+	            </li>
+	            <li>
+	              Transition
+	            </li>
+	            <li>
+	              Fade
+	            </li>
+	            <li>
+	              Pause
+	            </li>
+	  		</ol>
+	  </div>
+
+  		Saved Scenes:
+  		<ol id="savedScenes" class="savedScenes vertical">
+  		</ol>
+  </div>
+
+
+
+  <div id="cleared"></div>
+</div>
+
+				</div>
+
+		</div>
 
 		<!--  
 			****************************************
@@ -156,21 +245,26 @@
 			******************************************
 		 -->
 
-		<!--PopUp for colorPicker and so on -->
-		<div class="myPopUpMenue" id="colorPicker"></div>
+		<!--PopUp for colorPicker -->
+		<div class="myPopUpMenue" id="colorPicker">
+		</div>
 
-		<!--Modal Window-->
+		<!--Frame Fading Window-->
 		<div id="myModal" class="modal fade">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<!-- Header -->
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-						<h4 class="modal-title">Transitions</h4>
+						<h4 class="modal-title">Einstellungen</h4>
 					</div>
 					
 					<div class="modal-body">
-						<!-- Buttons -->
+						<p>Setz die Farben dieser Zeile:</p>
+						<button id="resetToWhite" type="button" class="btn btn-default">auf Weiß</button>
+						<button id="resetToBlack" type="button" class="btn btn-default">auf Schwarz</button>
+						<button id="resetToAbove" type="button" class="btn btn-default">auf Drüberliegende</button></br></br>						
+						<p></br>Übergangsart</p>
 						<div class="btn-group" data-toggle="buttons">
 						  <label class="btn  btn-default active">
 							<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
@@ -181,12 +275,12 @@
 						</div>
 
 						<!-- Slider -->
-						<p>Zeit in Millisekunden</p>
+						<p></br>Übergangszeit in Millisekunden</p>
 						<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
 							<div class="slider-track"></div>
 							<div class="slider-selection" style="z-index: 1;"></div>
 						</div>				            	
-						<p></br>Todo: Slider für delay & cutoff</p>
+						<p></br></br>Todo: Slider für delay & cutoff</p>
 						
 						<!-- Footer -->	
 						<div class="modal-footer">
@@ -197,8 +291,74 @@
 				</div>
 			</div>
 		</div>
+		
+		<!--Frame Shifting Window-->
+		<div id="createModal" class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<!-- Header -->
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Erstellen</h4>
+					</div>
+					
+					<div class="modal-body">
+						<!-- Buttons -->
+						<p></br>Verschieben um Schritte:</p>
+						<div class="btn-group" data-toggle="buttons">
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-5" autocomplete="off"> -5
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-4" autocomplete="off"> -4
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-3" autocomplete="off"> -3
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="-2" autocomplete="off"> -2
+						 </label>
+						  <label class="btn  btn-default ">
+							<input class="cm_shift" type="radio" name="-1" autocomplete="off"> -1
+						  </label>
+						  <label class="btn  btn-default" >
+							<input class="cm_shift" type="radio" name="0" autocomplete="off"> 0
+						  </label>
+						  <label class="btn  btn-default active">
+							<input class="cm_shift" type="radio" name="1" autocomplete="off"> 1
+						  </label>
+						   <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="2" autocomplete="off"> 2
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="3" autocomplete="off"> 3
+						  </label>
+						   <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="4" autocomplete="off"> 4
+						  </label>
+						  <label class="btn  btn-default">
+							<input class="cm_shift" type="radio" name="5" autocomplete="off"> 5
+						  </label>
+						</div>
 
-<!--Modal Window-->
+						<!-- Slider -->
+						<p></br>Anzahl Zeilen</p>
+						<div id="create_lines" class="slider slider-horizontal" style="width: 520px;">
+							<div class="slider-track"></div>
+							<div class="slider-selection" style="z-index: 1;"></div>
+						</div>	          	
+
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelCreateModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="saveCreateModal" type="button" class="btn btn-primary">Erstellen</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--Save Window-->
 		<div id="saveSceneModal" class="modal fade">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -221,7 +381,7 @@
 			</div>
 		</div>
 
-<!--Settings Window-->
+		<!--Settings Window-->
 		<div id="settings_window" class="modal fade">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -239,10 +399,23 @@
 							<div class="slider-selection" style="z-index: 1;"></div>
 						</div>
 
+						<div class="checkbox">
+						  <label>
+						    <input type="checkbox" id="GlowingWindowsCheck" value="true" aria-label="...">
+						    Glowing Windows
+						  </label>
+						</div>
+
+						<div class="checkbox">
+						  <label>
+						    <input type="checkbox" id="TopWindowsCheck" value="true" aria-label="...">
+						    Top Windows
+						  </label>
+						</div>
+
 						<!-- Footer -->	
 						<div class="modal-footer">
-							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-							<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
+							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 						</div>
 					</div>
 				</div>
@@ -250,4 +423,32 @@
 		</div>
 
     </body>
+	
+		<!-- ---------------- Custom Shader Code ------------------------ -->
+		<script id="vertexShader" type="x-shader/x-vertex">
+		uniform vec3 viewVector;
+		uniform float c;
+		uniform float p;
+		varying float intensity;
+		void main() 
+		{
+		    vec3 vNormal = normalize( normalMatrix * normal );
+			vec3 vNormel = normalize( normalMatrix * viewVector );
+			intensity = pow( c - dot(vNormal, vNormel), p );
+			
+		    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}
+		</script>
+
+		<!-- fragment shader a.k.a. pixel shader -->
+		<script id="fragmentShader" type="x-shader/x-vertex"> 
+		uniform vec3 glowColor;
+		varying float intensity;
+		void main() 
+		{
+			vec3 glow = glowColor * intensity;
+		    gl_FragColor = vec4( glow, 1.0 );
+		}
+		</script>
+		
 </html>

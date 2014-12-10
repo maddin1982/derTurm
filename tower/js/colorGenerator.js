@@ -49,7 +49,7 @@ function colorGeneratorObj(){
 		//defaults
 		if(!width)width=20;
 		if(!height)height=20;
-		if(numberOfSteps)numberOfSteps=10;
+		if(!numberOfSteps)numberOfSteps=10;
 		
 		var colorBarDiv=document.createElement('div');
 		var firstPart=Math.floor(numberOfSteps/2);
@@ -84,6 +84,7 @@ function colorGeneratorObj(){
 		$(colorSelection).css("class","colorSelector")
 		return colorSelection;
 	}
+	
 	this.parseColor = function(color) {	 
 		var cache
 		, p = parseInt // Use p as a byte saving reference to parseInt
