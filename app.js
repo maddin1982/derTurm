@@ -9,7 +9,7 @@ var udpServer = dgram.createSocket("udp4");
 
 //serial communication
 var SerialPort = require("serialport").SerialPort;
-var serialport = new SerialPort("COM6", {
+var serialport = new SerialPort("COM3", {
     baudrate: 115200,
 	 dataBits: 8,
      parity: 'none',
