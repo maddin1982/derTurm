@@ -1,15 +1,22 @@
-
 //file operations
 var fs = require('fs');
+
+//load Render Module
+var Renderer=require('./renderModule.js');
 
 //serial communication
 var SerialPort = require("serialport").SerialPort;
 
-var serialManager =function(){
+var fps=24;
+
+//create new Renderer with 24 Frames
+var myRenderer=new Renderer(fps);
+
+var SerialManagerObj =function(){
 	var that=this;
-	
+	var serialport;
 	this.openSerialport=function(){
-		var serialport = new SerialPort("COM6", {
+		serialport = new SerialPort("COM6", {
 			baudrate: 115200,
 			dataBits: 8,
 			parity: 'none',
@@ -23,163 +30,237 @@ var serialManager =function(){
 			} else {
 				console.log('open');
 				serialport.on('data', function(data) {
-				  console.log(data)
+					console.log(data)
 				});
 			}
 		})
 	}
 	
-	this.sendFrameToArduino=function(frame){
+	this.sendFrame=function(frame){
+		//console.log("sendFrame")
+		//console.log(frame)
 		var allcolorsSerialized=[];
-		for(var i =0; i<frame.windows.length;i++){
-			allcolorsSerialized.push(frame.windows[i][0])
-			allcolorsSerialized.push(frame.windows[i][1])
-			allcolorsSerialized.push(frame.windows[i][2])
+		for(var i =0; i<frame.length;i++){
+			allcolorsSerialized.push(frame[i][0])
+			allcolorsSerialized.push(frame[i][1])
+			allcolorsSerialized.push(frame[i][2])
 		}
 		//Serial Messages
 		var buffer = new Buffer(allcolorsSerialized);
+		
+		if(!serialport)
+			throw "serialPort not initialized";
+			
 		serialport.write(buffer, function(err, results) {
-			  console.log('err ' + err);
-			  console.log('wrote bytes ' + results);
+			if(err) throw('err ' + err)
 		});
+		
 	}
 	
 	this.showSerialPorts=function(){
-		 //SHOW ALL PORTS
-		 var SerialPortObj = require("serialport");
-		 SerialPortObj.list(function (err, ports) {
-			  ports.forEach(function(port) {
+		//SHOW ALL PORTS
+		var SerialPortObj = require("serialport");
+		SerialPortObj.list(function (err, ports) {
+			ports.forEach(function(port) {
 				console.log(port.comName);
 				console.log(port.pnpId);
 				console.log(port.manufacturer);
-			  });
-		  })
+			});
+		})
 	}
 }
 
-var sceneManagerObj = function(){
-	var sceneName="";
-	var data=[];
-	var storyboard=[];
+var FileManagerObj = function(){
+	var that=this;
+	var currentsceneName="";
 	
-	this.getData=function(){
-		//look for new dataset in storyboard
-		if(storyboard.length>0){
-		  var currTime=new Date().getTime();
-		  var nextStartTime;
-		  var nextSceneName;
-		  for(var i=0;i<storyboard.length;i++){
-			 if(storyboard[i].startTime<currTime&&(!nextStartTime||nextStartTime>storyboard[i].startTime)){
-				nextStartTime=storyboard[i].startTime;
-				nextSceneName=storyboard[i].sceneName;
-			}
-		  }
-		  if(nextSceneName!=sceneName){
-			getSceneData(nextSceneName);
-		  }
-		}	
-		return data;
+	var sceneData=[];
+	var sceneRanking=[];
+	
+	var newSceneAvailable=false;
+	var blendingScene=[];
+	
+	this.getBlendingScene=function(){
+		return blendingScene;
+	}
+	
+	this.isNewSceneDataAvailable=function(){
+		return newSceneAvailable;
+	}
+	
+	this.getNewSceneData=function(){
+		newSceneAvailable=false;
+		return sceneData;
+	}
+	
+	this.getNextSceneNameByRanking=function(){
+		//console.log("pick new scene by Ranking");
+
+		var highestRanking=0;
+		var highestRankedScene;
+		
+		//console.log("sceneRanking: ")
+		//console.log(sceneRanking);
+		for(var i =0;i<sceneRanking.length;i++){
+			//Ranking system:
+			
+			//add currentrating or increase Currentrating
+			if(!sceneRanking[i].currentRating)
+				sceneRanking[i].currentRating=sceneRanking[i].dynamicRating;
+			else{
+				sceneRanking[i].currentRating+=sceneRanking[i].dynamicRating;
+			}		
+			//find scene with highest current rating value an play it
+			if(parseInt(sceneRanking[i].currentRating)>=highestRanking){
+				highestRanking=sceneRanking[i].currentRating;
+				highestRankedScene=sceneRanking[i];
+			}	
+		}
+		
+		// console.log("nextScene: ")
+		// console.log(highestRankedScene.sceneName);
+		
+		//reset current rating of highest Ranked Scene
+		highestRankedScene.currentRating=0;
+		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
+		that.loadSceneData(highestRankedScene.sceneName);
+	}
+	
+	//return if files differ or not
+	this.dataDiffers=function(json1,json2){
+		if(json1.length!=json2.length)
+			return true;
+		
+		for(var i =0;i<json1.length;i++){
+			if(json1[i].staticRating!=json2[i].staticRating||json1[i].sceneName!=json2[i].sceneName)	
+				return true;
+		}
+		return false;
 	}
 	
 	//loads json object holding scenenames and time [{startTime:DateObj1,sceneName:name1},{startTime:DateObj2,sceneName:name2}]
-	this.loadStoryboard=function(){
-		fs.readFile('savedAnimations/'+stroyboard, "utf-8", function (err, data) {
-		  if (err) throw err;
-		  storyboard=JSON.parse(data);
-		  //do sth with data
+	//this.loadSceneRanking=function(callBack){
+	this.loadSceneRanking=function(){
+		
+		fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, result) {
+			if (err) throw err;
+			  
+			var newSceneRanking=JSON.parse(result);
+			 //console.log(newSceneRanking)
+			 //console.log(sceneRanking)
+			//TODO: only replace SceneRanking if new scene was added or Ranking of scenes was changed!
+			if(that.dataDiffers(sceneRanking,newSceneRanking)){
+				sceneRanking=newSceneRanking;
+				that.getNextSceneNameByRanking();
+				console.log("----------------------------")
+				console.log("THER WAS A CHANGE OF FILES!!!")
+				console.log("----------------------------")
+			}	
 		});
 	}
 	
-	this.getSavedScenes=function(){
-		var scenes = fs.readdirSync('savedAnimations/');
-	})
-	
-	this.getSceneData=function(sceneName) {
+	this.loadSceneData=function(sceneName) {
 		this.sceneName=sceneName
-		fs.readFile('savedAnimations/'+sceneName, "utf-8", function (err, data) {
-		  if (err) throw err;
-		  //todo: add default animation if file could not be loaded
-		  data=JSON.parse(data);
+		fs.readFile('savedAnimations/'+sceneName, "utf-8", function (err, result) {
+			if (err){
+				console.log("error: "+err);
+				//todo: add errorscene
+				sceneData=blendingScene;
+			}
+			else{	
+				sceneData=myRenderer.parse(JSON.parse(result));
+			}
+			newSceneAvailable=true;
+			//todo: add default animation if file could not be loaded
 		});
-	})	
+	}
+
+	this.loadBlendingScene=function(){
+		fs.readFile('savedAnimations/_blendingScene', "utf-8", function (err, result) {
+			if (err) throw err;
+			blendingScene=myRenderer.parse(JSON.parse(result));
+		});
+	}	
 }
 
-
-var PlayerObj = function(DataManager){
-	var dataManager=DataManager;
-	
+var PlayerObj = function(fps,fileManager,serialManager){
+	var fps=fps;
 	var that=this;
+	var currentScene=[];
+	var nextScene=[];
+	var currentSceneFrameNumber=0;
 	
-	var fps=24;
-	
-	this.lastFrameId;
-	this.currentframeId=0;
-	this.frameAnimationRunning=false;
-	
-	this.currentFrame=[];
-	this.lastFrameStartTime=new Date().getTime();
-	var data=[];
-
-	//start framechange with timer if it isnt already running
 	this.start=function(){
-		//update data
-		data=dataManager.getData();
-		if(!that.frameAnimationRunning&&data.length>1){
-			that.goToNextFrame()
-			that.frameAnimationRunning=true;
-		}
-		setInterval(this.playerTick,1000/fps);
-	}
-
-	//go to next Frame if there is one
-	this.goToNextFrame=function(){
-		//update data 
-		data=dataManager.getData();
-		if(data.length>1){
-			that.lastFrameStartTime=new Date().getTime();
-			that.currentframeId=that.getNextFrameId();
-			setTimeout(function () {that.goToNextFrame()},data[that.currentframeId].duration)			
-		}
-		else //animation stoped
-			that.frameAnimationRunning=false;
+		//check every second if new scene is available
+		setInterval(that.checkForNewScenes,5000);
+		
+		//send fps frames per second to arduino
+		setInterval(that.playerTick,1000/fps);
 	}
 	
-	this.getNextFrameId=function(){
-		if(data.length>1)
-			return ((that.currentframeId+1)%data.length);
-		return null;
+	//check if new scenedata is available
+	this.checkForNewScenes=function(){
+		console.log("checkForNewScenes")
+		fileManager.loadSceneRanking();
 	}
 
 	this.playerTick=function(){
-		currTime=new Date().getTime();
-		startTime=that.lastFrameStartTime;
+		//if currentScene is available
+		//console.log(currentScene.length)
 		
-		if(data.length==0){
-			that.currentFrame=[];
-			return;
-		}
-		if(data[that.currentframeId].type == 1)
-		{
-			mixValue = (currTime-startTime)/data[that.currentframeId].duration;
+		if(currentScene.length>0){		
 
-			var tmp = jQuery.extend(true, {}, data[that.currentframeId]);
-			var nextFrameId = that.getNextFrameId();
-			if( nextFrameId !== null)
-			{
-				var next = data[nextFrameId];
-				$.each(tmp.windows,function(i,win){
-					var c1 = win.color;
-					var c2 = next.windows[i].color;					
-					win.color = [parseInt(c1[0]*(1-mixValue)+c2[0]*(mixValue)),parseInt(c1[1]*(1-mixValue)+c2[1]*(mixValue)),parseInt( c1[2]*(1-mixValue)+c2[2]*(mixValue))]
-				})
+			//console.log("sendFrame")
+			//console.log(currentScene[currentSceneFrameNumber])
+			
+			//last frame of scene
+			if(currentScene.length==currentSceneFrameNumber){
+				currentScene=[];
+
+				//if new scene is available
+				if(fileManager.isNewSceneDataAvailable()){
+					nextScene=fileManager.getNewSceneData();
+					//console.log("play next ranked scene")
+				}
+				else{
+					//request new scene by ranking in filemanager
+					fileManager.getNextSceneNameByRanking();
+					//set blending scene as next scene
+					nextScene=fileManager.getBlendingScene();
+					//console.log("play BlendingScene")
+				}
+				
 			}
-			that.currentFrame=tmp;
-			return;
+			else{
+				//send frame to arduino
+				serialManager.sendFrame(currentScene[currentSceneFrameNumber]);	
+				currentSceneFrameNumber++;
+			}
 		}
-		that.currentFrame=data[that.currentframeId];
+		//when currentscene ended or no currentscene is available try to load next scene
+		else{
+			if(nextScene.length>0){
+				currentScene=nextScene;
+				currentSceneFrameNumber=0;
+			}
+			//initial loading of next scene
+			else{
+				if(fileManager.isNewSceneDataAvailable()){
+					console.log("loading")
+					nextScene=fileManager.getNewSceneData();
+				}
+			}
+		}
 	}
-	
-	this.getCurrentFrame=function(){
-		return that.currentFrame;
-	}	
 }
+
+
+var serialManager=new SerialManagerObj();
+var fileManager=new FileManagerObj();
+fileManager.loadBlendingScene();
+
+serialManager.openSerialport();
+
+var player=new PlayerObj(fps,fileManager,serialManager);
+
+player.start();

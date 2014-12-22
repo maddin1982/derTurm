@@ -1,0 +1,2 @@
+node raspberryApp.js
+pause

@@ -4,19 +4,19 @@ var express = require('express.io')
 var fs = require('fs');
 
 //udp communication
-var dgram = require("dgram");
-var udpServer = dgram.createSocket("udp4");
+// var dgram = require("dgram");
+// var udpServer = dgram.createSocket("udp4");
 
-//serial communication
-var SerialPort = require("serialport").SerialPort;
-var serialport = new SerialPort("COM3", {
-    baudrate: 115200,
-	 dataBits: 8,
-     parity: 'none',
-     stopBits: 1,
-     flowControl: false 
-},false);
-openSerialPort();
+// //serial communication
+// var SerialPort = require("serialport").SerialPort;
+// var serialport = new SerialPort("COM3", {
+    // baudrate: 115200,
+	 // dataBits: 8,
+     // parity: 'none',
+     // stopBits: 1,
+     // flowControl: false 
+// },false);
+// openSerialPort();
 
 var app = express()
 
@@ -27,27 +27,36 @@ app.http().io()
 app.use(express.static(__dirname + '/tower'));
 
 //frames data
-var frameData=[];
-//id of current frame
-var currentFrameId=0;
+// var frameData=[];
+// //id of current frame
+// var currentFrameId=0;
 
-var frameAnimationRunning=false;
-//save last send message to avoid sending if nothing has changed
-var lastMessageSendToArduino="";
+// var frameAnimationRunning=false;
+// //save last send message to avoid sending if nothing has changed
+// var lastMessageSendToArduino="";
 
-var bytesReceivedByArduino=1;
+// var bytesReceivedByArduino=1;
 
 // get new data
-app.io.route('showInModel', function(req) {
-	bytesReceivedByArduino=1;
-	frameData=req.data;
-	// send data over serial port 
-	startAnimation();
-})
+// app.io.route('showInModel', function(req) {
+	// bytesReceivedByArduino=1;
+	// frameData=req.data;
+	// // send data over serial port 
+	// startAnimation();
+// })
+
+
+function getSceneRankingItem(sceneName,staticRating,dynamicRating){
+	var item={};
+	item.sceneName=sceneName;
+	item.dynamicRating=dynamicRating;
+	item.staticRating=staticRating;
+	return item;
+}
 
 //save scene to file
 app.io.route('saveSceneToFile', function(req) {
-	//save to file
+	//save to file; if no filename is set, make one
 	if(req.data.fileName==""){
 		var date=new Date();
 		filename=date.getDate()+"_"+(date.getMonth()+1)+"_"+date.getFullYear()+"_"+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds();
@@ -59,11 +68,53 @@ app.io.route('saveSceneToFile', function(req) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});
+	
+	//change sceneranking file!! 
+	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
+		var sceneRanking=[];
+		if(data){
+			//add file to existing sceneRanking file
+			console.log("add file to existing sceneRanking file")
+			sceneRanking=JSON.parse(data);
+			//check if sceneName exists and remove it
+			for(var i=0;i<sceneRanking.length;i++){
+				if(sceneRanking[i].sceneName==filename){
+					sceneRanking.splice(i,1);
+					i--;
+				}
+			}	
+		}
+		else{
+			//write new sceneRanking File
+			var fileNames=getAllSceneFileNames();
+			console.log("add new sceneRanking")
+			for(var i=0;i<fileNames.length;i++)
+				sceneRanking.push(getSceneRankingItem(fileNames[i],1,1))
+		}
+		//add new Scene
+		sceneRanking.push(getSceneRankingItem(filename,10,1))
+
+		fs.writeFile('savedAnimations/_sceneRanking', JSON.stringify(sceneRanking), function (err) {
+		  if (err) throw err;
+		  console.log('It\'s saved!');
+		});
+	})
 })
 
+function getAllSceneFileNames(){
+	var sceneNames = fs.readdirSync('savedAnimations/');
+	//remove all filenames beginning with underscore 
+	for(var i=0;i<sceneNames.length;i++){
+		if(sceneNames[i].charAt(0)=="_"){
+			sceneNames.splice(i,1)
+			i--;
+		}
+	}
+	return sceneNames;
+}
+
 app.io.route('getSavedScenes', function(req) {
-	var scenes = fs.readdirSync('savedAnimations/');
-	req.io.emit('savedScenesLoaded', scenes)
+	req.io.emit('savedScenesLoaded', getAllSceneFileNames())
 })
 
 app.io.route('getSceneData', function(req) {
@@ -73,92 +124,92 @@ app.io.route('getSceneData', function(req) {
 	});
 })
 
-function openSerialPort(){
- console.log('openSerialPort');
+// function openSerialPort(){
+ // console.log('openSerialPort');
  
- //SHOW ALL PORTS
- // var SerialPortObj = require("serialport");
- // SerialPortObj.list(function (err, ports) {
-  // ports.forEach(function(port) {
-    // console.log(port.comName);
-    // console.log(port.pnpId);
-    // console.log(port.manufacturer);
-  // });
-  // })
+ // //SHOW ALL PORTS
+ // // var SerialPortObj = require("serialport");
+ // // SerialPortObj.list(function (err, ports) {
+  // // ports.forEach(function(port) {
+    // // console.log(port.comName);
+    // // console.log(port.pnpId);
+    // // console.log(port.manufacturer);
+  // // });
+  // // })
   
-	 serialport.open(function (error) {
-	  if ( error ) {
-		console.log('failed to open: '+error);
-	  } else {
-		console.log('open');
-		serialport.on('data', function(data) {
-		  console.log(data)
-		});
+	 // serialport.open(function (error) {
+	  // if ( error ) {
+		// console.log('failed to open: '+error);
+	  // } else {
+		// console.log('open');
+		// serialport.on('data', function(data) {
+		  // console.log(data)
+		// });
 	
-	  }
-	})
-}
+	  // }
+	// })
+// }
 
-function writeSerialMessage(colorArray){
-	var buffer = new Buffer(colorArray);
-	serialport.write(buffer, function(err, results) {
-		  console.log('err ' + err);
-		  console.log('wrote bytes ' + results);
-	});
-}
+// function writeSerialMessage(colorArray){
+	// var buffer = new Buffer(colorArray);
+	// serialport.write(buffer, function(err, results) {
+		  // console.log('err ' + err);
+		  // console.log('wrote bytes ' + results);
+	// });
+// }
 
 //go to next Frame if there is one
-function goToNextFrame(){
-	if(frameData.length>1){
-		setTimeout(function () {goToNextFrame()},frameData[currentFrameId].duration)
-		sendFrameToArduino(currentFrameId)
-		currentFrameId=(currentFrameId+1)%frameData.length;
-	}
-	else //animation stoped
-		frameAnimationRunning=false;
-}
+// function goToNextFrame(){
+	// if(frameData.length>1){
+		// setTimeout(function () {goToNextFrame()},frameData[currentFrameId].duration)
+		// sendFrameToArduino(currentFrameId)
+		// currentFrameId=(currentFrameId+1)%frameData.length;
+	// }
+	// else //animation stoped
+		// frameAnimationRunning=false;
+// }
 
-//start framechange with timer if it isnt already running
-function startAnimation(){
-	if(!frameAnimationRunning&&frameData.length>1){
-		goToNextFrame()
-		frameAnimationRunning=true;
-	}
-}
+// //start framechange with timer if it isnt already running
+// function startAnimation(){
+	// if(!frameAnimationRunning&&frameData.length>1){
+		// goToNextFrame()
+		// frameAnimationRunning=true;
+	// }
+// }
 
-var sendFrameToArduino=function(frameId){
+// var sendFrameToArduino=function(frameId){
 	
-	/* 
-	//UDP Messages 
-	var messageString="";
-	for(var i =0; i<frameData[frameId].windows.length;i++){
-		messageString+=frameData[frameId].windows[i][0]+",";  	//r
-		messageString+=frameData[frameId].windows[i][1]+",";	//g
-		messageString+=frameData[frameId].windows[i][2];	//b
-		if(frameData[frameId].windows.length>i+1)messageString+="|"
-	}
-	//console.log(messageString)
-	var message = new Buffer(messageString);
-	var client = dgram.createSocket("udp4");
-	//console.log(messageString)
-	if(lastMessageSendToArduino!=messageString){
-		client.send(message, 0, message.length, 8888, "192.168.2.20", function(err, bytes) {
-		  client.close();
-		});
-	}
-	lastMessageSendToArduino=messageString;
-	*/
+	// /* 
+	// //UDP Messages 
+	// var messageString="";
+	// for(var i =0; i<frameData[frameId].windows.length;i++){
+		// messageString+=frameData[frameId].windows[i][0]+",";  	//r
+		// messageString+=frameData[frameId].windows[i][1]+",";	//g
+		// messageString+=frameData[frameId].windows[i][2];	//b
+		// if(frameData[frameId].windows.length>i+1)messageString+="|"
+	// }
+	// //console.log(messageString)
+	// var message = new Buffer(messageString);
+	// var client = dgram.createSocket("udp4");
+	// //console.log(messageString)
+	// if(lastMessageSendToArduino!=messageString){
+		// client.send(message, 0, message.length, 8888, "192.168.2.20", function(err, bytes) {
+		  // client.close();
+		// });
+	// }
+	// lastMessageSendToArduino=messageString;
+	// */
 	
-	var allcolorsSerialized=[];
-	for(var i =0; i<frameData[frameId].windows.length;i++){
-		allcolorsSerialized.push(frameData[frameId].windows[i][0])
-		allcolorsSerialized.push(frameData[frameId].windows[i][1])
-		allcolorsSerialized.push(frameData[frameId].windows[i][2])
-	}
-	//Serial Messages
+	// var allcolorsSerialized=[];
+	// for(var i =0; i<frameData[frameId].windows.length;i++){
+		// allcolorsSerialized.push(frameData[frameId].windows[i][0])
+		// allcolorsSerialized.push(frameData[frameId].windows[i][1])
+		// allcolorsSerialized.push(frameData[frameId].windows[i][2])
+	// }
+	// //Serial Messages
 	
-	writeSerialMessage(allcolorsSerialized)
-}
+	// writeSerialMessage(allcolorsSerialized)
+// }
 
 var server = app.listen(3000, function () {
 
