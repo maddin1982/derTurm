@@ -72,7 +72,6 @@ var SerialManagerObj =function(){
 
 var FileManagerObj = function(){
 	var that=this;
-	var currentsceneName="";
 	
 	var sceneData=[];
 	var sceneRanking=[];
@@ -94,33 +93,23 @@ var FileManagerObj = function(){
 	}
 	
 	this.getNextSceneNameByRanking=function(){
-		//console.log("pick new scene by Ranking");
-
 		var highestRanking=0;
 		var highestRankedScene;
-		
-		//console.log("sceneRanking: ")
-		//console.log(sceneRanking);
+
 		for(var i =0;i<sceneRanking.length;i++){
-			//Ranking system:
-			
-			//add currentrating or increase Currentrating
+			//add or increase currentrating
 			if(!sceneRanking[i].currentRating)
 				sceneRanking[i].currentRating=sceneRanking[i].dynamicRating;
 			else{
 				sceneRanking[i].currentRating+=sceneRanking[i].dynamicRating;
 			}		
-			//find scene with highest current rating value an play it
+			//find scene with highest current rating value
 			if(parseInt(sceneRanking[i].currentRating)>=highestRanking){
 				highestRanking=sceneRanking[i].currentRating;
 				highestRankedScene=sceneRanking[i];
 			}	
 		}
-		
-		// console.log("nextScene: ")
-		// console.log(highestRankedScene.sceneName);
-		
-		//reset current rating of highest Ranked Scene
+		//reset currentrating of highest ranked scene
 		highestRankedScene.currentRating=0;
 		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
 		that.loadSceneData(highestRankedScene.sceneName);
@@ -139,21 +128,18 @@ var FileManagerObj = function(){
 	}
 	
 	//loads json object holding scenenames and time [{startTime:DateObj1,sceneName:name1},{startTime:DateObj2,sceneName:name2}]
-	//this.loadSceneRanking=function(callBack){
 	this.loadSceneRanking=function(){
 		
 		fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, result) {
 			if (err) throw err;
 			  
 			var newSceneRanking=JSON.parse(result);
-			 //console.log(newSceneRanking)
-			 //console.log(sceneRanking)
-			//TODO: only replace SceneRanking if new scene was added or Ranking of scenes was changed!
+			
 			if(that.dataDiffers(sceneRanking,newSceneRanking)){
 				sceneRanking=newSceneRanking;
 				that.getNextSceneNameByRanking();
 				console.log("----------------------------")
-				console.log("THER WAS A CHANGE OF FILES!!!")
+				console.log("FILES OR RANKING CHANGED!!!")
 				console.log("----------------------------")
 			}	
 		});
@@ -191,7 +177,7 @@ var PlayerObj = function(fps,fileManager,serialManager){
 	var currentSceneFrameNumber=0;
 	
 	this.start=function(){
-		//check every second if new scene is available
+		//check  if new scene is available
 		setInterval(that.checkForNewScenes,5000);
 		
 		//send fps frames per second to arduino
@@ -205,31 +191,23 @@ var PlayerObj = function(fps,fileManager,serialManager){
 	}
 
 	this.playerTick=function(){
-		//if currentScene is available
-		//console.log(currentScene.length)
-		
 		if(currentScene.length>0){		
-
-			//console.log("sendFrame")
-			//console.log(currentScene[currentSceneFrameNumber])
 			
-			//last frame of scene
+			//if last frame of scene
 			if(currentScene.length==currentSceneFrameNumber){
 				currentScene=[];
 
 				//if new scene is available
 				if(fileManager.isNewSceneDataAvailable()){
+					//get next scene from fimemanager
 					nextScene=fileManager.getNewSceneData();
-					//console.log("play next ranked scene")
 				}
 				else{
 					//request new scene by ranking in filemanager
 					fileManager.getNextSceneNameByRanking();
 					//set blending scene as next scene
 					nextScene=fileManager.getBlendingScene();
-					//console.log("play BlendingScene")
 				}
-				
 			}
 			else{
 				//send frame to arduino
@@ -246,14 +224,13 @@ var PlayerObj = function(fps,fileManager,serialManager){
 			//initial loading of next scene
 			else{
 				if(fileManager.isNewSceneDataAvailable()){
-					console.log("loading")
+					console.log("initial loading")
 					nextScene=fileManager.getNewSceneData();
 				}
 			}
 		}
 	}
 }
-
 
 var serialManager=new SerialManagerObj();
 var fileManager=new FileManagerObj();
