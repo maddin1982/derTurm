@@ -167,10 +167,14 @@ var framesManagerObj = function(framesContainer){
 	this.setFrame = function(inFrameID,inType,inDuration,inDelay,inCutoff){
 			data[inFrameID].type = inType;
 			data[inFrameID].duration = inDuration;
+			if( inType==1)
+				$( "#transitionBtn"+inFrameID).text("["+(inDuration/1000)+"]");
+			else if( inType==0)
+				$( "#transitionBtn"+inFrameID).text("("+(inDuration/1000)+")");
 	};
 
 	this.addFrame = function(inFrameID){
-		var newFrame = {duration:1000/24,type:0,windows:[]}; //type 0=still, 1=fade, 2=shift
+		var newFrame = {duration:100,type:1,windows:[]}; //type 0=still, 1=fade, 2=shift
 		for( var i=0;i < 16; i++)
 		{
 			var window = {color:[0,0,0], active:1}; 
@@ -226,7 +230,9 @@ var framesManagerObj = function(framesContainer){
 	}
 
 	//renders Frames after change
-	this.renderFrames=function(){		
+	this.renderFrames=function(){	
+	
+
 		windowManager.updateData();
 		that.framesContainer.empty();
 		var frameDiv = null;
@@ -238,9 +244,10 @@ var framesManagerObj = function(framesContainer){
 			$(iIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s")
 			$(frameDiv).append(iIcon)
 			$.each(frame.windows,function(i,frameWindow){
+
 				var windowDiv=document.createElement('div')
-			$(windowDiv).mousemove(function( event ) {
-				that.mouseMovedOverFrame(event)
+				$(windowDiv).mousemove(function( event ) {
+					that.mouseMovedOverFrame(event)
 				});
 				$(windowDiv).attr("windowId",i);
 				$(windowDiv).attr("style","background-color: rgb("+frameWindow.color[0]+","+frameWindow.color[1]+","+frameWindow.color[2]+")");
@@ -253,20 +260,24 @@ var framesManagerObj = function(framesContainer){
 			if( j < data.length)
 			{
 				var addFrame=document.createElement('i')
-				$(addFrame).attr("id","deleteFrameBtn"+j)
+				$(addFrame).attr("id","addFrameBtn"+j)
 				$(addFrame).attr("class","ui-icon ui-icon-plus f_left")
 				$(addFrame).attr("onclick","framesManager.addFrame("+j+")")
 				$(frameDiv).append(addFrame)
 
 				var frameFadingDialogBtn=document.createElement('i')
 				$(frameFadingDialogBtn).attr("id","transitionBtn"+j)
-				$(frameFadingDialogBtn).attr("class","ui-icon ui-icon-shuffle f_left")
+				$(frameFadingDialogBtn).attr("class","small_time")
 				$(frameFadingDialogBtn).attr("data-toggle","modal")
 				$(frameFadingDialogBtn).attr("onclick","createFrameFadingDialog(this);")
+				if(frame.type == 1)
+					$(frameFadingDialogBtn).text("["+(frame.duration/1000).toFixed(1) +"]");	
+				else
+					$(frameFadingDialogBtn).text("("+(frame.duration/1000).toFixed(1) +")");
 				$(frameDiv).append(frameFadingDialogBtn)
 
 				var frameShiftingDialogBtn=document.createElement('i')
-				$(frameShiftingDialogBtn).attr("id","transitionBtn"+j)
+				$(frameShiftingDialogBtn).attr("id","duplicateBtn"+j)
 				$(frameShiftingDialogBtn).attr("class","ui-icon ui-icon-signal f_left")
 				$(frameShiftingDialogBtn).attr("data-toggle","modal")
 				$(frameShiftingDialogBtn).attr("onclick","createFrameShiftingDialog(this);")
