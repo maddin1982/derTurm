@@ -1,4 +1,4 @@
-//get parameter value
+//get url parameter value
 function gup( name )
 {
   name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
@@ -9,4 +9,15 @@ function gup( name )
     return null;
   else
     return results[1];
+}
+
+//convert int to hex
+function intToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+//convert rgb to hex
+function rgbToHex(r, g, b) {
+    return "#" + intToHex(r) + intToHex(g) + intToHex(b);
 }

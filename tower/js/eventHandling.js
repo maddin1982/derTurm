@@ -46,12 +46,12 @@ function initializeEvents(){
 	});
 
 	$("#GlowingWindowsCheck").on("change",function(){
-		switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
+		tower3D.switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
 		createCookie("withGlowingWindows", $('#GlowingWindowsCheck').is(':checked'), 20 )
 	});
 
 	$("#TopWindowsCheck").on("change",function(){
-		switchTopWindows($('#TopWindowsCheck').is(':checked'))
+		tower3D.switchTopWindows($('#TopWindowsCheck').is(':checked'))
 		createCookie("withTopWindows", $('#TopWindowsCheck').is(':checked'), 20 )
 	});
 
@@ -84,17 +84,17 @@ function initializeEvents(){
 	//save Settings
 	$("#resetToWhite").on("click",function(){	
 		framesManager.resetFrame(currentModalDialogRow,'white');
-		$('#myModal').modal('hide');
+		$('#frameFadingDialog').modal('hide');
 	});
 	
 	$("#resetToBlack").on("click",function(){
 		framesManager.resetFrame(currentModalDialogRow,'black');
-		$('#myModal').modal('hide');
+		$('#frameFadingDialog').modal('hide');
 	});
 	
 	$("#resetToAbove").on("click",function(){
 		framesManager.resetFrame(currentModalDialogRow,'above');
-		$('#myModal').modal('hide');
+		$('#frameFadingDialog').modal('hide');
 	});
 
 	$("#saveModal").on("click", function() {	
@@ -104,10 +104,10 @@ function initializeEvents(){
 			currentFrameType = 1;
 		framesManager.setFrame(currentModalDialogRow,currentFrameType,parseFloat($('#trans_duration').data('slider').getValue()));
 		// hide the modal dialog 
-		$('#myModal').modal('hide')
+		$('#frameFadingDialog').modal('hide')
 	});
 
-	$('#myModal').on('hidden.bs.modal', function () {
+	$('#frameFadingDialog').on('hidden.bs.modal', function () {
 		//reset the current row when the modal dialog is hidden
 		currentModalDialogRow = null;
 		currentFrameType = null;
@@ -127,10 +127,10 @@ function initializeEvents(){
 
 		// hide the modal dialog 
 		framesManager.duplicateFrameAndShift(currentModalDialogRow,shifts,lines);
-		$('#createModal').modal('hide')
+		$('#frameFadingDialog').modal('hide')
 	});
 
-	$('#createModal').on('hidden.bs.modal', function () {
+	$('#frameFadingDialog').on('hidden.bs.modal', function () {
 		//reset the current row when the modal dialog is hidden
 		currentModalDialogRow = null;
 		currentFrameType = null;

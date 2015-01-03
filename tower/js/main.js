@@ -3,6 +3,7 @@ var io;
 var framesManager;
 var windowManager;
 var myColorPicker;
+var tower3D;
 var player;
 
 var currentModalDialogRow = null;
@@ -27,7 +28,8 @@ $(document).ready(function() {
 	myColorPicker.addColorSelection();
 	
 	//initialize 3d Scene
-	init3DSceneOnElement($("#3DContainer"));	
+	tower3D=new Tower3DObj();
+	tower3D.init3DSceneOnElement($("#3DContainer"));	
 	
 	//Mouse Events Sliders and so on...
 	initializeEvents();
@@ -39,11 +41,11 @@ $(document).ready(function() {
     if (valueGlowing) {
     	if(valueGlowing == "true"){
     		$('#GlowingWindowsCheck').prop('checked',  true);
-    		switchGlowingWindows( true )
+    		tower3D.switchGlowingWindows( true )
     	}
     	else{
     		$('#GlowingWindowsCheck').prop('checked',  false);
-    		switchGlowingWindows( false )
+    		tower3D.switchGlowingWindows( false )
     	}
 	}
 
@@ -51,11 +53,11 @@ $(document).ready(function() {
     if (valueTopWindows) {
     	if(valueTopWindows == "true"){
     		$('#TopWindowsCheck').prop('checked',  true);
-    		switchTopWindows( true )
+    		tower3D.switchTopWindows( true )
     	}
     	else{
     		$('#TopWindowsCheck').prop('checked',  false);
-    		switchTopWindows( false )
+    		tower3D.switchTopWindows( false )
     	}
 	}
 	
@@ -83,28 +85,32 @@ $(document).ready(function() {
 	})	
 
 });
-	
+
+//SAVE DIALOG	
 function showSaveDialog(){
 	$('#saveSceneModal').modal('show');
 	var date=new Date();
 	$('#saveDialog_fileName').val(date.getDate()+"_"+(date.getMonth()+1)+"_"+date.getFullYear()+"_"+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds());
 }
 
-function createModal(inthis) {
+//ADD NEW LINES WITH FRAME TRANSITION - DIALOG WINDOW
+function createFrameShiftingDialog(inthis) {
 	if( currentModalDialogRow == null)
 	{
 		//save current Row for this Transition Dialog
 		currentModalDialogRow = parseInt((inthis.id).split("transitionBtn").pop());
 		
 		//show the Create Modal Dialog
-		$('#createModal').modal('show');
+		$('#frameShiftingDialog').modal('show');
+		
 		// set maximum duration to 10seconds
 		$("#create_lines").slider({min:1, max: 16 }) ;
 		$('#create_lines').data('slider').setValue(1);
 	}
 }
 
-function modalDialog(inthis){
+//CREATE FRAME TRANSITION DIALOG
+function createFrameFadingDialog(inthis){
 	if( currentModalDialogRow == null)
 	{
 		//save current Row for this Transition Dialog
@@ -112,7 +118,7 @@ function modalDialog(inthis){
 		var tmpdata = framesManager.getFrameById(currentModalDialogRow);
 		
 		//show the Modal Dialog
-		$('#myModal').modal('show');
+		$('#frameFadingDialog').modal('show');
 		// set maximum duration to 10seconds
 		$("#trans_duration").slider({ max: 10000 }) ;
 
