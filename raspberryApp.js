@@ -131,7 +131,11 @@ var FileManagerObj = function(){
 		var highestRankedScene;
 
 		for(var i =0;i<sceneRanking.length;i++){
-			//add or increase currentrating
+			//check if dynamicRating is below staticRating 
+			if(sceneRanking[i].dynamicRating<sceneRanking[i].staticRating)
+				sceneRanking[i].dynamicRating=sceneRanking[i].staticRating;
+		
+			//add or increase current rating
 			if(!sceneRanking[i].currentRating)
 				sceneRanking[i].currentRating=sceneRanking[i].dynamicRating;
 			else{
@@ -141,11 +145,14 @@ var FileManagerObj = function(){
 			if(parseInt(sceneRanking[i].currentRating)>=highestRanking){
 				highestRanking=sceneRanking[i].currentRating;
 				highestRankedScene=sceneRanking[i];
-			}	
+			}
+			
 		}
 		//reset currentrating of highest ranked scene
 		highestRankedScene.currentRating=0;
 		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
+		
+		
 		
 		that.loadSceneData(highestRankedScene);
 	}
