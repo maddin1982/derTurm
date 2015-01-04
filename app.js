@@ -11,7 +11,7 @@ app.http().io()
 //directory of frontend files
 app.use(express.static(__dirname + '/tower'));
 
-function getSceneRankingItem(sceneName,staticRating,dynamicRating){
+function getSceneRankingItem(sceneName,dynamicRating,staticRating){
 	var item={};
 	item.sceneName=sceneName;
 	item.dynamicRating=dynamicRating;

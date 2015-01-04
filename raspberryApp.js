@@ -142,7 +142,7 @@ var FileManagerObj = function(){
 		highestRankedScene.currentRating=0;
 		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
 		
-		that.loadSceneData(highestRankedScene.sceneName);
+		that.loadSceneData(highestRankedScene);
 	}
 	
 	this.computeNextScheduledScene=function(){
@@ -226,8 +226,8 @@ var FileManagerObj = function(){
 		});
 	}
 	
-	this.loadSceneData=function(sceneName) {
-		this.sceneName=sceneName
+	this.loadSceneData=function(sceneInfo) {
+		sceneName=sceneInfo.sceneName;
 		fs.readFile('savedAnimations/'+sceneName, "utf-8", function (err, result) {
 			if (err){
 				console.log("error: "+err);
@@ -237,7 +237,8 @@ var FileManagerObj = function(){
 			}
 			else{
 				sceneData=myRenderer.parse(JSON.parse(result));
-				console.log("next Scene will be: "+sceneName);
+				
+				console.log("next Scene will be: "+sceneName+", the rating values are d/s:"+sceneInfo.dynamicRating+"/"+sceneInfo.staticRating);
 				console.log("this scene is:"+Math.floor(sceneData.length/24,2)+" seconds long");
 			}
 			newSceneAvailable=true;
