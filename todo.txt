@@ -1,0 +1,14 @@
+- zuschauer sicherung - klappe vor treppe
+- technik bestellung status
+- mdr termin nachfragen
+- umts modem ? - bereit am 5.?
+
+
+für mich:
+- color mixer farbsets
+- fronted bedienung verbesern -> mit michbeck abstimmen
+- anwendung auf raspberry pi überspielen
+- timer priorisierung (animationen zu bestimmter uhrzeit abspielen)
+- animationen in einzel frames zerpflücken -> übergang erstellen > auflösen > einzeln bearbeiten
+- prüfen ob Rendermodul in frontend verwendet werden kann
+- 

@@ -1,12 +1,12 @@
 {
   "name": "towerNode",
   "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Technische Sammlungen Turm",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Kazoosh",
   "license": "ISC",
   "dependencies": {
     "express": "^4.10.1",

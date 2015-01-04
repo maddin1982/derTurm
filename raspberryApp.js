@@ -1,3 +1,21 @@
+
+var enableSimulation=true;
+
+if(enableSimulation){
+	//socket io for debugging and testing interface (tower simulation)
+	var express = require('express.io')
+	var app = express();
+	//open socket
+	app.http().io()
+	app.use(express.static(__dirname + '/towerSimulation'));
+	
+	var server = app.listen(3001, function () {
+	  var host = server.address().address
+	  var port = server.address().port
+	  console.log('tower app listening at http://%s:%s', host, port)
+	})
+}
+
 //file operations
 var fs = require('fs');
 
@@ -199,7 +217,7 @@ var PlayerObj = function(fps,fileManager,serialManager){
 
 				//if new scene is available
 				if(fileManager.isNewSceneDataAvailable()){
-					//get next scene from fimemanager
+					//get next scene from filemanager
 					nextScene=fileManager.getNewSceneData();
 				}
 				else{
