@@ -33,6 +33,8 @@ var myRenderer=new Renderer(fps);
 var SerialManagerObj =function(){
 	var that=this;
 	var serialport;
+	var serialPortReady=false;
+	
 	this.openSerialport=function(){
 		serialport = new SerialPort("COM6", {
 			baudrate: 115200,
@@ -46,6 +48,7 @@ var SerialManagerObj =function(){
 			if ( error ) {
 				console.log('failed to open: '+error);
 			} else {
+				serialPortReady=true;
 				console.log('open');
 				serialport.on('data', function(data) {
 					console.log(data)
@@ -55,23 +58,28 @@ var SerialManagerObj =function(){
 	}
 	
 	this.sendFrame=function(frame){
-		//console.log("sendFrame")
-		//console.log(frame)
 		var allcolorsSerialized=[];
 		for(var i =0; i<frame.length;i++){
 			allcolorsSerialized.push(frame[i][0])
 			allcolorsSerialized.push(frame[i][1])
 			allcolorsSerialized.push(frame[i][2])
 		}
-		//Serial Messages
-		var buffer = new Buffer(allcolorsSerialized);
-		
-		if(!serialport)
-			throw "serialPort not initialized";
+		if(enableSimulation){
+			//broadcast to all connected clients
+			app.io.broadcast('newFrame', allcolorsSerialized)
+		}
+
+		if(serialPortReady){
+			//Serial Messages
+			var buffer = new Buffer(allcolorsSerialized);
 			
-		serialport.write(buffer, function(err, results) {
-			if(err) throw('err ' + err)
-		});
+			if(!serialport)
+				throw "serialPort not initialized";
+				
+			serialport.write(buffer, function(err, results) {
+				if(err) throw('err ' + err)
+			});
+		}
 	}
 	
 	this.showSerialPorts=function(){
@@ -112,7 +120,7 @@ var FileManagerObj = function(){
 		newSceneAvailable=false;
 		return sceneData;
 	}
-	
+
 	this.getNextSceneNameByRanking=function(){
 		var highestRanking=0;
 		var highestRankedScene;
@@ -133,6 +141,7 @@ var FileManagerObj = function(){
 		//reset currentrating of highest ranked scene
 		highestRankedScene.currentRating=0;
 		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
+		
 		that.loadSceneData(highestRankedScene.sceneName);
 	}
 	
@@ -224,9 +233,12 @@ var FileManagerObj = function(){
 				console.log("error: "+err);
 				//todo: add errorscene
 				sceneData=blendingScene;
+				
 			}
-			else{	
+			else{
 				sceneData=myRenderer.parse(JSON.parse(result));
+				console.log("next Scene will be: "+sceneName);
+				console.log("this scene is:"+Math.floor(sceneData.length/24,2)+" seconds long");
 			}
 			newSceneAvailable=true;
 			//todo: add default animation if file could not be loaded

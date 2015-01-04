@@ -9,7 +9,7 @@ var app = express()
 app.http().io()
 
 //directory of frontend files
-app.use(express.static(__dirname + '/towerSimulation'));
+app.use(express.static(__dirname + '/tower'));
 
 function getSceneRankingItem(sceneName,staticRating,dynamicRating){
 	var item={};
