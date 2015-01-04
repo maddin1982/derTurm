@@ -121,8 +121,6 @@ var FileManagerObj = function(){
 	this.computeNextScheduledScene=function(){
 		var current = (new Date).getTime();	
 		var closestTime=current;
-		var nextScheduledTime=null;
-		var nextScheduledSceneName=null;
 		//for each schedule entry 
 		for(var i =0;i<schedule.length;i++){
 			// check if it is currently before the endDate
@@ -262,6 +260,7 @@ var PlayerObj = function(fps,fileManager,serialManager){
 				else{
 					//request new scene by ranking in filemanager
 					fileManager.getNextSceneNameByRanking();
+					fileManager.computeNextScheduledScene();
 					//set blending scene as next scene
 					nextScene=fileManager.getBlendingScene();
 				}
