@@ -102,12 +102,17 @@ var FileManagerObj = function(){
 	var sceneRanking=[];
 	
 	var schedule=[];
+	var b_scheduledSceneNext=false;
 	var nextScheduledTime=null;
 	var nextScheduledSceneName=null;
 
 	var newSceneAvailable=false;
 	var blendingScene=[];
 	
+	this.isNextSceneScheduled=function()
+	{
+		return b_scheduledSceneNext;
+	}
 	this.getBlendingScene=function(){
 		return blendingScene;
 	}
@@ -225,9 +230,35 @@ var FileManagerObj = function(){
 			}	
 		});
 	}
-	
+
+	this.createBlendingSceneWith=function(inFrames) {
+		var tmpData=blendingScene.slice();
+		//console.log("The sceneData has "+sceneData.length+" frames.");
+		//console.log ("But we need  "+ neededFrameCount+ " frames.");
+		if (inFrames <= sceneData.length)
+		{
+			var remove = tmpData.length-inFrames;
+			tmpData.splice(remove*-1,remove);
+		}
+		else
+		{	while ( tmpData.length < inFrames)
+			{
+				tmpData.push(tmpData[0]);
+			}
+		}
+		return tmpData;
+	}
+
 	this.loadSceneData=function(sceneInfo) {
 		sceneName=sceneInfo.sceneName;
+		//there was a waiting period and now the scheduled scene should start
+		if (b_scheduledSceneNext)
+		{
+			b_scheduledSceneNext=false;
+			sceneName = nextScheduledSceneName;
+			// how much delay?
+			console.log("delay: "+((new Date).getTime()-nextScheduledTime));
+		}
 		fs.readFile('savedAnimations/'+sceneName, "utf-8", function (err, result) {
 			if (err){
 				console.log("error: "+err);
@@ -240,12 +271,23 @@ var FileManagerObj = function(){
 				
 				console.log("next Scene will be: "+sceneName+", the rating values are d/s:"+sceneInfo.dynamicRating+"/"+sceneInfo.staticRating);
 				console.log("this scene is:"+Math.floor(sceneData.length/24,2)+" seconds long");
+				/*var diff = (nextScheduledTime-(new Date).getTime())/1000;
+				console.log(nextScheduledTime+" the next scheduled scene should start in "+diff+ " seconds");
+				
+				//when there is too little time to show that Scene
+				if( diff < ((sceneData.length/24)+2.0)) //+ 2seconds offset 
+				{
+					//set flag for scheduled animation!
+					b_scheduledSceneNext = true;
+					//fill the time with just the right amount of Frames
+					var neededFrameCount = parseInt(24*diff);
+					sceneData = that.createBlendingSceneWith(neededFrameCount);
+				}*/
 			}
 			newSceneAvailable=true;
 			//todo: add default animation if file could not be loaded
 		});
 	}
-
 	this.loadBlendingScene=function(){
 		fs.readFile('savedAnimations/_blendingScene', "utf-8", function (err, result) {
 			if (err) throw err;
@@ -292,7 +334,7 @@ var PlayerObj = function(fps,fileManager,serialManager){
 					//request new scene by ranking in filemanager
 					fileManager.getNextSceneNameByRanking();
 					fileManager.computeNextScheduledScene();
-					//set blending scene as next scene
+					//set blending scene as next scene					
 					nextScene=fileManager.getBlendingScene();
 				}
 			}
@@ -304,7 +346,7 @@ var PlayerObj = function(fps,fileManager,serialManager){
 		}
 		//when currentscene ended or no currentscene is available try to load next scene
 		else{
-			if(nextScene.length>0){
+			if(nextScene.length>0){					
 				currentScene=nextScene;
 				currentSceneFrameNumber=0;
 			}
