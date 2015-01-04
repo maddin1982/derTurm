@@ -72,7 +72,6 @@ var SerialManagerObj =function(){
 		serialport.write(buffer, function(err, results) {
 			if(err) throw('err ' + err)
 		});
-		
 	}
 	
 	this.showSerialPorts=function(){
@@ -94,6 +93,10 @@ var FileManagerObj = function(){
 	var sceneData=[];
 	var sceneRanking=[];
 	
+	var schedule=[];
+	var nextScheduledTime=null;
+	var nextScheduledSceneName=null;
+
 	var newSceneAvailable=false;
 	var blendingScene=[];
 	
@@ -133,8 +136,45 @@ var FileManagerObj = function(){
 		that.loadSceneData(highestRankedScene.sceneName);
 	}
 	
+	this.computeNextScheduledScene=function(){
+		var current = (new Date).getTime();	
+		var closestTime=current;
+		//for each schedule entry 
+		for(var i =0;i<schedule.length;i++){
+			// check if it is currently before the endDate
+			if(current < schedule[i].endDate)
+			{
+				//find the closest start time to now
+				var tmp = schedule[i].startDate;
+				while ( tmp < current )
+				{
+					tmp+=schedule[i].repeatEach
+				}	
+				//found new closest Schedule
+				if((tmp-current) < closestTime)	
+				{
+					closestTime = (tmp-current);
+					nextScheduledTime = tmp;
+					nextScheduledSceneName = schedule[i].sceneName;					
+				}
+			}			
+		}
+		console.log("Play Scene: "+ nextScheduledSceneName +" in "+(closestTime)/1000+ "seconds. Precisely at "+new Date(nextScheduledTime));		
+	}
+
+	this.scheduleDiffers=function(json1,json2){
+		if(json1.length!=json2.length)
+			return true;
+		
+		for(var i =0;i<json1.length;i++){
+			if(json1[i].startDate!=json2[i].startDate||json1[i].sceneName!=json2[i].sceneName||json1[i].endDate!=json2[i].endDate||json1[i].repeatEach!=json2[i].repeatEach)	
+				return true;
+		}
+		return false;
+	}
+
 	//return if files differ or not
-	this.dataDiffers=function(json1,json2){
+	this.rankingDiffers=function(json1,json2){
 		if(json1.length!=json2.length)
 			return true;
 		
@@ -144,7 +184,21 @@ var FileManagerObj = function(){
 		}
 		return false;
 	}
-	
+	this.loadSchedule=function(){
+		fs.readFile('savedAnimations/_schedule', "utf-8", function (err, result) {
+			if (err) throw err;
+			  
+			var newSchedule=JSON.parse(result);
+			
+			if(that.scheduleDiffers(schedule,newSchedule)){
+				schedule=newSchedule;
+				that.computeNextScheduledScene();
+				console.log("----------------------------")
+				console.log("--  SCHEDULE GOT UPDATED! --")
+				console.log("----------------------------")				
+			}	
+		});
+	}
 	//loads json object holding scenenames and time [{startTime:DateObj1,sceneName:name1},{startTime:DateObj2,sceneName:name2}]
 	this.loadSceneRanking=function(){
 		
@@ -153,7 +207,7 @@ var FileManagerObj = function(){
 			  
 			var newSceneRanking=JSON.parse(result);
 			
-			if(that.dataDiffers(sceneRanking,newSceneRanking)){
+			if(that.rankingDiffers(sceneRanking,newSceneRanking)){
 				sceneRanking=newSceneRanking;
 				that.getNextSceneNameByRanking();
 				console.log("----------------------------")
@@ -206,6 +260,7 @@ var PlayerObj = function(fps,fileManager,serialManager){
 	this.checkForNewScenes=function(){
 		console.log("checkForNewScenes")
 		fileManager.loadSceneRanking();
+		fileManager.loadSchedule();
 	}
 
 	this.playerTick=function(){
@@ -223,6 +278,7 @@ var PlayerObj = function(fps,fileManager,serialManager){
 				else{
 					//request new scene by ranking in filemanager
 					fileManager.getNextSceneNameByRanking();
+					fileManager.computeNextScheduledScene();
 					//set blending scene as next scene
 					nextScene=fileManager.getBlendingScene();
 				}

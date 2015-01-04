@@ -13,7 +13,7 @@ body {
 
 .frame div{
 	height:20px;
-	width:5.8%;
+	width:5.6%;
 	float:left;
 	border:solid 2px #fff;
 }
@@ -63,4 +63,10 @@ a.btn-xs {
 
 .f_left{
   float:left;
+}
+
+.small_time
+{
+	font-size: 10px;
+	font-style: normal;
 }
