@@ -1,4 +1,5 @@
 
+//create a socket based webserver to show arduino output
 var enableSimulation=true;
 
 if(enableSimulation){
@@ -95,35 +96,26 @@ var SerialManagerObj =function(){
 	}
 }
 
-var FileManagerObj = function(){
+var FileManagerObj = function(fps){
 	var that=this;
-	
-	var sceneData=[];
+	var fps=fps;
 	var sceneRanking=[];
-	
 	var schedule=[];
-	var b_scheduledSceneNext=false;
 	var nextScheduledTime=null;
 	var nextScheduledSceneName=null;
-
-	var newSceneAvailable=false;
 	var blendingScene=[];
 	
-	this.isNextSceneScheduled=function()
-	{
-		return b_scheduledSceneNext;
-	}
-	this.getBlendingScene=function(){
-		return blendingScene;
-	}
-	
-	this.isNewSceneDataAvailable=function(){
-		return newSceneAvailable;
-	}
-	
-	this.getNewSceneData=function(){
-		newSceneAvailable=false;
-		return sceneData;
+	//returns blendingscene, if param frame is set function returns blending scene with correct framecount
+	this.getBlendingScene=function(frames){
+		if(!frames)
+			return blendingScene;
+		else{
+			newBlendingScene=[];
+			for(var i=0;i<frames;i++){
+				newBlendingScene.push(blendingScene[i%blendingScene.length])
+			}
+			return newBlendingScene;
+		}
 	}
 
 	this.getNextSceneNameByRanking=function(){
@@ -151,13 +143,13 @@ var FileManagerObj = function(){
 		//reset currentrating of highest ranked scene
 		highestRankedScene.currentRating=0;
 		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
+
+		console.log("next Scene will be: "+highestRankedScene.sceneName+", the rating values are d/s:"+highestRankedScene.dynamicRating+"/"+highestRankedScene.staticRating);
 		
-		
-		
-		that.loadSceneData(highestRankedScene);
+		return highestRankedScene.sceneName;
 	}
 	
-	this.computeNextScheduledScene=function(){
+	this.getNextScheduledScene=function(){
 		var current = (new Date).getTime();	
 		var closestTime=current;
 		//for each schedule entry 
@@ -174,13 +166,14 @@ var FileManagerObj = function(){
 				//found new closest Schedule
 				if((tmp-current) < closestTime)	
 				{
+					
 					closestTime = (tmp-current);
 					nextScheduledTime = tmp;
-					nextScheduledSceneName = schedule[i].sceneName;					
+					nextScheduledSceneName = schedule[i].sceneName;		
+					return {"nextScheduledTime":nextScheduledTime,"nextScheduledSceneName":nextScheduledSceneName}; 					
 				}
 			}			
 		}
-		console.log("Play Scene: "+ nextScheduledSceneName +" in "+(closestTime)/1000+ "seconds. Precisely at "+new Date(nextScheduledTime));		
 	}
 
 	this.scheduleDiffers=function(json1,json2){
@@ -205,7 +198,8 @@ var FileManagerObj = function(){
 		}
 		return false;
 	}
-	this.loadSchedule=function(){
+	
+	this.loadSchedule=function(callback){
 		fs.readFile('savedAnimations/_schedule', "utf-8", function (err, result) {
 			if (err) throw err;
 			  
@@ -213,16 +207,15 @@ var FileManagerObj = function(){
 			
 			if(that.scheduleDiffers(schedule,newSchedule)){
 				schedule=newSchedule;
-				that.computeNextScheduledScene();
 				console.log("----------------------------")
 				console.log("--  SCHEDULE GOT UPDATED! --")
 				console.log("----------------------------")				
-			}	
+			}
+			callback();
 		});
 	}
 	//loads json object holding scenenames and time [{startTime:DateObj1,sceneName:name1},{startTime:DateObj2,sceneName:name2}]
 	this.loadSceneRanking=function(){
-		
 		fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, result) {
 			if (err) throw err;
 			  
@@ -230,7 +223,7 @@ var FileManagerObj = function(){
 			
 			if(that.rankingDiffers(sceneRanking,newSceneRanking)){
 				sceneRanking=newSceneRanking;
-				that.getNextSceneNameByRanking();
+				//that.getNextSceneNameByRanking();
 				console.log("----------------------------")
 				console.log("FILES OR RANKING CHANGED!!!")
 				console.log("----------------------------")
@@ -238,139 +231,168 @@ var FileManagerObj = function(){
 		});
 	}
 
-	this.createBlendingSceneWith=function(inFrames) {
-		var tmpData=blendingScene.slice();
-		//console.log("The sceneData has "+sceneData.length+" frames.");
-		//console.log ("But we need  "+ neededFrameCount+ " frames.");
-		if (inFrames <= sceneData.length)
-		{
-			var remove = tmpData.length-inFrames;
-			tmpData.splice(remove*-1,remove);
-		}
-		else
-		{	while ( tmpData.length < inFrames)
-			{
-				tmpData.push(tmpData[0]);
-			}
-		}
-		return tmpData;
-	}
-
-	this.loadSceneData=function(sceneInfo) {
-		sceneName=sceneInfo.sceneName;
-		//there was a waiting period and now the scheduled scene should start
-		if (b_scheduledSceneNext)
-		{
-			b_scheduledSceneNext=false;
-			sceneName = nextScheduledSceneName;
-			// how much delay?
-			console.log("delay: "+((new Date).getTime()-nextScheduledTime));
-		}
+	this.loadSceneData=function(sceneName,callback) {	
+		//load file 
 		fs.readFile('savedAnimations/'+sceneName, "utf-8", function (err, result) {
 			if (err){
 				console.log("error: "+err);
 				//todo: add errorscene
 				sceneData=blendingScene;
-				
 			}
 			else{
+				//transform scene from fronted json format to simple array with all frames
 				sceneData=myRenderer.parse(JSON.parse(result));
-				
-				console.log("next Scene will be: "+sceneName+", the rating values are d/s:"+sceneInfo.dynamicRating+"/"+sceneInfo.staticRating);
-				console.log("this scene is:"+Math.floor(sceneData.length/24,2)+" seconds long");
-				/*var diff = (nextScheduledTime-(new Date).getTime())/1000;
-				console.log(nextScheduledTime+" the next scheduled scene should start in "+diff+ " seconds");
-				
-				//when there is too little time to show that Scene
-				if( diff < ((sceneData.length/24)+2.0)) //+ 2seconds offset 
-				{
-					//set flag for scheduled animation!
-					b_scheduledSceneNext = true;
-					//fill the time with just the right amount of Frames
-					var neededFrameCount = parseInt(24*diff);
-					sceneData = that.createBlendingSceneWith(neededFrameCount);
-				}*/
+				callback(sceneData);
 			}
-			newSceneAvailable=true;
 			//todo: add default animation if file could not be loaded
 		});
 	}
-	this.loadBlendingScene=function(){
+	
+	//initial loading of blending animation
+	this.loadBlendingScene=function(callback){
 		fs.readFile('savedAnimations/_blendingScene', "utf-8", function (err, result) {
 			if (err) throw err;
 			blendingScene=myRenderer.parse(JSON.parse(result));
+			callback(blendingScene);
 		});
 	}	
 }
 
 var PlayerObj = function(fps,fileManager,serialManager){
+
 	var fps=fps;
 	var that=this;
 	var currentScene=[];
-	var nextScene=[];
+	var nextRankedScene=[];
+	var nextScheduledScene=[];
+	var nextSceneType="";
+	var blendingScene=[];
 	var currentSceneFrameNumber=0;
+	var nextScheduledSceneInfo;
+	var currentsceneType="";
+	
 	
 	this.start=function(){
-		//check  if new scene is available
+		//load the blending scene data
+		fileManager.loadBlendingScene(that.setBlendingScene)
+		
+		that.checkForNewScenes();
+		
+		//refresh Schedule and Scenelist
 		setInterval(that.checkForNewScenes,5000);
 		
-		//send fps frames per second to arduino
+		//interval to send  frames  to arduino
 		setInterval(that.playerTick,1000/fps);
 	}
 	
-	//check if new scenedata is available
+	//callback function to set Blendingscene
+	this.setBlendingScene=function(sceneData){
+		blendingScene=sceneData;
+	}
+	
+	this.setCurrentScene=function(sceneData){
+		console.log("loading new scene, duration: "+sceneData.length/fps)
+		currentSceneFrameNumber=0;
+		currentScene=sceneData;
+	}
+	
+	//callback function to set NextScheduledSceneInfo
+	this.setNextScheduledSceneInfo=function(){
+		//load next sheduled scene information (name and time)
+		nextScheduledSceneInfo=fileManager.getNextScheduledScene();
+	}
+	
+	//refresh Schedule and Scenelist every 5 seconds
 	this.checkForNewScenes=function(){
-		console.log("checkForNewScenes")
+		//console.log("checkForNewScenes")
 		fileManager.loadSceneRanking();
-		fileManager.loadSchedule();
+		fileManager.loadSchedule(that.setNextScheduledSceneInfo);
+	}
+	
+	this.setNextScene=function(sceneData){	
+		
+		//set next scene type to rankedScene as default
+		nextRankedScene=sceneData;	
+		nextSceneType="rankedScene";
+		
+		//check if there is a time conflict with the next sheduled scene
+		var diff = (nextScheduledSceneInfo.nextScheduledTime-(new Date()).getTime())/1000;
+		console.log("the next scheduled scene "+nextScheduledSceneInfo.nextScheduledSceneName+" should start in "+diff+ " seconds. Precisely at "+new Date(nextScheduledSceneInfo.nextScheduledTime));
+		
+		if(diff < ((nextRankedScene.length/fps)+(blendingScene.length/fps))){			
+			console.log("create a fitting blendingScene with "+(Math.floor(diff)*fps)+" frames")
+			
+			//if there is a conflict create a fitting blending scene to wait for the scheduled scene
+			var fittingBlendingScene=fileManager.getBlendingScene(Math.floor(diff)*fps)
+			currentsceneType="blendingScene";
+			that.setCurrentScene(fittingBlendingScene);
+			
+			//and load the next sheduled scene
+			fileManager.loadSceneData(nextScheduledSceneInfo.nextScheduledSceneName,that.setNextScheduledScene)
+		}
+		else{
+			//set a normal blending scene
+			console.log("set currentscene to blendingScene")
+			currentsceneType="blendingScene";
+			that.setCurrentScene(blendingScene);
+		}	
+	}
+	
+	this.setNextScheduledScene=function(sceneData){
+		nextSceneType="scheduledScene";
+		nextScheduledScene=sceneData;
+		//search for next sheduled scene
+		that.setNextScheduledSceneInfo();
+	}
+
+	this.loadNewScene=function(){
+		//if the current scene endet and was of type blendingscene load a sheduled or a ranked scene
+		if(currentsceneType=="blendingScene"){
+			if(nextSceneType=="scheduledScene"){
+				console.log("set currentscene to scheduledScene")
+				currentsceneType="scheduledScene"
+				that.setCurrentScene(nextScheduledScene);
+			}
+			if(nextSceneType=="rankedScene"){
+				console.log("set currentscene to rankedScene")
+				currentsceneType="rankedScene"
+				that.setCurrentScene(nextRankedScene);
+			}
+		}
+		//if the current scene endet and was of type rankedScene, sheduledscene or undefined then try to find the next scene and add a blendingscene until loading is done
+		else if(currentsceneType=="rankedScene"||currentsceneType=="scheduledScene"||currentsceneType==""){	
+			//get next ranked scene name 
+			var nextSceneName=fileManager.getNextSceneNameByRanking();
+			//load the next ranked scene and check if there is a time conflict with a scheduled scene
+			fileManager.loadSceneData(nextSceneName,that.setNextScene)
+		}
 	}
 
 	this.playerTick=function(){
 		if(currentScene.length>0){		
-			
 			//if last frame of scene
-			if(currentScene.length==currentSceneFrameNumber){
-				currentScene=[];
-
-				//if new scene is available
-				if(fileManager.isNewSceneDataAvailable()){
-					//get next scene from filemanager
-					nextScene=fileManager.getNewSceneData();
-				}
-				else{
-					//request new scene by ranking in filemanager
-					fileManager.getNextSceneNameByRanking();
-					fileManager.computeNextScheduledScene();
-					//set blending scene as next scene					
-					nextScene=fileManager.getBlendingScene();
-				}
+			if(currentSceneFrameNumber==currentScene.length){
+				that.loadNewScene();
+				currentSceneFrameNumber=0;
 			}
 			else{
-				//send frame to arduino
-				serialManager.sendFrame(currentScene[currentSceneFrameNumber]);	
+				if(currentScene[currentSceneFrameNumber])
+					serialManager.sendFrame(currentScene[currentSceneFrameNumber]);	
+				else
+					console.log("framerror, possibly with blending scene generation");
+				
 				currentSceneFrameNumber++;
 			}
 		}
-		//when currentscene ended or no currentscene is available try to load next scene
 		else{
-			if(nextScene.length>0){					
-				currentScene=nextScene;
-				currentSceneFrameNumber=0;
-			}
-			//initial loading of next scene
-			else{
-				if(fileManager.isNewSceneDataAvailable()){
-					console.log("initial loading")
-					nextScene=fileManager.getNewSceneData();
-				}
-			}
+			that.loadNewScene();
 		}
 	}
 }
 
 var serialManager=new SerialManagerObj();
-var fileManager=new FileManagerObj();
-fileManager.loadBlendingScene();
+var fileManager=new FileManagerObj(fps);
+//fileManager.loadBlendingScene();
 
 serialManager.openSerialport();
 

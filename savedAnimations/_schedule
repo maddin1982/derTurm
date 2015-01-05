@@ -1,1 +1,1 @@
-[{"sceneName":"fire","startDate":1420383600000,"endDate":1428268304658,"repeatEach":3600000},{"sceneName":"Yellow_Gong","startDate":1420383600000,"endDate":1428268304658,"repeatEach":600001}]
+[{"sceneName":"Yellow_Gong","startDate":1420383600000,"endDate":1428268304658,"repeatEach":50000},{"sceneName":"Yellow_Gong","startDate":1420383600000,"endDate":1428268304658,"repeatEach":100001}]

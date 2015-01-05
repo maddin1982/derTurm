@@ -38,9 +38,10 @@ app.io.route('saveSceneToFile', function(req) {
 	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
 		var sceneRanking=[];
 		if(data){
-			//add file to existing sceneRanking file
+			//add file-data to existing sceneRanking file
 			console.log("add file to existing sceneRanking file")
 			sceneRanking=JSON.parse(data);
+
 			//check if sceneName exists and remove it
 			for(var i=0;i<sceneRanking.length;i++){
 				if(sceneRanking[i].sceneName==filename){
