@@ -5,22 +5,32 @@ body {
 	padding-bottom: 20px;
 }
 
+.ui-resizable-s{
+	background-image: url(../img/handle.png);
+	background-repeat:repeat-x;
+	height: 14px !important;
+}
+
 .container{
 	min-width:400px;
+	margin-top:-20px;
+}
+#3DWindow div{
+	background-color:black;
 }
 
-#buttonBar{
-	margin-top:5px;
+#buttonBarRow{
+	margin-top:-40px;
+	margin-bottom:20px;
 }
 
-#storyboard{
-	margin-top:10px;
-	padding-left:0px;
-	margin-left:0px;
-}
 #storyboard div{
-	padding-left:0px;
-	padding-right:0px;
+	padding: 0 !important;
+}
+
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
 }
 
 .windowContainer div{
@@ -30,6 +40,11 @@ body {
 	border:solid 1px #fff;
 }
 
+#showSettingBtn{
+	position:absolute;
+	top:5px;
+	right:5px;
+}
 
 .myPopUpMenue{
 	position:absolute;
@@ -39,6 +54,7 @@ body {
 #colorPicker{
 	height:150px;
 	width:200px;
+	z-index:9999;
 }
 
 

@@ -21,6 +21,7 @@ var Tower3DObj=function(){
 	this.init3DSceneOnElement=function(container) {
 		//make 3d container resizable
 		 container.resizable({
+		  handles: 's',
 		  resize: function( event, ui ) {
 			that.update3DWindowAspectRatio();
 		  }

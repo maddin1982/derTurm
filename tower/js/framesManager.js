@@ -101,8 +101,8 @@ var framesManagerObj = function(framesContainer){
 	}	
 	
 	this.setData=function(newData){
+		player.restart();
 		data=newData;
-		that.currentframeId=0;
 		that.generateFrameDisplay();
 		player.start();
 	}	
@@ -233,6 +233,7 @@ var framesManagerObj = function(framesContainer){
 	this.deleteFrame=function(id){
 		data.splice(id, 1);
 		that.generateFrameDisplay();
+		player.restart();
 	};
 
 	this.getFrame=function(id){

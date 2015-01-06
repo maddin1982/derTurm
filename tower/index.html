@@ -77,22 +77,21 @@
 		</div>
 		-->
 		
-		<div class="container">	
-		 
+		<div class="container">	´
 			<!--3D Window -->
-			<div class="row">
-				<div class="col-md-12">
+			<div id="3DWindow" class="row">
+				<div class="col-md-12 nopadding">
 				  <div id="3DContainer" >	
-					
+					<!--Settings -->
+					<button id="showSettingBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-gear"></button>
+
 				  </div>
 				</div>
 			</div>
 			
 			<!--Button Bar -->
-			<div id="buttonBar" class="row">
-				<div class="col-md-12">	
-
-					
+			<div id="buttonBarRow" class="row">
+				<div class="col-md-12 nopadding">	
 					<!--Save Scene -->
 					<button id="openSaveDialogBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-disk"></span></button>
 					
@@ -131,41 +130,15 @@
 							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
 							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
 						</ul>
-					</div>
-					
-					<!--Framerate dropdown 
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-						Framerate
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
-						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
-						</ul>
-					</div>
-					-->
-					<!--Switch between views  Todo: link to restricted/sceneEditor.html  
-					<button id="switchBtn" type="button" class="btn btn-default">Switch</button>
-					-->
-					
+					</div>				
 					<button id="openColorSelectBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-pencil"></span></button>
-					
-					
-					<!--Settings -->
-					<button id="showSettingBtn" type="button" class="btn btn-default btn-sm">Settings</button>
 
 				</div>
 			</div>	
 			
-			<!--Frames Window -->
-			<div class="row">
-				<div class="col-md-12">	
-					<ol id="storyboard" ></ol>
-				</div>
-			</div>
+
+			<ol id="storyboard" class="nopadding" ></ol>
+	
 			
 
 			<!--  
@@ -324,7 +297,7 @@
 
 						<div class="modal-body">
 							<!-- Slider -->
-							<p>Luminosity</p>
+							<p>Helligkeit des 3D Turms</p>
 							<div id="luminosity" class="slider slider-horizontal" style="width: 520px;">
 								<div class="slider-track"></div>
 								<div class="slider-selection" style="z-index: 1;"></div>
@@ -333,14 +306,14 @@
 							<div class="checkbox">
 							  <label>
 								<input type="checkbox" id="GlowingWindowsCheck" value="true" aria-label="...">
-								Glowing Windows
+								Leuchtende Fenster
 							  </label>
 							</div>
 
 							<div class="checkbox">
 							  <label>
 								<input type="checkbox" id="TopWindowsCheck" value="true" aria-label="...">
-								Top Windows
+								Schwebende Fenster
 							  </label>
 							</div>
 
