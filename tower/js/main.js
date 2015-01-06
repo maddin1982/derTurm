@@ -120,7 +120,7 @@ function createFrameFadingDialog(inthis){
 		//show the Modal Dialog
 		$('#frameFadingDialog').modal('show');
 		// set maximum duration to 10seconds
-		$("#trans_duration").slider({ max: 60000, step: 100 }) ;
+		$("#trans_duration").slider({ max: 10000, step: 100 }) ;
 
 		// set Slider Value correctly
 		$('#trans_duration').data('slider').setValue(tmpdata.duration);

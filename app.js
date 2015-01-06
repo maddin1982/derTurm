@@ -29,7 +29,17 @@ app.io.route('saveSceneToFile', function(req) {
 	else
 		filename=req.data.fileName;
 	
-	fs.writeFile('savedAnimations/'+filename, JSON.stringify(req.data.frameData), function (err) {
+	//stringify data
+	var jsonFile=req.data.frameData;;
+	//remove active attribute from all windows
+	for(var i=0;i<jsonFile.length;i++){
+		for(var j=0;j<jsonFile[i].windows.length;j++){
+			delete jsonFile[i].windows[j].active;
+		}		
+	}
+
+	
+	fs.writeFile('savedAnimations/'+filename, JSON.stringify(jsonFile), function (err) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});

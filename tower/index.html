@@ -91,12 +91,7 @@
 			<!--Button Bar -->
 			<div id="buttonBar" class="row">
 				<div class="col-md-12">	
-				
-					<!--Add Frame 
-					<button id="addFrameBtn" type="button" class="btn btn-default">add frame</button>
-					-->
-					<!--show On Model 
-					<button id="showInModelBtn" type="button" class="btn btn-default">push to model</button>-->
+
 					
 					<!--Save Scene -->
 					<button id="openSaveDialogBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-disk"></span></button>
@@ -190,14 +185,9 @@
 						<!-- Header -->
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-							<h4 class="modal-title">Einstellungen</h4>
+							<h4 class="modal-title">Übergang zum nächsten Frame festlegen</h4>
 						</div>
-						
-						<div class="modal-body">
-							<p>Setz die Farben dieser Zeile:</p>
-							<button id="resetToWhite" type="button" class="btn btn-default">auf Weiß</button>
-							<button id="resetToBlack" type="button" class="btn btn-default">auf Schwarz</button>
-							<button id="resetToAbove" type="button" class="btn btn-default">auf Drüberliegende</button></br></br>						
+						<div class="modal-body">					
 							<p></br>Übergangsart</p>
 							<div class="btn-group" data-toggle="buttons">
 							  <label class="btn  btn-default active">
@@ -213,9 +203,10 @@
 							<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
 								<div class="slider-track"></div>
 								<div class="slider-selection" style="z-index: 1;"></div>
-							</div>				            	
-							<p></br></br>Todo: Slider für delay & cutoff</p>
-							
+							</div>		
+							<!-- todo 
+								Slider für delay & cutoff !!
+							-->
 							<!-- Footer -->	
 							<div class="modal-footer">
 								<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
@@ -233,11 +224,17 @@
 						<!-- Header -->
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-							<h4 class="modal-title">Erstellen</h4>
+							<h4 class="modal-title">Frames manipulieren</h4>
 						</div>
 						
 						<div class="modal-body">
 							<!-- Buttons -->
+							
+							<p>Setz die Farben dieser Zeile:</p>
+							<button id="resetToWhite" type="button" class="btn btn-default">auf Weiß</button>
+							<button id="resetToBlack" type="button" class="btn btn-default">auf Schwarz</button>
+							<button id="resetToAbove" type="button" class="btn btn-default">auf Drüberliegende</button></br></br>	
+							
 							<p></br>Verschieben um Schritte:</p>
 							<div class="btn-group" data-toggle="buttons">
 							  <label class="btn  btn-default">

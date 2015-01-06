@@ -224,14 +224,15 @@ var framesManagerObj = function(framesContainer){
 		var windowDivs=$(frame).find(".windowContainer").children();
 		var windowData=data[frameId].windows;
 		for(var i=0;i<windowData.length;i++){
+			opacity=$(windowDivs[i]).css("opacity");
 			$(windowDivs[i]).attr("style","background-color: rgb("+windowData[i].color[0]+","+windowData[i].color[1]+","+windowData[i].color[2]+")");
+			$(windowDivs[i]).css("opacity",opacity)
 		}
 	}
 
 	this.deleteFrame=function(id){
 		data.splice(id, 1);
 		that.generateFrameDisplay();
-		player.restart();
 	};
 
 	this.getFrame=function(id){
@@ -312,17 +313,12 @@ var framesManagerObj = function(framesContainer){
 				
 				if( j < data.length)
 				{
-					var frameFadingDialogBtn=document.createElement('i')
-					$(frameFadingDialogBtn).attr("id","transitionBtn"+j)
-					$(frameFadingDialogBtn).attr("class","small_time")
-					$(frameFadingDialogBtn).attr("data-toggle","modal")
-					$(frameFadingDialogBtn).attr("onclick","createFrameFadingDialog(this);")
-					
-					if(frame.type == 1)
-						$(frameFadingDialogBtn).text("["+(frame.duration/1000).toFixed(1) +"]");	
-					else
-						$(frameFadingDialogBtn).text("("+(frame.duration/1000).toFixed(1) +")");
-					$(rightFrameOptionsDiv).append(frameFadingDialogBtn)
+					var delFrame=document.createElement('i')
+					$(delFrame).attr("id","deleteFrameBtn"+j)
+					$(delFrame).attr("class","ui-icon  ui-icon-trash f_left")
+					$(delFrame).attr("onclick","framesManager.deleteFrame("+j+")")
+					$(delFrame).text("-")
+					$(rightFrameOptionsDiv).append(delFrame)
 
 					var frameShiftingDialogBtn=document.createElement('i')
 					$(frameShiftingDialogBtn).attr("id","duplicateBtn"+j)
@@ -331,12 +327,16 @@ var framesManagerObj = function(framesContainer){
 					$(frameShiftingDialogBtn).attr("onclick","createFrameShiftingDialog(this);")
 					$(rightFrameOptionsDiv).append(frameShiftingDialogBtn)
 
-					var delFrame=document.createElement('i')
-					$(delFrame).attr("id","deleteFrameBtn"+j)
-					$(delFrame).attr("class","ui-icon  ui-icon-trash f_left")
-					$(delFrame).attr("onclick","framesManager.deleteFrame("+j+")")
-					$(delFrame).text("-")
-					$(rightFrameOptionsDiv).append(delFrame)
+					var frameFadingDialogBtn=document.createElement('i')
+					$(frameFadingDialogBtn).attr("id","transitionBtn"+j)
+					$(frameFadingDialogBtn).attr("class","small_time f_left")
+					$(frameFadingDialogBtn).attr("data-toggle","modal")
+					$(frameFadingDialogBtn).attr("onclick","createFrameFadingDialog(this);")
+					if(frame.type == 1)
+						$(frameFadingDialogBtn).text("["+(frame.duration/1000).toFixed(1) +"]");	
+					else
+						$(frameFadingDialogBtn).text("("+(frame.duration/1000).toFixed(1) +")");
+					$(rightFrameOptionsDiv).append(frameFadingDialogBtn)
 					
 					$(rowDiv).append(rightFrameOptionsDiv)
 				}

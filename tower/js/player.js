@@ -24,10 +24,6 @@ var PlayerObj = function(DataManager){
 		setInterval(this.playerTick,1000/fps);
 	}
 	
-	this.restart=function(){
-		that.currentframeId=0;
-	}
-
 	//go to next Frame if there is one
 	this.goToNextFrame=function(){
 		//update data 
