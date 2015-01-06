@@ -9,7 +9,7 @@ var framesManagerObj = function(framesContainer){
 	
 	var indexBeforeDrag;
 	makeFramesContainersortable();
-	
+
 	//add drag and drop functions 
 	function makeFramesContainersortable(){
 		framesContainer.sortable({
@@ -59,7 +59,7 @@ var framesManagerObj = function(framesContainer){
 			inCount--;
 			inID++;
 		}
-		that.renderFrames();
+		that.generateFrameDisplay();
 	}
 
 	this.resetFrame=function(inID, inMode){
@@ -85,7 +85,7 @@ var framesManagerObj = function(framesContainer){
 				win.color = data[inID-1].windows[i].color;
 			})
 		}
-		that.renderFrames();
+		that.generateFrameDisplay();
 	}
 
 	this.copyFrameAttributes=function(inSrcID,inTargetID)
@@ -103,7 +103,7 @@ var framesManagerObj = function(framesContainer){
 	this.setData=function(newData){
 		data=newData;
 		that.currentframeId=0;
-		that.renderFrames();
+		that.generateFrameDisplay();
 		player.start();
 	}	
 
@@ -116,11 +116,12 @@ var framesManagerObj = function(framesContainer){
 
 	this.moveFrame=function(oldIndex, newIndex){
 		data.splice(newIndex,0,data.splice(oldIndex,1)[0]);
+		that.generateFrameDisplay();
 	}
 
 	this.copyFrame=function(origin, destination){
 		data.splice(destination, 0, data[origin]);
-		that.renderFrames();
+		that.generateFrameDisplay();
 	}
 
 	this.showInModel=function(){
@@ -159,10 +160,19 @@ var framesManagerObj = function(framesContainer){
 		return data[inID];
 	}
 
-	this.selectFrame=function(evt){
-		that.lastSelectedWindowDiv=evt.target;
-		framesManager.setSingleWindowColor(that.currentWindowBrushColor);	
-	};
+	// this.selectFrame=function(evt){
+		// that.lastSelectedWindowDiv=evt.target;
+		// framesManager.setSingleWindowColor(that.currentWindowBrushColor);	
+	// };
+	// this.=function(event){
+ 		// if(_leftMouseDown == true) {
+			
+			// framesManager.setSingleWindowColor(that.currentWindowBrushColor);
+		// }
+	// }
+
+	
+	
 
 	this.setFrame = function(inFrameID,inType,inDuration,inDelay,inCutoff){
 			data[inFrameID].type = inType;
@@ -184,34 +194,44 @@ var framesManagerObj = function(framesContainer){
 			data.push(newFrame);
 		else
 			data.splice(inFrameID+1, 0,newFrame);
-		that.renderFrames();
+		that.generateFrameDisplay();
 		player.start();
 	}
 	
-	this.setSingleWindowColor=function(color,frameId,windowId){
-		if(!frameId){
-				if(that.lastSelectedWindowDiv)
-					frameId=parseInt($(that.lastSelectedWindowDiv).parent().attr("frameid"))
-				else 
-					frameId=0;
+	this.setSingleWindowColor=function(event){
+		if(_leftMouseDown == true||event.type=="click") {
+			that.lastSelectedWindowDiv=event.target;
+			color=that.currentWindowBrushColor;
+			frameId=parseInt($(event.target).parents('.frame').attr("frameid"))
+
+			windowId=parseInt($(event.target).attr("windowid"))
+
+			data[frameId].windows[windowId].color = color;
+			
+			//change other windows depending on current windowmode
+			windowManager.updateData();
+			
+			that.redrawSingleFrame(frameId)
+			//that.generateFrameDisplay();
 		}
-		if(!windowId){
-				if(that.lastSelectedWindowDiv)
-					windowId=parseInt($(that.lastSelectedWindowDiv).attr("windowid"))
-				else 
-					windowId=0;
-		}
-		data[frameId].windows[windowId].color = color;
-		
-		//change other windows depending on current windowmode
-		windowManager.updateData();
-		that.renderFrames();
+		event.preventDefault();
+		event.stopPropagation();
 	};
 	
+	//redraw a single frame if color was changed instead of redraw all frames
+	this.redrawSingleFrame=function(frameId){
+		var frame=$("#storyboard").find("[frameid='" + frameId + "']");
+		var windowDivs=$(frame).find(".windowContainer").children();
+		var windowData=data[frameId].windows;
+		for(var i=0;i<windowData.length;i++){
+			$(windowDivs[i]).attr("style","background-color: rgb("+windowData[i].color[0]+","+windowData[i].color[1]+","+windowData[i].color[2]+")");
+		}
+	}
+
 	this.deleteFrame=function(id){
 		data.splice(id, 1);
-		that.renderFrames();
-		startAnimation();
+		that.generateFrameDisplay();
+		player.restart();
 	};
 
 	this.getFrame=function(id){
@@ -221,77 +241,109 @@ var framesManagerObj = function(framesContainer){
 			return null;
 	};
 
-	this.mouseMovedOverFrame=function(event){
- 		var current = $(this);
- 		if(_leftMouseDown == true) {
-			that.lastSelectedWindowDiv=event.target;
-			framesManager.setSingleWindowColor(that.currentWindowBrushColor);
+
+	//generates Frames after change
+	this.generateFrameDisplay=function(){	
+
+		if(data.length==0){
+			that.framesContainer.empty();
+			var frameContainer = null;
+			var addFrameIcon=document.createElement('i')
+			//$(addFrame).attr("id","addFrameBtn"+j)
+			$(addFrameIcon).attr("class","ui-icon ui-icon-plus f_left")
+			$(addFrameIcon).attr("onclick","framesManager.addFrame()")
+			console.log("aff icon")
+			that.framesContainer.append(addFrameIcon);
 		}
-	}
-
-	//renders Frames after change
-	this.renderFrames=function(){	
-	
-
-		windowManager.updateData();
-		that.framesContainer.empty();
-		var frameDiv = null;
-		$.each(data,function(j,frame){
-			frameDiv=document.createElement('li')
-			$(frameDiv).attr("class","frame")
-			$(frameDiv).attr("frameId",j)
-			iIcon=document.createElement('i')
-			$(iIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s")
-			$(frameDiv).append(iIcon)
-			$.each(frame.windows,function(i,frameWindow){
-
-				var windowDiv=document.createElement('div')
-				$(windowDiv).mousemove(function( event ) {
-					that.mouseMovedOverFrame(event)
-				});
-				$(windowDiv).attr("windowId",i);
-				$(windowDiv).attr("style","background-color: rgb("+frameWindow.color[0]+","+frameWindow.color[1]+","+frameWindow.color[2]+")");
-			    if(frameWindow.active!=1)
-			    	$(windowDiv).css({opacity: 0.2});
+		else{
+			windowManager.updateData();	
+			that.framesContainer.empty();
+			var frameContainer = null;
+			$.each(data,function(j,frame){
+			
+				//create frame li element
+				frameContainer=document.createElement('li')
+				$(frameContainer).attr({class:"frame",frameId:j})
 		
-				$(windowDiv).on("click",that.selectFrame)
-				$(frameDiv).append(windowDiv)
+				var rowDiv=document.createElement('div');
+				$(rowDiv).attr("class","row");
+		
+				//create move icon
+				var moveFrameIcon=document.createElement('i')
+				$(moveFrameIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s f_left")
+				
+				var addFrameIcon=document.createElement('i')
+				//$(addFrame).attr("id","addFrameBtn"+j)
+				$(addFrameIcon).attr("class","ui-icon ui-icon-plus f_left")
+				$(addFrameIcon).attr("onclick","framesManager.addFrame("+j+")")
+
+				//create container for move and add icon icon
+				var leftFrameOptionsDiv=document.createElement('div')
+				$(leftFrameOptionsDiv).attr("class","col-xs-1")
+				
+				$(leftFrameOptionsDiv).append(addFrameIcon)
+				$(leftFrameOptionsDiv).append(moveFrameIcon)
+				
+				$(rowDiv).append(leftFrameOptionsDiv)
+				
+				//create container windows
+				var windowsContainerDiv=document.createElement('div')
+				$(windowsContainerDiv).attr("class","col-xs-9 col-lg-10 windowContainer")
+
+				$.each(frame.windows,function(i,frameWindow){
+
+					var windowDiv=document.createElement('div')
+					// $(windowDiv).mousemove(function( event ) {
+						// that.mouseMovedOverFrame(event)
+					// });
+					$(windowDiv).attr("windowId",i);
+					$(windowDiv).attr("style","background-color: rgb("+frameWindow.color[0]+","+frameWindow.color[1]+","+frameWindow.color[2]+")");
+					if(frameWindow.active!=1)
+						$(windowDiv).css({opacity: 0.2});
+			
+					$(windowDiv).on("click mousemove",that.setSingleWindowColor)
+					$(windowsContainerDiv).append(windowDiv)
+				})
+				$(rowDiv).append(windowsContainerDiv)
+				
+				//create container for delete shifting and animation ptions
+				var rightFrameOptionsDiv=document.createElement('div')
+				$(rightFrameOptionsDiv).attr("class","col-xs-2 col-md-2 col-lg-1")
+				
+				if( j < data.length)
+				{
+					var frameFadingDialogBtn=document.createElement('i')
+					$(frameFadingDialogBtn).attr("id","transitionBtn"+j)
+					$(frameFadingDialogBtn).attr("class","small_time")
+					$(frameFadingDialogBtn).attr("data-toggle","modal")
+					$(frameFadingDialogBtn).attr("onclick","createFrameFadingDialog(this);")
+					
+					if(frame.type == 1)
+						$(frameFadingDialogBtn).text("["+(frame.duration/1000).toFixed(1) +"]");	
+					else
+						$(frameFadingDialogBtn).text("("+(frame.duration/1000).toFixed(1) +")");
+					$(rightFrameOptionsDiv).append(frameFadingDialogBtn)
+
+					var frameShiftingDialogBtn=document.createElement('i')
+					$(frameShiftingDialogBtn).attr("id","duplicateBtn"+j)
+					$(frameShiftingDialogBtn).attr("class","ui-icon ui-icon-signal f_left")
+					$(frameShiftingDialogBtn).attr("data-toggle","modal")
+					$(frameShiftingDialogBtn).attr("onclick","createFrameShiftingDialog(this);")
+					$(rightFrameOptionsDiv).append(frameShiftingDialogBtn)
+
+					var delFrame=document.createElement('i')
+					$(delFrame).attr("id","deleteFrameBtn"+j)
+					$(delFrame).attr("class","ui-icon  ui-icon-trash f_left")
+					$(delFrame).attr("onclick","framesManager.deleteFrame("+j+")")
+					$(delFrame).text("-")
+					$(rightFrameOptionsDiv).append(delFrame)
+					
+					$(rowDiv).append(rightFrameOptionsDiv)
+				}
+				$(frameContainer).append(rowDiv);
+				that.framesContainer.append(frameContainer);
+
 			})
-			if( j < data.length)
-			{
-				var addFrame=document.createElement('i')
-				$(addFrame).attr("id","addFrameBtn"+j)
-				$(addFrame).attr("class","ui-icon ui-icon-plus f_left")
-				$(addFrame).attr("onclick","framesManager.addFrame("+j+")")
-				$(frameDiv).append(addFrame)
-
-				var frameFadingDialogBtn=document.createElement('i')
-				$(frameFadingDialogBtn).attr("id","transitionBtn"+j)
-				$(frameFadingDialogBtn).attr("class","small_time")
-				$(frameFadingDialogBtn).attr("data-toggle","modal")
-				$(frameFadingDialogBtn).attr("onclick","createFrameFadingDialog(this);")
-				if(frame.type == 1)
-					$(frameFadingDialogBtn).text("["+(frame.duration/1000).toFixed(1) +"]");	
-				else
-					$(frameFadingDialogBtn).text("("+(frame.duration/1000).toFixed(1) +")");
-				$(frameDiv).append(frameFadingDialogBtn)
-
-				var frameShiftingDialogBtn=document.createElement('i')
-				$(frameShiftingDialogBtn).attr("id","duplicateBtn"+j)
-				$(frameShiftingDialogBtn).attr("class","ui-icon ui-icon-signal f_left")
-				$(frameShiftingDialogBtn).attr("data-toggle","modal")
-				$(frameShiftingDialogBtn).attr("onclick","createFrameShiftingDialog(this);")
-				$(frameDiv).append(frameShiftingDialogBtn)
-
-				var delFrame=document.createElement('i')
-				$(delFrame).attr("id","deleteFrameBtn"+j)
-				$(delFrame).attr("class","ui-icon  ui-icon-trash f_left")
-				$(delFrame).attr("onclick","framesManager.deleteFrame("+j+")")
-				$(delFrame).text("-")
-				$(frameDiv).append(delFrame)
-			}
-			that.framesContainer.append(frameDiv)
-
-		})
+		}
 	}
 }

@@ -12,16 +12,16 @@ var _shiftPressed;
 var _leftMouseDown;
 
 $(document).ready(function() { 
-	
 	//initialize frameManager
 	framesManager= new framesManagerObj($("#storyboard"));
+	framesManager.generateFrameDisplay();
 	
 	//initialize player
 	player= new PlayerObj(framesManager);
 	player.start();
 	
 	//initialize windowManager 
-	windowManager = new windowManagerObj();
+	windowManager = new windowManagerObj();	
 	
 	//initialize color selection popup
 	myColorPicker= new colorPickerObj($("#colorPicker"));
@@ -98,7 +98,7 @@ function createFrameShiftingDialog(inthis) {
 	if( currentModalDialogRow == null)
 	{
 		//save current Row for this Transition Dialog
-		currentModalDialogRow = parseInt((inthis.id).split("transitionBtn").pop());
+		currentModalDialogRow = parseInt((inthis.id).split("duplicateBtn").pop());
 		
 		//show the Create Modal Dialog
 		$('#frameShiftingDialog').modal('show');

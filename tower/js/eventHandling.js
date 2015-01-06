@@ -3,16 +3,29 @@
 **************************/
 function initializeEvents(){
 
+	//disable firefox default dragging shit
+	// $(document).on("dragstart", function() {
+		 // return false;
+	// });
+	document.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+
 	$("#addFrameBtn").on("click",framesManager.addFrame)
 	$("#showInModelBtn").on("click",framesManager.showInModel)
 	
 	//save dialog
 	$("#openSaveDialogBtn").on("click",showSaveDialog)
+	
 	$("#saveSceneBtn").on("click",function(){
 		framesManager.saveSceneToFile($('#saveDialog_fileName').val())
 		$('#saveSceneModal').modal('hide');
 	})
 	
+	$("#openColorSelectBtn").on("click",function(event){
+		myColorPicker.moveToPosition(event.pageX ,event.pageY );
+		myColorPicker.show();
+	})
+
 	//load files button
 	$("#loadSceneFilesBtn").on("click",framesManager.getSavedScenes)
 	
@@ -27,9 +40,10 @@ function initializeEvents(){
 	});
 	
 	// Klick auf dropdown für FPS Select
+	/*
 	$(".fps_select").on("click",function(){	
 		framesManager.setFramerate(parseInt($(this).attr("fps")))
-	});
+	});*/
 
 	// Settings dialog
 	$("#showSettingBtn").on("click",function(){	
@@ -37,6 +51,7 @@ function initializeEvents(){
 	});
 
 	// Settings dialog
+	/*
 	$("#switchBtn").on("click",function(){	
 		$('#compositor').toggle();
 
@@ -44,7 +59,8 @@ function initializeEvents(){
 		$('#savedScenes').empty();
 		framesManager.getSavedScenes();
 	});
-
+	*/
+	
 	$("#GlowingWindowsCheck").on("change",function(){
 		tower3D.switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
 		createCookie("withGlowingWindows", $('#GlowingWindowsCheck').is(':checked'), 20 )
@@ -75,7 +91,7 @@ function initializeEvents(){
 	$('#luminosity').slider().on('slideStop', function(ev){
 	    var newVal = $('#luminosity').data('slider').getValue();
 	    if(originalSliderVal != newVal) {
-	        changeAmbientLight(newVal)
+	        tower3D.changeAmbientLight(newVal)
 	        createCookie("luminosity", newVal, 20 )
 	    }
 	});
@@ -130,13 +146,13 @@ function initializeEvents(){
 		$('#frameFadingDialog').modal('hide')
 	});
 
-	$('#frameFadingDialog').on('hidden.bs.modal', function () {
+	$('#frameShiftingDialog').on('hidden.bs.modal', function () {
 		//reset the current row when the modal dialog is hidden
 		currentModalDialogRow = null;
 		currentFrameType = null;
 	});
 
-	$('#storyboard').mouseup(function(event) {
+	$(document).mouseup(function(event) {
 	    switch (event.which) {
 	        case 1:
 	        	// left mouse

@@ -40,7 +40,7 @@ var colorPickerObj=function(colorPickerDiv){
 			if(!that.isDragged){
 				var newColor=$(evt.target).css("backgroundColor");
 				framesManager.currentWindowBrushColor=colorGenerator.parseColor(newColor);
-				$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
+				//$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
 				//framesManager.setSingleWindowColor(newColor);
 				that.hide();
 			}

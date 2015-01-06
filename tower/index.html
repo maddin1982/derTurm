@@ -32,7 +32,6 @@
 		
 		<!-- own js files -->
 		<script src="js/helpers.js"></script>
-		<script src="js/sortable.js"></script>
 		<script src="js/cookie.js"></script>
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
@@ -42,10 +41,12 @@
 		<script src="js/colorPicker.js"></script>
 		<script src="js/player.js"></script>
 		<script src="js/main.js"></script>
+		<script src="js/bootstrapResizeEvents.js"></script>
 
 
     </head>
     <body oncontextmenu="return false;">
+	
 	<!--  LOGIN SPÄTER IMPLEMENTIEREN
 		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 		  <div class="container">
@@ -78,278 +79,283 @@
 		
 		<div class="container">	
 		 
-		<!--3D Window -->
-		<div class="row">
-			<div class="col-md-12">
-			  <div id="3DContainer" class="ui-widget-content">	
-			  </div>
-			</div>
-		</div>
-		
-		<!--Button Bar -->
-		<div id="storyBoardHeader" class="row">
-			<div class="col-md-12">	
-			
-				<!--Add Frame -->
-				<button id="addFrameBtn" type="button" class="btn btn-default">add frame</button>
-				
-				<!--show On Model 
-				<button id="showInModelBtn" type="button" class="btn btn-default">push to model</button>-->
-				
-				<!--Save Scene -->
-				<button id="openSaveDialogBtn" type="button" class="btn btn-default">save scene</button>
-				
-				<!--Load Scenes -->
-				<div class="dropdown">
-					<button id="loadSceneFilesBtn" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">load Scene <span class="caret"></span></button>
-					<ul id="listOfFiles" class="dropdown-menu scrollable-menu" role="menu">
-						<!--<li><a href="#">Action</a></li>-->
-					</ul>
-				</div>
-
-				<!--Aktive Fenster dropdown -->
-				<div class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-					Aktive Fenster
-					<span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
-					</ul>
-				</div>
-				
-				<!--Fenster Modus dropdown -->
-				<div class="dropdown">
-					<button class="btn btn-default dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
-					Fenster Modus
-					<span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
-						<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
-					</ul>
-				</div>
-				
-				<!--Framerate dropdown -->
-				<div class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-					Framerate
-					<span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
-					  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
-					</ul>
-				</div>
-			
-				<!--Switch between views  Todo: link to restricted/sceneEditor.html  
-				<button id="switchBtn" type="button" class="btn btn-default">Switch</button>
-				-->
-				
-				
-				<!--Settings -->
-				<button id="showSettingBtn" type="button" class="btn btn-default">Settings</button>
-
-			</div>
-				
-			<!--Frames Window -->
+			<!--3D Window -->
 			<div class="row">
-				<ol class='col-md-12' id="storyboard">
-				</ol>
+				<div class="col-md-12">
+				  <div id="3DContainer" >	
+					
+				  </div>
+				</div>
 			</div>
-		</div>
+			
+			<!--Button Bar -->
+			<div id="buttonBar" class="row">
+				<div class="col-md-12">	
+				
+					<!--Add Frame 
+					<button id="addFrameBtn" type="button" class="btn btn-default">add frame</button>
+					-->
+					<!--show On Model 
+					<button id="showInModelBtn" type="button" class="btn btn-default">push to model</button>-->
+					
+					<!--Save Scene -->
+					<button id="openSaveDialogBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-disk"></span></button>
+					
+					<!--Load Scenes -->
+					<div class="dropdown">
+						<button id="loadSceneFilesBtn" type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="ui-icon ui-icon-folder-open"></span></button>
+						<ul id="listOfFiles" class="dropdown-menu scrollable-menu" role="menu">
+							<!--<li><a href="#">Action</a></li>-->
+						</ul>
+					</div>
 
-		<!--  
-			****************************************
-			POPUPS AND OVERLAYS
-			******************************************
-		 -->
-
-		<!--PopUp for colorPicker -->
-		<div class="myPopUpMenue" id="colorPicker">
-		</div>
-
-		<!--Frame Fading Window-->
-		<div id="frameFadingDialog" class="modal fade">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<!-- Header -->
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-						<h4 class="modal-title">Einstellungen</h4>
+					<!--Aktive Fenster dropdown -->
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+						Aktive Fenster
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
+						</ul>
 					</div>
 					
-					<div class="modal-body">
-						<p>Setz die Farben dieser Zeile:</p>
-						<button id="resetToWhite" type="button" class="btn btn-default">auf Weiß</button>
-						<button id="resetToBlack" type="button" class="btn btn-default">auf Schwarz</button>
-						<button id="resetToAbove" type="button" class="btn btn-default">auf Drüberliegende</button></br></br>						
-						<p></br>Übergangsart</p>
-						<div class="btn-group" data-toggle="buttons">
-						  <label class="btn  btn-default active">
-							<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
-						  </label>
-						  <label class="btn  btn-default">
-							<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
-						  </label>
-						</div>
+					<!--Fenster Modus dropdown -->
+					<div class="dropdown">
+						<button class="btn btn-default btn-sm dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
+						Fenster Modus
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
+						</ul>
+					</div>
+					
+					<!--Framerate dropdown 
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+						Framerate
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="1">1 fps</a></li>
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="5">5 fps</a></li>
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="15">15 fps</a></li>
+						  <li role="presentation"><a role="menuitem" tabindex="-1" class="fps_select" fps="24">24 fps</a></li>
+						</ul>
+					</div>
+					-->
+					<!--Switch between views  Todo: link to restricted/sceneEditor.html  
+					<button id="switchBtn" type="button" class="btn btn-default">Switch</button>
+					-->
+					
+					<button id="openColorSelectBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-pencil"></span></button>
+					
+					
+					<!--Settings -->
+					<button id="showSettingBtn" type="button" class="btn btn-default btn-sm">Settings</button>
 
-						<!-- Slider -->
-						<p></br>Übergangszeit in Millisekunden</p>
-						<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
-							<div class="slider-track"></div>
-							<div class="slider-selection" style="z-index: 1;"></div>
-						</div>				            	
-						<p></br></br>Todo: Slider für delay & cutoff</p>
+				</div>
+			</div>	
+			
+			<!--Frames Window -->
+			<div class="row">
+				<div class="col-md-12">	
+					<ol id="storyboard" ></ol>
+				</div>
+			</div>
+			
+
+			<!--  
+				****************************************
+				POPUPS AND OVERLAYS
+				******************************************
+			 -->
+
+			<!--PopUp for colorPicker -->
+			<div class="myPopUpMenue" id="colorPicker">
+			</div>
+
+			<!--Frame Fading Window-->
+			<div id="frameFadingDialog" class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Header -->
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title">Einstellungen</h4>
+						</div>
 						
+						<div class="modal-body">
+							<p>Setz die Farben dieser Zeile:</p>
+							<button id="resetToWhite" type="button" class="btn btn-default">auf Weiß</button>
+							<button id="resetToBlack" type="button" class="btn btn-default">auf Schwarz</button>
+							<button id="resetToAbove" type="button" class="btn btn-default">auf Drüberliegende</button></br></br>						
+							<p></br>Übergangsart</p>
+							<div class="btn-group" data-toggle="buttons">
+							  <label class="btn  btn-default active">
+								<input id="ft_still" type="radio" name="options" autocomplete="off"> Statisch
+							  </label>
+							  <label class="btn  btn-default">
+								<input id="ft_fade" type="radio" name="options" autocomplete="off"> Animiert
+							  </label>
+							</div>
+
+							<!-- Slider -->
+							<p></br>Übergangszeit in Millisekunden</p>
+							<div id="trans_duration" class="slider slider-horizontal" style="width: 520px;">
+								<div class="slider-track"></div>
+								<div class="slider-selection" style="z-index: 1;"></div>
+							</div>				            	
+							<p></br></br>Todo: Slider für delay & cutoff</p>
+							
+							<!-- Footer -->	
+							<div class="modal-footer">
+								<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+								<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!--Frame Shifting Window-->
+			<div id="frameShiftingDialog" class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Header -->
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title">Erstellen</h4>
+						</div>
+						
+						<div class="modal-body">
+							<!-- Buttons -->
+							<p></br>Verschieben um Schritte:</p>
+							<div class="btn-group" data-toggle="buttons">
+							  <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="-5" autocomplete="off"> -5
+							  </label>
+							  <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="-4" autocomplete="off"> -4
+							  </label>
+							  <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="-3" autocomplete="off"> -3
+							  </label>
+							  <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="-2" autocomplete="off"> -2
+							 </label>
+							  <label class="btn  btn-default ">
+								<input class="cm_shift" type="radio" name="-1" autocomplete="off"> -1
+							  </label>
+							  <label class="btn  btn-default" >
+								<input class="cm_shift" type="radio" name="0" autocomplete="off"> 0
+							  </label>
+							  <label class="btn  btn-default active">
+								<input class="cm_shift" type="radio" name="1" autocomplete="off"> 1
+							  </label>
+							   <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="2" autocomplete="off"> 2
+							  </label>
+							  <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="3" autocomplete="off"> 3
+							  </label>
+							   <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="4" autocomplete="off"> 4
+							  </label>
+							  <label class="btn  btn-default">
+								<input class="cm_shift" type="radio" name="5" autocomplete="off"> 5
+							  </label>
+							</div>
+
+							<!-- Slider -->
+							<p></br>Anzahl Zeilen</p>
+							<div id="create_lines" class="slider slider-horizontal" style="width: 520px;">
+								<div class="slider-track"></div>
+								<div class="slider-selection" style="z-index: 1;"></div>
+							</div>	          	
+
+							<!-- Footer -->	
+							<div class="modal-footer">
+								<button id="cancelCreateModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+								<button id="saveCreateModal" type="button" class="btn btn-primary">Erstellen</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!--Save Window-->
+			<div id="saveSceneModal" class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Header -->
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title">Save</h4>
+						</div>
+						
+						<div class="modal-body">
+							<input type="text" class="form-control" id="saveDialog_fileName" placeholder="enterFilename">
+						</div>
+							
 						<!-- Footer -->	
 						<div class="modal-footer">
 							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-							<button id="saveModal" type="button" class="btn btn-primary">Speichern</button>
+							<button id="saveSceneBtn" type="button" class="btn btn-primary">Speichern</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!--Settings Window-->
+			<div id="settings_window" class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Header -->
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title">Settings</h4>
+						</div>
+
+						<div class="modal-body">
+							<!-- Slider -->
+							<p>Luminosity</p>
+							<div id="luminosity" class="slider slider-horizontal" style="width: 520px;">
+								<div class="slider-track"></div>
+								<div class="slider-selection" style="z-index: 1;"></div>
+							</div>
+
+							<div class="checkbox">
+							  <label>
+								<input type="checkbox" id="GlowingWindowsCheck" value="true" aria-label="...">
+								Glowing Windows
+							  </label>
+							</div>
+
+							<div class="checkbox">
+							  <label>
+								<input type="checkbox" id="TopWindowsCheck" value="true" aria-label="...">
+								Top Windows
+							  </label>
+							</div>
+
+							<!-- Footer -->	
+							<div class="modal-footer">
+								<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		
-		<!--Frame Shifting Window-->
-		<div id="frameShiftingDialog" class="modal fade">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<!-- Header -->
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-						<h4 class="modal-title">Erstellen</h4>
-					</div>
-					
-					<div class="modal-body">
-						<!-- Buttons -->
-						<p></br>Verschieben um Schritte:</p>
-						<div class="btn-group" data-toggle="buttons">
-						  <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="-5" autocomplete="off"> -5
-						  </label>
-						  <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="-4" autocomplete="off"> -4
-						  </label>
-						  <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="-3" autocomplete="off"> -3
-						  </label>
-						  <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="-2" autocomplete="off"> -2
-						 </label>
-						  <label class="btn  btn-default ">
-							<input class="cm_shift" type="radio" name="-1" autocomplete="off"> -1
-						  </label>
-						  <label class="btn  btn-default" >
-							<input class="cm_shift" type="radio" name="0" autocomplete="off"> 0
-						  </label>
-						  <label class="btn  btn-default active">
-							<input class="cm_shift" type="radio" name="1" autocomplete="off"> 1
-						  </label>
-						   <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="2" autocomplete="off"> 2
-						  </label>
-						  <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="3" autocomplete="off"> 3
-						  </label>
-						   <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="4" autocomplete="off"> 4
-						  </label>
-						  <label class="btn  btn-default">
-							<input class="cm_shift" type="radio" name="5" autocomplete="off"> 5
-						  </label>
-						</div>
-
-						<!-- Slider -->
-						<p></br>Anzahl Zeilen</p>
-						<div id="create_lines" class="slider slider-horizontal" style="width: 520px;">
-							<div class="slider-track"></div>
-							<div class="slider-selection" style="z-index: 1;"></div>
-						</div>	          	
-
-						<!-- Footer -->	
-						<div class="modal-footer">
-							<button id="cancelCreateModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-							<button id="saveCreateModal" type="button" class="btn btn-primary">Erstellen</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!--Save Window-->
-		<div id="saveSceneModal" class="modal fade">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<!-- Header -->
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-						<h4 class="modal-title">Save</h4>
-					</div>
-					
-					<div class="modal-body">
-						<input type="text" class="form-control" id="saveDialog_fileName" placeholder="enterFilename">
-					</div>
-						
-					<!-- Footer -->	
-					<div class="modal-footer">
-						<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-						<button id="saveSceneBtn" type="button" class="btn btn-primary">Speichern</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!--Settings Window-->
-		<div id="settings_window" class="modal fade">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<!-- Header -->
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-						<h4 class="modal-title">Settings</h4>
-					</div>
-
-					<div class="modal-body">
-						<!-- Slider -->
-						<p>Luminosity</p>
-						<div id="luminosity" class="slider slider-horizontal" style="width: 520px;">
-							<div class="slider-track"></div>
-							<div class="slider-selection" style="z-index: 1;"></div>
-						</div>
-
-						<div class="checkbox">
-						  <label>
-						    <input type="checkbox" id="GlowingWindowsCheck" value="true" aria-label="...">
-						    Glowing Windows
-						  </label>
-						</div>
-
-						<div class="checkbox">
-						  <label>
-						    <input type="checkbox" id="TopWindowsCheck" value="true" aria-label="...">
-						    Top Windows
-						  </label>
-						</div>
-
-						<!-- Footer -->	
-						<div class="modal-footer">
-							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
     </body>
 	
 		<!-- ---------------- Custom Shader Code ------------------------ -->

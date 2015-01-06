@@ -19,7 +19,7 @@ var windowManagerObj = function(){
 		{
 			windowAmount = newWindowAmount;
 			//redraw updates data
-			framesManager.renderFrames();
+			framesManager.generateFrameDisplay();
 		}
 	};
 	
@@ -30,7 +30,7 @@ var windowManagerObj = function(){
 			//something like: frames.setWindowsInactive(windowMode);
 			$("#dd_WindowMode").text("Modus: "+c_str_ModeName[newWindowMode]);
 			windowMode = newWindowMode;
-			framesManager.renderFrames();
+			framesManager.generateFrameDisplay();
 		}
 	};
 

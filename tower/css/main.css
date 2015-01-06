@@ -5,18 +5,31 @@ body {
 	padding-bottom: 20px;
 }
 
-.frame{
-	height:20px;
-	clear:both;
-	list-style-type: none;
+.container{
+	min-width:400px;
 }
 
-.frame div{
-	height:20px;
-	width:5.6%;
-	float:left;
-	border:solid 2px #fff;
+#buttonBar{
+	margin-top:5px;
 }
+
+#storyboard{
+	margin-top:10px;
+	padding-left:0px;
+	margin-left:0px;
+}
+#storyboard div{
+	padding-left:0px;
+	padding-right:0px;
+}
+
+.windowContainer div{
+	height:20px;
+	width:6.25%;
+	float:left;
+	border:solid 1px #fff;
+}
+
 
 .myPopUpMenue{
 	position:absolute;

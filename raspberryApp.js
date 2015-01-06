@@ -144,7 +144,7 @@ var FileManagerObj = function(fps){
 		highestRankedScene.currentRating=0;
 		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
 
-		console.log("next Scene will be: "+highestRankedScene.sceneName+", the rating values are d/s:"+highestRankedScene.dynamicRating+"/"+highestRankedScene.staticRating);
+		console.log("next Scene: "+highestRankedScene.sceneName+", rating values d/s:"+highestRankedScene.dynamicRating+"/"+highestRankedScene.staticRating);
 		
 		return highestRankedScene.sceneName;
 	}
@@ -319,7 +319,8 @@ var PlayerObj = function(fps,fileManager,serialManager){
 		var diff = (nextScheduledSceneInfo.nextScheduledTime-(new Date()).getTime())/1000;
 		console.log("the next scheduled scene "+nextScheduledSceneInfo.nextScheduledSceneName+" should start in "+diff+ " seconds. Precisely at "+new Date(nextScheduledSceneInfo.nextScheduledTime));
 		
-		if(diff < ((nextRankedScene.length/fps)+(blendingScene.length/fps))){			
+		if(diff < ((nextRankedScene.length/fps)+(blendingScene.length/fps))){
+			console.log("nextscene: "+nextRankedScene.length/fps+" s |"+" blending: "+blendingScene.length/fps +" s are to long")
 			console.log("create a fitting blendingScene with "+(Math.floor(diff)*fps)+" frames")
 			
 			//if there is a conflict create a fitting blending scene to wait for the scheduled scene
