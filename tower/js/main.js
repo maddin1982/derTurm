@@ -25,7 +25,7 @@ $(document).ready(function() {
 	
 	//initialize color selection popup
 	myColorPicker= new colorPickerObj($("#colorPicker"));
-	myColorPicker.addColorSelection();
+	myColorPicker.addColorSelection(colorGenerator.ColorSets.WARM);
 	
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
@@ -50,7 +50,8 @@ $(document).ready(function() {
 	}
 
    var valueTopWindows = readCookie('withTopWindows')
-    if (valueTopWindows) {
+    if (valueTopWindows) 
+	{
     	if(valueTopWindows == "true"){
     		$('#TopWindowsCheck').prop('checked',  true);
     		tower3D.switchTopWindows( true )
@@ -74,7 +75,6 @@ $(document).ready(function() {
 		$.each(data,function(i,sceneName){	
 			$("#listOfFiles").append("<li><a onclick='framesManager.getSavedSceneByName(this)'>"+sceneName+"</a></li>")
 			$("#savedScenes").append("<li>"+sceneName+"</li>")
-
 		})
 		
 		console.log("savedScenesLoaded")

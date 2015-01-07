@@ -11,7 +11,6 @@ body {
 
 .container{
 	min-width:400px;
-	margin-top:-20px;
 }
 
 #buttonBar{
@@ -46,13 +45,14 @@ body {
 	float:left;
 	border:solid 1px #fff;
 }
+.lastSelectedColor{
+	border:solid 1px #000;
+}
 
-.myPopUpMenue{
+#colorPicker{
 	position:absolute;
 	display:none;
 	background:white;
-}
-#colorPicker{
 	height:150px;
 	width:200px;
 	z-index:9999;

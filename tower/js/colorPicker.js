@@ -1,7 +1,9 @@
 var colorPickerObj=function(colorPickerDiv){
+	
 	this.colorPickerDiv=colorPickerDiv;
 	this.isDragged=false;
 	var that=this;
+
 	colorPickerDiv.draggable({
 		start: function() {
 			that.isDragged=true;
@@ -15,7 +17,9 @@ var colorPickerObj=function(colorPickerDiv){
 		that.colorPickerDiv.show();
 	}
 	this.hide=function(){
-		that.colorPickerDiv.hide();
+		if(!that.isDragged)
+			that.colorPickerDiv.hide();
+		
 	}
 	this.moveToPosition=function(x,y){
 		var width=that.colorPickerDiv.width()
@@ -32,19 +36,43 @@ var colorPickerObj=function(colorPickerDiv){
 		that.colorPickerDiv.css("top",y)
 		that.colorPickerDiv.css("left",x)
 	}
-	
 
-	this.addColorSelection=function(){
-		var colorselectionDiv=colorGenerator.getFullColorSelection(20,that.colorPickerDiv.width(),that.colorPickerDiv.height(),3)
+	this.addColorSelection=function(colorSet){
+		that.colorPickerDiv.empty();
+		var horizontalColorSteps=16;
+		var w=that.colorPickerDiv.width();
+		var h=that.colorPickerDiv.height()-25;
+		
+		var colorselectionDiv=colorGenerator.getFullColorSelection(horizontalColorSteps,w,h,colorSet)
 		$(colorselectionDiv).find(".singleColor").on("mouseup",function(evt){
 			if(!that.isDragged){
 				var newColor=$(evt.target).css("backgroundColor");
+				$(evt.target).parent().parent().find(".lastSelectedColor").removeClass("lastSelectedColor");
+				$(evt.target).addClass("lastSelectedColor");
 				framesManager.currentWindowBrushColor=colorGenerator.parseColor(newColor);
 				//$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
 				//framesManager.setSingleWindowColor(newColor);
 				that.hide();
 			}
 		})
+		
+		var selectColorSetDiv=document.createElement('div');
+		for(var i in colorGenerator.ColorSets){
+			var selectColorSetBtn=document.createElement('button')
+			$(selectColorSetBtn).attr("class","colorSetSelectBtn")
+			$(selectColorSetBtn).attr("ColorSetName",i);
+			selectColorSetBtn.innerHTML=i;
+			$(selectColorSetBtn).on("mouseup",function(e){
+				ColorSetName=$(this).attr("ColorSetName");
+				e.stopPropagation();
+				that.addColorSelection(colorGenerator.ColorSets[ColorSetName])
+			})
+			$(selectColorSetDiv).append(selectColorSetBtn);
+
+		}
+		$(selectColorSetDiv).css("height","25px");
+		that.colorPickerDiv.append(selectColorSetDiv);
 		that.colorPickerDiv.append(colorselectionDiv);		
 	}
+	
 }

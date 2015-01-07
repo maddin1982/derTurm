@@ -157,6 +157,7 @@ function initializeEvents(){
 	        case 1:
 	        	// left mouse
 	        	_leftMouseDown = false
+				myColorPicker.hide();
 	            break;
 	        case 2:
 	        	break;

@@ -1,5 +1,13 @@
 function colorGeneratorObj(){
 	var that=this;
+
+	this.ColorSets={
+		FULL:["#ff0000","#ff8800","#ffff00","#88ff00","#00ff00","#00ffff","#0088ff","#0000ff","#8800ff","#ff00ff","#ff0088","#888888"],
+		WARM:["#ff0000","#ff4400","#ff8800","#ffbb00","#ffff00","#aaff00","#88ff00","#44ff00","#00ff00"],
+		COLD:["#00ffff","#00bbff","#0088ff","#0044ff","#0000ff","#4400ff","#8800ff","#bb00ff","#ff00ff","#ff00bb","#ff0088"]
+	}
+	
+
 	//hard coded color lists
 	this.standardColorBars=[
 		{name:"red",position:1,colors:["#330000","#660000","#990000","#CC0000","#FF0000","#FF3333","#FF6666","#FF9999","#FFCCCC"]},
@@ -67,18 +75,16 @@ function colorGeneratorObj(){
 	}
 	
 	//create div with multiple colorBars
-	this.getFullColorSelection=function(numberOfSteps,width,height,colorSetNumber){
-		if(!colorSetNumber)colorSetNumber=3;
-		var ColorSets=[["#ff0000","#00ff00","#0000ff","#888888"],
-					  ["#ff0000","#ffff00","#00ff00","#00ffff","#0000ff","#ff00ff","#888888"],
-					  ["#ff0000","#ff8800","#ffff00","#88ff00","#00ff00","#00ffff","#0088ff","#0000ff","#8800ff","#ff00ff","#ff0088","#888888"]]
-				
+	this.getFullColorSelection=function(numberOfSteps,width,height,colorSet){
+		if(!colorSet)
+			colorSet=that.ColorSets.FULL;
+
 		var singleColorWidth=width/numberOfSteps;
-		var singleColorHeight=height/ColorSets[colorSetNumber-1].length;
+		var singleColorHeight=height/colorSet.length;
 
 		var colorSelection=document.createElement('div');
 		
-		$.each(ColorSets[colorSetNumber-1],function(i,color){
+		$.each(colorSet,function(i,color){
 			$(colorSelection).append(that.createColorBarDiv(color,numberOfSteps,singleColorWidth,singleColorHeight))
 		})	
 		$(colorSelection).css("class","colorSelector")
