@@ -29,7 +29,7 @@ $(document).ready(function() {
 	
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
-	tower3D.init3DSceneOnElement($("#3DContainer"));	
+	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));	
 	
 	//Mouse Events Sliders and so on...
 	initializeEvents();

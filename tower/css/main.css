@@ -1,5 +1,3 @@
-
-
 body {
 	padding-top: 5px;
 	padding-bottom: 20px;
@@ -15,13 +13,22 @@ body {
 	min-width:400px;
 	margin-top:-20px;
 }
-#3DWindow div{
-	background-color:black;
+
+#buttonBar{
+	float:left;
+	position:absolute;
+	bottom:10px;
+	left:0px;
+	height:30px;
+}
+#showSettingBtn{
+	position:absolute;
+	top:5px;
+	right:5px;
 }
 
-#buttonBarRow{
-	margin-top:-40px;
-	margin-bottom:20px;
+.spacerdiv{
+	height:10px;
 }
 
 #storyboard div{
@@ -40,12 +47,6 @@ body {
 	border:solid 1px #fff;
 }
 
-#showSettingBtn{
-	position:absolute;
-	top:5px;
-	right:5px;
-}
-
 .myPopUpMenue{
 	position:absolute;
 	display:none;
@@ -56,7 +57,6 @@ body {
 	width:200px;
 	z-index:9999;
 }
-
 
 .dropdown {
 	position: relative;
@@ -88,6 +88,14 @@ a.btn-xs {
 
 .hidden_div {
      display:none;
+}
+
+.ui-icon-trash{
+	margin-left:10%;
+}
+
+.f_right{
+  float:right;
 }
 
 .f_left{

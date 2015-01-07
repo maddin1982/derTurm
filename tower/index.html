@@ -20,6 +20,7 @@
 		<script src="js/vendor/jquery-1.11.1.min.js"></script>
 		<script src="js/vendor/jquery-ui.min.js"></script>
 		<script src="js/vendor/jquery-sortable.js"></script>
+		<script src="js/vendor/jQueryTouchPunchHack.js"></script>
 
 		<!-- Bootstrap includes -->
 		<script src="js/vendor/bootstrap.min.js"></script>
@@ -79,63 +80,59 @@
 		
 		<div class="container">	´
 			<!--3D Window -->
-			<div id="3DWindow" class="row">
+			<div class="row">
 				<div class="col-md-12 nopadding">
-				  <div id="3DContainer" >	
-					<!--Settings -->
+				  <div id="scalablePreviewWindow">	
+					<!--display options in top right corner-->
 					<button id="showSettingBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-gear"></button>
+					
+					<!--button bar in lower left corner -->
+					<div id="buttonBar">
+						<!--Save Scene -->
+						<button id="openSaveDialogBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-disk"></span></button>
+							
+						<!--Load Scenes -->
+						<div class="dropdown">
+							<button id="loadSceneFilesBtn" type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="ui-icon ui-icon-folder-open"></span></button>
+							<ul id="listOfFiles" class="dropdown-menu scrollable-menu" role="menu">
+								<!--<li><a href="#">Action</a></li>-->
+							</ul>
+						</div>
 
+						<!--Aktive Fenster dropdown -->
+						<div class="dropdown">
+							<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+							Aktive Fenster
+							<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
+							</ul>
+						</div>
+						
+						<!--Fenster Modus dropdown -->
+						<div class="dropdown">
+							<button class="btn btn-default btn-sm dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
+							Fenster Modus
+							<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
+							</ul>
+						</div>				
+						<button id="openColorSelectBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-pencil"></span></button>
+					  </div>
 				  </div>
-				</div>
+				</div>			
 			</div>
-			
-			<!--Button Bar -->
-			<div id="buttonBarRow" class="row">
-				<div class="col-md-12 nopadding">	
-					<!--Save Scene -->
-					<button id="openSaveDialogBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-disk"></span></button>
-					
-					<!--Load Scenes -->
-					<div class="dropdown">
-						<button id="loadSceneFilesBtn" type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="ui-icon ui-icon-folder-open"></span></button>
-						<ul id="listOfFiles" class="dropdown-menu scrollable-menu" role="menu">
-							<!--<li><a href="#">Action</a></li>-->
-						</ul>
-					</div>
-
-					<!--Aktive Fenster dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-						Aktive Fenster
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
-						</ul>
-					</div>
-					
-					<!--Fenster Modus dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-default btn-sm dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
-						Fenster Modus
-						<span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
-						</ul>
-					</div>				
-					<button id="openColorSelectBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-pencil"></span></button>
-
-				</div>
-			</div>	
-			
+			<div class="spacerdiv"></div>
 
 			<ol id="storyboard" class="nopadding" ></ol>
 	

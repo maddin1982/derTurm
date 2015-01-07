@@ -272,7 +272,7 @@ var framesManagerObj = function(framesContainer){
 		
 				//create move icon
 				var moveFrameIcon=document.createElement('i')
-				$(moveFrameIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s f_left")
+				$(moveFrameIcon).attr("class","icon-move ui-icon ui-icon-carat-2-n-s f_right")
 				
 				var addFrameIcon=document.createElement('i')
 				//$(addFrame).attr("id","addFrameBtn"+j)
@@ -323,14 +323,14 @@ var framesManagerObj = function(framesContainer){
 
 					var frameShiftingDialogBtn=document.createElement('i')
 					$(frameShiftingDialogBtn).attr("id","duplicateBtn"+j)
-					$(frameShiftingDialogBtn).attr("class","ui-icon ui-icon-signal f_left")
+					$(frameShiftingDialogBtn).attr("class","ui-icon ui-icon-signal f_right")
 					$(frameShiftingDialogBtn).attr("data-toggle","modal")
 					$(frameShiftingDialogBtn).attr("onclick","createFrameShiftingDialog(this);")
 					$(rightFrameOptionsDiv).append(frameShiftingDialogBtn)
 
 					var frameFadingDialogBtn=document.createElement('i')
 					$(frameFadingDialogBtn).attr("id","transitionBtn"+j)
-					$(frameFadingDialogBtn).attr("class","small_time f_left")
+					$(frameFadingDialogBtn).attr("class","small_time f_right")
 					$(frameFadingDialogBtn).attr("data-toggle","modal")
 					$(frameFadingDialogBtn).attr("onclick","createFrameFadingDialog(this);")
 					if(frame.type == 1)

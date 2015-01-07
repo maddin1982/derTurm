@@ -17,8 +17,10 @@ var Tower3DObj=function(){
 	var _withTopWindows;
 	
 	var showFullModel=false;
+	this.container;
 
 	this.init3DSceneOnElement=function(container) {
+		that.container=container;
 		//make 3d container resizable
 		 container.resizable({
 		  handles: 's',
@@ -233,9 +235,9 @@ var Tower3DObj=function(){
 
 	this.update3DWindowAspectRatio=function() {
 
-		camera.aspect = $("#3DContainer").width() / $("#3DContainer").height();
+		camera.aspect = that.container.width() / that.container.height();
 		camera.updateProjectionMatrix();
-		renderer.setSize($("#3DContainer").width(), $("#3DContainer").height());
+		renderer.setSize(that.container.width(), that.container.height());
 
 	}
 
