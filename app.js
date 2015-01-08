@@ -1,9 +1,15 @@
-var express = require('express.io')
+var express = require('express.io');
 
 //file operations
 var fs = require('fs');
 
-var app = express()
+var app = express();
+
+// module for synchronization of user content
+var gitsync = require('gitsync');
+gitsync.directory = 'savedAnimations/';
+gitsync.remote    = '../sync.git/';
+gitsync.branch    = 'animations';
 
 //open socket
 app.http().io()
@@ -75,13 +81,24 @@ app.io.route('saveSceneToFile', function(req) {
 		  console.log('It\'s saved!');
 		});
 	})
+	
+	// make a neat commit message to say what happened
+	var commitMessage = "app.js: animation '" + filename.trim() + "' saved";
+	
+	// push saved animations
+	gitsync.push( { init: true, message: commitMessage }, function( error )
+	{
+		// log result
+		!error && console.log( "Directory \"" + gitsync.directory + "\" has been pushed." );
+		error  && console.log( "Error while pushing directory \"" + gitsync.directory + "\":", error );
+	});
 })
 
 function getAllSceneFileNames(){
 	var sceneNames = fs.readdirSync('savedAnimations/');
-	//remove all filenames beginning with underscore 
+	//remove all filenames beginning with an underscore or a dot
 	for(var i=0;i<sceneNames.length;i++){
-		if(sceneNames[i].charAt(0)=="_"){
+		if(sceneNames[i].charAt(0)=="_" || sceneNames[i].charAt(0)=="."){
 			sceneNames.splice(i,1)
 			i--;
 		}

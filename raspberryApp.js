@@ -20,6 +20,15 @@ if(enableSimulation){
 //file operations
 var fs = require('fs');
 
+// module for synchronization of user content
+var gitsync = require('gitsync');
+gitsync.directory = 'savedAnimations/';
+gitsync.remote    = 'git://localhost:3003/sync';
+gitsync.branch    = 'animations';
+
+// time between checks for changed scenes [ms]
+var sceneCheckInterval = 30*1000;
+
 //load Render Module
 var Renderer=require('./renderModule.js');
 
@@ -286,10 +295,9 @@ var PlayerObj = function(fps,fileManager,serialManager){
 		//load the blending scene data
 		fileManager.loadBlendingScene(that.setBlendingScene)
 		
-		that.checkForNewScenes();
-		
 		//refresh Schedule and Scenelist
-		setInterval(that.checkForNewScenes,5000);
+		setInterval(that.checkForNewScenes, sceneCheckInterval);
+		that.checkForNewScenes();
 		
 		//interval to send  frames  to arduino
 		setInterval(that.playerTick,1000/fps);
@@ -315,8 +323,25 @@ var PlayerObj = function(fps,fileManager,serialManager){
 	//refresh Schedule and Scenelist every 5 seconds
 	this.checkForNewScenes=function(){
 		//console.log("checkForNewScenes")
-		fileManager.loadSceneRanking();
-		fileManager.loadSchedule(that.setNextScheduledSceneInfo);
+		
+		// update files from remote repository
+		gitsync.pull( { init: true }, function( error )
+		{
+			if ( !error )
+			{
+				// log success
+				console.log( "Pulled scenes from remote." );
+				
+				// load scenes from files
+				fileManager.loadSceneRanking();
+				fileManager.loadSchedule(that.setNextScheduledSceneInfo);
+			}
+			else
+			{
+				// log error
+				console.log( "Error pulling scenes from remote:", error );
+			}
+		});
 	}
 	
 	this.setNextScene=function(sceneData){	
