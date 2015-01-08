@@ -107,3 +107,7 @@ a.btn-xs {
 	font-size: 10px;
 	font-style: normal;
 }
+#create_lines_tf
+{
+	width: 50px;
+}

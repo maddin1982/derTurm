@@ -100,17 +100,17 @@ function initializeEvents(){
 	//save Settings
 	$("#resetToWhite").on("click",function(){	
 		framesManager.resetFrame(currentModalDialogRow,'white');
-		$('#frameFadingDialog').modal('hide');
+		$('#frameShiftingDialog').modal('hide');
 	});
 	
 	$("#resetToBlack").on("click",function(){
 		framesManager.resetFrame(currentModalDialogRow,'black');
-		$('#frameFadingDialog').modal('hide');
+		$('#frameShiftingDialog').modal('hide');
 	});
 	
 	$("#resetToAbove").on("click",function(){
 		framesManager.resetFrame(currentModalDialogRow,'above');
-		$('#frameFadingDialog').modal('hide');
+		$('#frameShiftingDialog').modal('hide');
 	});
 
 	$("#saveModal").on("click", function() {	
@@ -128,7 +128,17 @@ function initializeEvents(){
 		currentModalDialogRow = null;
 		currentFrameType = null;
 	});
-	
+
+ 	$('#create_lines_tf').on('keyup', function(ev){
+ 		lines = parseInt($('#create_lines_tf').val());
+ 		$('#create_lines').data('slider').setValue(lines);
+ 	});
+
+	$('#create_lines').on('slide', function(ev){
+	    lines = $('#create_lines').val();
+	    $('#create_lines_tf').val(lines);
+	});
+
 	$("#saveCreateModal").on("click", function() {
 		
 		//currentFrameType 0= static, 1 =fade 
@@ -138,12 +148,16 @@ function initializeEvents(){
 		  		shifts = parseInt($( this ).attr('name'));//.innerHTML);
 		  //
 		});
-		var lines = 1;
-		lines = parseInt($('#create_lines').data('slider').getValue());
-
+		var lines_slider = 1;
+		lines_slider = parseInt($('#create_lines').data('slider').getValue());
+		lines_tf = parseInt($('#create_lines_tf').val());
+		
+		//overwrite slider if lines_tf is larger 
+		if(lines_slider < lines_tf)
+			lines_slider=lines_tf;
 		// hide the modal dialog 
-		framesManager.duplicateFrameAndShift(currentModalDialogRow,shifts,lines);
-		$('#frameFadingDialog').modal('hide')
+		framesManager.duplicateFrameAndShift(currentModalDialogRow,shifts,lines_slider);
+		$('#frameShiftingDialog').modal('hide');
 	});
 
 	$('#frameShiftingDialog').on('hidden.bs.modal', function () {

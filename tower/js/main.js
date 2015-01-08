@@ -30,7 +30,7 @@ $(document).ready(function() {
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
 	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));	
-	
+
 	//Mouse Events Sliders and so on...
 	initializeEvents();
 	
@@ -106,6 +106,7 @@ function createFrameShiftingDialog(inthis) {
 		// set maximum duration to 10seconds
 		$("#create_lines").slider({min:1, max: 16 }) ;
 		$('#create_lines').data('slider').setValue(1);
+		$('#create_lines_tf').val(1);
 	}
 }
 
