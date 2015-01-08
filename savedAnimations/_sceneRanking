@@ -1,1 +1,1 @@
-[{"sceneName":"red","dynamicRating":10,"staticRating":1},{"sceneName":"farbtest","dynamicRating":10,"staticRating":1},{"sceneName":"disco","dynamicRating":10,"staticRating":10}]
+[{"sceneName":"red","dynamicRating":10,"staticRating":1},{"sceneName":"farbtest","dynamicRating":10,"staticRating":1},{"sceneName":"disco","dynamicRating":10,"staticRating":10},{"sceneName":"testöäüüäö","dynamicRating":10,"staticRating":1},{"sceneName":"bla-blubb_test","dynamicRating":10,"staticRating":1}]

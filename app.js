@@ -14,9 +14,18 @@ gitsync.branch    = 'animations';
 //open socket
 app.http().io()
 
-//directory of frontend files
-app.use(express.static(__dirname + '/tower'));
+//authentication
+var auth = express.basicAuth('testUser', 'testPass');
 
+//return cut-down version of site
+app.use('/', express.static(__dirname + '/tower'));
+
+//return content with full option set
+app.use('/protected', auth);
+app.use('/protected', express.static(__dirname + '/tower'));
+
+
+//todo add other apps
 function getSceneRankingItem(sceneName,dynamicRating,staticRating){
 	var item={};
 	item.sceneName=sceneName;
@@ -32,9 +41,13 @@ app.io.route('saveSceneToFile', function(req) {
 		var date=new Date();
 		filename=date.getDate()+"_"+(date.getMonth()+1)+"_"+date.getFullYear()+"_"+date.getHours()+"-"+date.getMinutes()+"-"+date.getSeconds();
 	}
-	else
+	else{
+		//prevent shit to happen		
 		filename=req.data.fileName;
-	
+		console.log(filename)
+		filename=filename.replace(/[^\w\s-_!ßäüöÄÜÖ]/g,"");
+		console.log(filename)
+	}
 	//stringify data
 	var jsonFile=req.data.frameData;;
 	//remove active attribute from all windows
@@ -44,7 +57,6 @@ app.io.route('saveSceneToFile', function(req) {
 		}		
 	}
 
-	
 	fs.writeFile('savedAnimations/'+filename, JSON.stringify(jsonFile), function (err) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
