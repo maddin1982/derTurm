@@ -26,7 +26,7 @@ var Renderer=require('./renderModule.js');
 //serial communication
 var SerialPort = require("serialport").SerialPort;
 
-var fps=24;
+var fps=50;
 
 //create new Renderer with 24 Frames
 var myRenderer=new Renderer(fps);
@@ -37,7 +37,7 @@ var SerialManagerObj =function(){
 	var serialPortReady=false;
 	
 	this.openSerialport=function(){
-		serialport = new SerialPort("COM6", {
+		serialport = new SerialPort("COM8", {
 			baudrate: 115200,
 			dataBits: 8,
 			parity: 'none',
@@ -61,10 +61,19 @@ var SerialManagerObj =function(){
 	this.sendFrame=function(frame){
 		var allcolorsSerialized=[];
 		for(var i =0; i<frame.length;i++){
-			allcolorsSerialized.push(frame[i][0])
-			allcolorsSerialized.push(frame[i][1])
-			allcolorsSerialized.push(frame[i][2])
+			allcolorsSerialized.push(frame[i][0]);
+			allcolorsSerialized.push(frame[i][1]);
+			allcolorsSerialized.push(frame[i][2]);					
 		}
+		
+		var allcolorsSerializedRGBW=[];
+		for(var i =0; i<frame.length;i++){
+			allcolorsSerializedRGBW.push(frame[i][0]);
+			allcolorsSerializedRGBW.push(frame[i][1]);
+			allcolorsSerializedRGBW.push(frame[i][2]);		
+			allcolorsSerializedRGBW.push(0);
+		}
+		
 		if(enableSimulation){
 			//broadcast to all connected clients
 			app.io.broadcast('newFrame', allcolorsSerialized)
@@ -72,13 +81,14 @@ var SerialManagerObj =function(){
 
 		if(serialPortReady){
 			//Serial Messages
-			var buffer = new Buffer(allcolorsSerialized);
+			var buffer = new Buffer(allcolorsSerializedRGBW);
 			
 			if(!serialport)
 				throw "serialPort not initialized";
 				
 			serialport.write(buffer, function(err, results) {
 				if(err) throw('err ' + err)
+				
 			});
 		}
 	}

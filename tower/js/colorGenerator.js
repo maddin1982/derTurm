@@ -2,9 +2,9 @@ function colorGeneratorObj(){
 	var that=this;
 
 	this.ColorSets={
-		FULL:["#ff0000","#ff8800","#ffff00","#88ff00","#00ff00","#00ffff","#0088ff","#0000ff","#8800ff","#ff00ff","#ff0088","#888888"],
+		VOLL:["#ff0000","#ff8800","#ffff00","#88ff00","#00ff00","#00ffff","#0088ff","#0000ff","#8800ff","#ff00ff","#ff0088","#888888"],
 		WARM:["#ff0000","#ff4400","#ff8800","#ffbb00","#ffff00","#aaff00","#88ff00","#44ff00","#00ff00"],
-		COLD:["#00ffff","#00bbff","#0088ff","#0044ff","#0000ff","#4400ff","#8800ff","#bb00ff","#ff00ff","#ff00bb","#ff0088"]
+		KALT:["#00ffff","#00bbff","#0088ff","#0044ff","#0000ff","#4400ff","#8800ff","#bb00ff","#ff00ff","#ff00bb","#ff0088"]
 	}
 	
 
