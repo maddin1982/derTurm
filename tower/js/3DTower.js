@@ -121,7 +121,7 @@ var Tower3DObj=function(){
 				group.add( mittelBalkenMesh );
 
 				var windowMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, transparent: true, opacity: 0.7, side: THREE.FrontSide } );
-				var windowGlass= new THREE.PlaneBufferGeometry(2, 2);
+				var windowGlass= new THREE.PlaneGeometry(2, 2);
 				windowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0,1,0), 90* Math.PI / 180));	
 				windowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
 				//windlow plane 
@@ -130,7 +130,7 @@ var Tower3DObj=function(){
 				windowMeshes[i]=plane;
 
 				
-				var topWindowGlass= new THREE.PlaneBufferGeometry(2, 2);
+				var topWindowGlass= new THREE.PlaneGeometry(2, 2);
 				topWindowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1,0,0), 90* Math.PI / 180));	
 				topWindowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
 				var topPlane = new THREE.Mesh(topWindowGlass,windowMaterial);
@@ -232,7 +232,7 @@ var Tower3DObj=function(){
 		controls.update();
 		
 		that.animate();
-		window.addEventListener( 'resize', that.update3DWindowAspectRatio, false );
+		//window.addEventListener( 'resize', that.update3DWindowAspectRatio, false );
 	}
 
 	this.update3DWindowAspectRatio=function() {

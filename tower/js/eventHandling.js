@@ -23,6 +23,7 @@ function initializeEvents(){
 
 	$("#viewModeBtn").on("click", function() {
 		$("#readyEditingBtns").show();
+		$("#showSettingBtn").show();
 		$(this).hide();
 		//show big tower
 		tower3D.container.addClass("fullscreen");
@@ -32,6 +33,7 @@ function initializeEvents(){
 	$("#editModeBtn").on("click", function() {
 		$("#readyEditingBtns").hide();
 		$("#viewModeBtn").show();
+		$("#showSettingBtn").hide();
 		tower3D.container.removeClass("fullscreen");
 		tower3D.update3DWindowAspectRatio();
 	});
@@ -41,6 +43,7 @@ function initializeEvents(){
 		if($("#readyEditingBtns").is(':visible')) {
 			$("#readyEditingBtns").hide();
 			$("#viewModeBtn").show();
+			$("#showSettingBtn").hide();
 			tower3D.container.removeClass("fullscreen");
 			tower3D.update3DWindowAspectRatio();
 		}

@@ -155,7 +155,7 @@ body {
 	margin-bottom: 0;
 }
 
-#readyEditingBtns {
+#readyEditingBtns, #showSettingBtn {
 	display: none;
 }
 
