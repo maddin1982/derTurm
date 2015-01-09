@@ -1,6 +1,7 @@
 body {
 	padding-top: 5px;
 	padding-bottom: 20px;
+	background: black;
 }
 
 .ui-resizable-s{
@@ -13,11 +14,27 @@ body {
 	min-width:400px;
 }
 
+#scalablePreviewWindow {
+	float: left;
+	width: 211px;
+	height: 211px;
+	border-radius: 105px;
+	border: 3px solid #2da1e3;
+	overflow: hidden;
+	margin-right: 13px;
+}
+
+#previewCircleWindow {
+	float: left;
+	width: 131px;
+	height: 131px;
+	border-radius: 65px;
+	border: 3px solid #2da1e3;
+	margin-top: 70px;
+}
+
 #buttonBar{
 	float:left;
-	position:absolute;
-	bottom:10px;
-	left:0px;
 	height:30px;
 }
 #showSettingBtn{
@@ -28,10 +45,6 @@ body {
 
 .spacerdiv{
 	height:10px;
-}
-
-#storyboard div{
-	padding: 0 !important;
 }
 
 .nopadding {
@@ -90,6 +103,10 @@ a.btn-xs {
      display:none;
 }
 
+.ui-icon.white { background-image: url(jqueryUi/images/ui-icons_ffffff_256x240.png); }
+.ui-icon.red { background-image: url(jqueryUi/images/ui-icons_cd0a0a_256x240.png); }
+.ui-icon.blue { background-image: url(jqueryUi/images/ui-icons_228ef1_256x240.png); }
+
 .ui-icon-trash{
 	margin-left:10%;
 }
@@ -110,4 +127,17 @@ a.btn-xs {
 #create_lines_tf
 {
 	width: 50px;
+}
+
+.frame .row {
+	background: rgba(255,255,255,0.6);
+	padding: 0 5px;
+}
+
+#storyboard li:first-child .row {
+	padding-top: 5px;
+}
+
+#storyboard li:last-child .row {
+	padding-bottom: 5px;
 }
