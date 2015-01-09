@@ -35,6 +35,12 @@ var PlayerObj = function(DataManager){
 	this.restart=function(){
 		that.currentframeId=0;
 	}
+
+	this.reset=function(){
+		that.currentframeId=0;
+		that.data = [];
+	}
+
 	
 	//go to next Frame if there is one
 	this.goToNextFrame=function(){

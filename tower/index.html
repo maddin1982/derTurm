@@ -79,6 +79,37 @@
 		</div>
 		-->
 		
+		<div class="nav topnav">
+			<div class="container">	
+				<button id="openColorSelectBtn" type="button"><span><i class="ui-icon ui-icon-pencil f_left"></i>Zeichenfarbe</span></button>
+			</div>
+		</div>
+
+		<div class="nav bottomnav"> 
+			<div class="container">	
+
+				<!--Save Scene -->
+				<button id="reloadPageBtn" type="button"><span class="ui-icon ui-icon-arrowrefresh-1-w f_left"></span>Neu anfangen</button>
+					
+				<!--Load Scenes -->
+				<div class="dropup">
+					<button id="loadSceneFilesBtn" type="button" data-toggle="dropdown"><span class="ui-icon ui-icon-folder-open f_left"></span>Gespeicherte Szene laden</button>
+					<ul id="listOfFiles" class="dropdown-menu scrollable-menu dropup" role="menu">
+						<!--<li><a href="#">Action</a></li>-->
+					</ul>
+				</div>
+
+				<!--switch between edit and view mode -->
+				<button id="viewModeBtn" type="button"><span class="ui-icon ui-icon-check f_left"></span>Fertig!</button>
+				<div id="readyEditingBtns">
+					<!--Save Scene -->
+					<button id="openSaveDialogBtn" type="button"><span class="ui-icon ui-icon-disk f_left"></span>Speichern</button>
+					<!--Edit Scene -->
+					<button id="editModeBtn" type="button"><span class="ui-icon ui-icon-pencil f_left"></span>Ändern</button>
+				</div>
+			</div>
+		</div>
+
 		<div class="container">	
 			<div class="row">
 			  	<div id="scalablePreviewWindow">	
@@ -88,22 +119,16 @@
 				
 			  	</div>
 			
-			  	<canvas width="125" height="125" id="previewCircleWindow">
-			  	</canvas>
-				<div id="buttonBar" class="col-md-5 nopadding">
+				<div id="previewCircleWindowContainer">
+			  		<canvas width="93" height="93" id="previewCircleWindow"></canvas>
+			  	</div>
+
+				<!--
+				<div id="buttonBar" class="col-md-5 nopadding">-->
 					
-					<!--Save Scene -->
-					<button id="openSaveDialogBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-disk"></span></button>
-						
-					<!--Load Scenes -->
-					<div class="dropdown">
-						<button id="loadSceneFilesBtn" type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="ui-icon ui-icon-folder-open"></span></button>
-						<ul id="listOfFiles" class="dropdown-menu scrollable-menu" role="menu">
-							<!--<li><a href="#">Action</a></li>-->
-						</ul>
-					</div>
 
 					<!--active windows dropdown -->
+					<!--
 					<div class="dropdown">
 						<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dd_WindowAmount" data-toggle="dropdown">
 						Aktive Fenster
@@ -118,6 +143,7 @@
 							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
 						</ul>
 					</div>
+					-->
 					
 					<!--window mode dropdown -->
 					<!--
@@ -133,8 +159,9 @@
 						</ul>
 					</div>				
 					-->
-					<button id="openColorSelectBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-pencil"></span></button>
-				  </div>	
+					
+					<!--
+				  </div>	-->
 			</div>
 			<div class="spacerdiv"></div>
 

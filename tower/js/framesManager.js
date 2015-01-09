@@ -245,7 +245,7 @@ var framesManagerObj = function(framesContainer){
 
 
 	//generates Frames after change
-	this.generateFrameDisplay=function(){	
+	this.generateFrameDisplay=function() {	
 
 		if(data.length==0){
 			that.framesContainer.empty();
@@ -349,5 +349,11 @@ var framesManagerObj = function(framesContainer){
 
 			})
 		}
+	}
+
+	this.clearFrames = function() {
+		data=[];
+		that.generateFrameDisplay();
+		player.reset();
 	}
 }

@@ -8,9 +8,9 @@ var Windows2DObj=function(){
 
 	var windows_num;
 	var center = [];
-	var outer_radius = 65;
-	var inner_radius = 42;
-	var margin = 5;
+	var outer_radius = 45;
+	var inner_radius = 31;
+	var margin = 6;
 
 	this.init2DWindows=function(container, windowAmount) {
 

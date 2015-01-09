@@ -24,7 +24,7 @@ $(document).ready(function() {
 	windowManager = new windowManagerObj();	
 	
 	//initialize color selection popup
-	myColorPicker= new colorPickerObj($("#colorPicker"));
+	myColorPicker= new colorPickerObj($("#colorPicker"), $("#openColorSelectBtn"));
 	myColorPicker.addColorSelection(colorGenerator.ColorSets.WARM);
 	
 	//initialize 3d Scene

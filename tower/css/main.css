@@ -1,7 +1,24 @@
 body {
 	padding-top: 5px;
-	padding-bottom: 20px;
-	background: black;
+	padding-bottom: 66px;
+	background: #212122;
+}
+
+.nav {
+	position: fixed;
+	width: 100%;
+}
+
+.topnav {
+	top:0;
+	border-top: 5px solid white;
+	z-index: 1001;
+}
+
+.bottomnav {
+	bottom: 0;
+	border-bottom: 5px solid white;
+	z-index:2000;
 }
 
 .ui-resizable-s{
@@ -19,18 +36,44 @@ body {
 	width: 211px;
 	height: 211px;
 	border-radius: 105px;
-	border: 3px solid #2da1e3;
+	border: 5px solid #fff;
 	overflow: hidden;
 	margin-right: 13px;
+	margin-top: -33px;
+	z-index: 1002;
+	position: relative;
+}
+
+#scalablePreviewWindow.fullscreen {
+	border-radius: 0;
+	border: 0;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	left: 0;
+	top: 0;
 }
 
 #previewCircleWindow {
+	width: 97px;
+	height: 97px;
+	border-radius: 48px;
+	border: 1px solid #212122;
+}
+
+#previewCircleWindowContainer {
 	float: left;
-	width: 131px;
-	height: 131px;
-	border-radius: 65px;
-	border: 3px solid #2da1e3;
-	margin-top: 70px;
+	margin-top: 31px;
+	margin-left:0px;
+	z-index: 1000;
+	position: relative;
+	overflow: hidden;
+	padding: 0;
+	height: 97px;
+	width: 290px;
+	background: url(../img/title.png) no-repeat;
 }
 
 #buttonBar{
@@ -41,6 +84,79 @@ body {
 	position:absolute;
 	top:5px;
 	right:5px;
+}
+
+#openColorSelectBtn {
+	float: right;
+	margin-right: 13px;
+	border-bottom-left-radius: 13px;
+	border-bottom-right-radius: 13px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	border-style: solid;
+	border-color: white;
+	border-width: 5px;
+	border-top: 0;
+	background: white;
+	margin-top: -5px;
+	color: #222222;
+	padding: 0;
+}
+
+#openColorSelectBtn span {
+	display: inline-block;
+	border-bottom-right-radius: 13px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	background: white;
+	color: #222222;
+	padding: 13px 42px 13px 13px;
+
+	background: -moz-linear-gradient(left,  rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left,  rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left,  rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left,  rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%); /* IE10+ */
+	background: linear-gradient(to right,  rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=1 ); /* IE6-9 */
+
+}
+
+#reloadPageBtn, #loadSceneFilesBtn {
+	float: left;
+	margin-right:13px;
+}
+
+#reloadPageBtn {
+	margin-left: 13px;
+}
+
+#viewModeBtn, #editModeBtn, #openSaveDialogBtn {
+	float: right;
+	margin-left:13px;
+}
+
+#viewModeBtn, #openSaveDialogBtn {
+	margin-right: 13px;
+}
+
+#viewModeBtn, #openSaveDialogBtn {
+	font-weight: bold;
+}
+
+#viewModeBtn, #reloadPageBtn, #loadSceneFilesBtn, #editModeBtn, #openSaveDialogBtn {
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+	border-top-left-radius: 13px;
+	border-top-right-radius: 13px;
+	border: none;
+	padding: 13px;
+	background: white;
+	margin-bottom: 0;
+}
+
+#readyEditingBtns {
+	display: none;
 }
 
 .spacerdiv{
@@ -103,10 +219,6 @@ a.btn-xs {
      display:none;
 }
 
-.ui-icon.white { background-image: url(jqueryUi/images/ui-icons_ffffff_256x240.png); }
-.ui-icon.red { background-image: url(jqueryUi/images/ui-icons_cd0a0a_256x240.png); }
-.ui-icon.blue { background-image: url(jqueryUi/images/ui-icons_228ef1_256x240.png); }
-
 .ui-icon-trash{
 	margin-left:10%;
 }
@@ -136,8 +248,12 @@ a.btn-xs {
 
 #storyboard li:first-child .row {
 	padding-top: 5px;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
 }
 
 #storyboard li:last-child .row {
 	padding-bottom: 5px;
+	border-bottom-left-radius: 13px;
+	border-bottom-right-radius: 13px;
 }
