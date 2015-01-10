@@ -36,6 +36,7 @@
 		<script src="js/cookie.js"></script>
 		<script src="js/colorGenerator.js"></script>
 		<script src="js/3DTower.js"></script>
+		<script src="js/windowVector.js"></script>
 		<script src="js/eventHandling.js"></script>
 		<script src="js/framesManager.js"></script>
 		<script src="js/windowManager.js"></script>
@@ -129,6 +130,8 @@
 							</ul>
 						</div>				
 						<button id="openColorSelectBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-pencil"></span></button>
+					  </div>
+					  <div id="windowVector" class="windows">
 					  </div>
 				  </div>
 				</div>			
@@ -299,21 +302,31 @@
 						</div>
 
 						<div class="modal-body">
+
+						<!-- Type of Tower -->
+							<p>Anzeigeart</p>
+    						<input type="radio" name="viewoption" value="vector"> Einfach<br>
+    						<input type="radio" name="viewoption" value="tower"> SD 3D Modell<br>
+    						<input type="radio" name="viewoption" value="fullview"> HQ 3D Modell<br>
+
+							<br><br>
 							<!-- Slider -->
-							<p>Helligkeit des 3D Turms</p>
-							<div id="luminosity" class="slider slider-horizontal" style="width: 520px;">
-								<div class="slider-track"></div>
-								<div class="slider-selection" style="z-index: 1;"></div>
+							<div  id="luminosityDiv"
+								<p>Helligkeit des 3D Turms</p>
+								<div id="luminosity" class="slider slider-horizontal" style="width: 520px;">
+									<div class="slider-track"></div>
+									<div class="slider-selection" style="z-index: 1;"></div>
+								</div>
 							</div>
 
-							<div class="checkbox">
+							<div class="checkbox" id="GlowingWindowsCheckDiv">
 							  <label>
 								<input type="checkbox" id="GlowingWindowsCheck" value="true" aria-label="...">
 								Leuchtende Fenster
 							  </label>
 							</div>
 
-							<div class="checkbox">
+							<div class="checkbox" id="TopWindowsCheckDiv">
 							  <label>
 								<input type="checkbox" id="TopWindowsCheck" value="true" aria-label="...">
 								Schwebende Fenster

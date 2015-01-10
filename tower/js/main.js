@@ -5,6 +5,7 @@ var windowManager;
 var myColorPicker;
 var tower3D;
 var player;
+var windowVector;
 
 var currentModalDialogRow = null;
 var currentFrameType=null;
@@ -26,6 +27,8 @@ $(document).ready(function() {
 	//initialize color selection popup
 	myColorPicker= new colorPickerObj($("#colorPicker"));
 	myColorPicker.addColorSelection(colorGenerator.ColorSets.WARM);
+
+	createVectorDivWindows()
 	
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
@@ -61,6 +64,44 @@ $(document).ready(function() {
     		tower3D.switchTopWindows( false )
     	}
 	}
+
+
+   var valueModelview = readCookie('modelview')
+    if (valueModelview){
+		if(valueModelview == "fullview"){
+			$( "#windowVector" ).hide();
+			$( "#luminosityDiv" ).show();
+			$( "#GlowingWindowsCheckDiv" ).hide();
+			$( "#TopWindowsCheckDiv" ).hide();
+		}
+		else if (valueModelview == "tower"){
+			$( "#windowVector" ).hide();
+			$( "#luminosityDiv" ).show();
+			$( "#GlowingWindowsCheckDiv" ).show();
+			$( "#TopWindowsCheckDiv" ).show();
+		}
+		else if (valueModelview == "vector"){
+			$( "#windowVector" ).show();
+			$( "#luminosityDiv" ).hide();
+			$( "#GlowingWindowsCheckDiv" ).hide();
+			$( "#TopWindowsCheckDiv" ).hide();
+		}
+	}
+	else {
+		if(checkIfMobileDevice()){
+			// Show Mobile Version
+			$( "#windowVector" ).show();
+			$( "#luminosityDiv" ).hide();
+			$( "#GlowingWindowsCheckDiv" ).hide();
+			$( "#TopWindowsCheckDiv" ).hide();
+		}
+		else{
+			$( "#windowVector" ).hide();
+			$( "#luminosityDiv" ).show();
+			$( "#GlowingWindowsCheckDiv" ).show();
+			$( "#TopWindowsCheckDiv" ).show();
+		}
+	}
 	
 	/**************************
 	* Backend Socket Events
@@ -85,6 +126,21 @@ $(document).ready(function() {
 	})	
 
 });
+
+function reload3dModel(){
+	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));
+}
+
+function createVectorDivWindows(){
+	for(var i=0;i<16;i++){
+		$("#windowVector").append("<div id='window"+i+"' class='window'></div>")
+	}
+
+	windowVector = 	new WindowVector();
+	windowVector.animate()
+
+}
+
 
 //SAVE DIALOG	
 function showSaveDialog(){

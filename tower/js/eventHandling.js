@@ -66,9 +66,44 @@ function initializeEvents(){
 		createCookie("withGlowingWindows", $('#GlowingWindowsCheck').is(':checked'), 20 )
 	});
 
+
+	$("input[name=viewoption]:radio").change(function () {
+			//tower3D.switchGlowingWindows($('#GlowingWindowsCheck').is(':checked'))
+
+			var value = $(this).val();
+
+			if(value == "fullview"){
+				cookieModel = "fullview";
+				$( "#windowVector" ).hide();
+				$( "#luminosityDiv" ).show();
+				$( "#GlowingWindowsCheckDiv" ).hide();
+				$( "#TopWindowsCheckDiv" ).hide();
+			}
+			else if (value == "tower"){
+				cookieModel = "tower";
+				$( "#windowVector" ).hide();
+				$( "#luminosityDiv" ).show();
+				$( "#GlowingWindowsCheckDiv" ).show();
+				$( "#TopWindowsCheckDiv" ).show();
+			}
+			else if (value == "vector"){
+				cookieModel = "vector"
+				$( "#windowVector" ).show();
+				$( "#luminosityDiv" ).hide();
+				$( "#GlowingWindowsCheckDiv" ).hide();
+				$( "#TopWindowsCheckDiv" ).hide();
+			}
+
+			createCookie("modelview", cookieModel, 20 )
+			reload3dModel()
+
+
+	});
+
 	$("#TopWindowsCheck").on("change",function(){
 		tower3D.switchTopWindows($('#TopWindowsCheck').is(':checked'))
 		createCookie("withTopWindows", $('#TopWindowsCheck').is(':checked'), 20 )
+
 	});
 
 	// determine if shift is pressed. Used for several copy/move things

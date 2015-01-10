@@ -3,6 +3,10 @@ body {
 	padding-bottom: 20px;
 }
 
+#scalablePreviewWindow{
+	min-height: 100px;
+}
+
 .ui-resizable-s{
 	background-image: url(../img/handle.png);
 	background-repeat:repeat-x;
@@ -110,4 +114,20 @@ a.btn-xs {
 #create_lines_tf
 {
 	width: 50px;
+}
+
+#windowVector {
+	padding-right: 55px;
+	padding-left: 55px;
+	padding-top: 15px;
+	float: left;
+	min-height:40px;
+	width:100%;
+}
+
+.window {
+	min-height:40px;
+	width: 6.25%;
+	float: left;
+	border:1px solid;
 }
