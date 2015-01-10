@@ -17,7 +17,8 @@ var Tower3DObj=function(){
 	var _withTopWindows;
 	
 	var showFullModel=false;
-
+	var renderTimeout;
+	
 	this.container;
 
 	this.init3DSceneOnElement=function(container) {
@@ -25,7 +26,11 @@ var Tower3DObj=function(){
 
 		if(renderer)
 			renderer.domElement.remove()
-
+		
+		//kill running animation timeout 
+		if(renderTimeout)
+			window.clearTimeout(renderTimeout);
+		
 		//make 3d container resizable
 		 container.resizable({
 		  handles: 's',
@@ -271,7 +276,12 @@ var Tower3DObj=function(){
 	}
 
 	this.animate=function() {
-		requestAnimationFrame(that.animate);
+		//render with 24 fps
+		renderTimeout=setTimeout( function() {
+			console.log("frame")
+			if(!that.stopAnimation)
+				requestAnimationFrame(that.animate);
+		}, 1000 / 24 );
 
 		var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
 		if(!(currentFrame.windows===undefined)){

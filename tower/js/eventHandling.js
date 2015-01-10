@@ -96,8 +96,6 @@ function initializeEvents(){
 
 			createCookie("modelview", cookieModel, 20 )
 			reload3dModel()
-
-
 	});
 
 	$("#TopWindowsCheck").on("change",function(){
