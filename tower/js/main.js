@@ -88,7 +88,7 @@ $(document).ready(function() {
 		}
 	}
 	else {
-		if(checkIfMobileDevice()){
+		if(isMobileDevice()){
 			// Show Mobile Version
 			$( "#windowVector" ).show();
 			$( "#luminosityDiv" ).hide();

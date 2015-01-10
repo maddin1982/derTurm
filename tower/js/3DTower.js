@@ -56,7 +56,7 @@ var Tower3DObj=function(){
 			}
 		}
 		else{
-			if(checkIfMobileDevice()){
+			if(isMobileDevice()){
 				// Show Mobile Version
 				return;
 			}

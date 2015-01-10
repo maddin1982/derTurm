@@ -22,7 +22,7 @@ function rgbToHex(r, g, b) {
     return "#" + intToHex(r) + intToHex(g) + intToHex(b);
 }
 
-function checkIfMobileDevice(){
+function isMobileDevice(){
   if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
    return true
   }
