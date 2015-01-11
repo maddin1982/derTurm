@@ -44,9 +44,15 @@ $(document).ready(function () {
 				
 				//change width of windows in framedisplay 
 				//$(".windowContainer div").css("width","5%")
+
 			}
 			if(currMode=="xs"){
 				console.log("mode xs")
+				$("#scalablePreviewWindow").remove();
+				$("body").addClass("mode-xs");
+				$("#editModeBtn").remove();
+				$("#viewModeBtn").remove();
+				$("#readyEditingBtns").show();
 			}
 			bootstrapMode=currMode;
 		}	

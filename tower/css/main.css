@@ -18,7 +18,7 @@ body {
 .bottomnav {
 	bottom: 0;
 	border-bottom: 5px solid white;
-	z-index:2000;
+	z-index:1005;
 }
 
 #scalablePreviewWindow{
@@ -78,6 +78,11 @@ body {
 	height: 97px;
 	width: 331px;
 	background: url(../img/title.png) no-repeat;
+}
+
+.mode-xs #previewCircleWindowContainer {
+	margin-top: 13px;
+	margin-left: 13px;
 }
 
 #buttonBar{
@@ -188,7 +193,7 @@ body {
 	background:white;
 	height:150px;
 	width:235px;
-	z-index:9999;
+	z-index:1010;
 }
 
 .dropdown {
@@ -211,6 +216,11 @@ a.btn-xs {
 	margin-top: 5px;
 	height: 18px;
 }
+
+.col-xs-1, .col-xs-2 {
+	padding: 0;
+}
+
 .modal-body {
 	height: auto;
 }
@@ -260,6 +270,10 @@ a.btn-xs {
 	padding-bottom: 5px;
 	border-bottom-left-radius: 13px;
 	border-bottom-right-radius: 13px;
+}
+
+.mode-xs #storyboard li:first-child .row, .mode-xs #storyboard li:last-child .row {
+	border-radius: 0;
 }
 
 #windowVector {
