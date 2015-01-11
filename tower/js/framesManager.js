@@ -199,18 +199,27 @@ var framesManagerObj = function(framesContainer){
 	}
 	
 	this.setSingleWindowColor=function(event){
-		if(_leftMouseDown == true||event.type=="click") {
-			that.lastSelectedWindowDiv=event.target;
-			color=that.currentWindowBrushColor;
-			frameId=parseInt($(event.target).parents('.frame').attr("frameid"))
+		if(_leftMouseDown == true||event.type=="click"||event.type=="touchmove") {
+			divToChange = null;
 
-			windowId=parseInt($(event.target).attr("windowid"))
+			if(event.type=="touchmove"){
+				divToChange = document.elementFromPoint(event.originalEvent.touches[0].pageX, event.originalEvent.touches[0].pageY)
+			}
+			else{
+				divToChange = event.target;
+			}
+
+			that.lastSelectedWindowDiv=divToChange;
+
+			color=that.currentWindowBrushColor;
+			frameId=parseInt($(divToChange).parents('.frame').attr("frameid"))
+
+			windowId=parseInt($(divToChange).attr("windowid"))
 
 			data[frameId].windows[windowId].color = color;
-			
 			//change other windows depending on current windowmode
 			windowManager.updateData();
-			
+
 			that.redrawSingleFrame(frameId)
 			//that.generateFrameDisplay();
 		}
@@ -303,7 +312,7 @@ var framesManagerObj = function(framesContainer){
 					if(frameWindow.active!=1)
 						$(windowDiv).css({opacity: 0.2});
 			
-					$(windowDiv).on("click mousemove",that.setSingleWindowColor)
+					$(windowDiv).on("click mousemove touchmove",that.setSingleWindowColor)
 					$(windowsContainerDiv).append(windowDiv)
 				})
 				$(rowDiv).append(windowsContainerDiv)
