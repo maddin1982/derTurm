@@ -48,15 +48,15 @@ var Tower3DObj=function(){
 		if (cookieModel) {
 			if(cookieModel == "fullview"){
 				showFullModel = true;
-				$( "#windowVector" ).hide();
+				windowVector.hide();
 			}
 			else if (cookieModel == "tower"){
 				showFullModel = false;
-				$( "#windowVector" ).hide();
+				windowVector.hide();
 			}
 			else if (cookieModel == "vector"){
 				showFullModel = false;
-				$( "#windowVector" ).show();
+				windowVector.show();
 				return;
 			}
 		}

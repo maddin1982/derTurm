@@ -28,8 +28,10 @@ $(document).ready(function() {
 	myColorPicker= new colorPickerObj($("#colorPicker"));
 	myColorPicker.addColorSelection(colorGenerator.ColorSets.WARM);
 
-	createVectorDivWindows()
-	
+	windowVector = 	new WindowVector();
+	windowVector.create($("#windowVector"));
+	windowVector.play();
+
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
 	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));	
@@ -131,15 +133,15 @@ function reload3dModel(){
 	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));
 }
 
-function createVectorDivWindows(){
-	for(var i=0;i<16;i++){
-		$("#windowVector").append("<div id='window"+i+"' class='window'></div>")
-	}
+// function createVectorDivWindows(){
+	// for(var i=0;i<16;i++){
+		// $("#windowVector").append("<div id='window"+i+"' class='window'></div>")
+	// }
 
-	windowVector = 	new WindowVector();
-	windowVector.animate()
+	// windowVector = 	new WindowVector();
+	// windowVector.play()
 
-}
+// }
 
 
 //SAVE DIALOG	
