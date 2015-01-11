@@ -19,10 +19,20 @@ var Tower3DObj=function(){
 	var _withTopWindows;
 	
 	var showFullModel=false;
+	var renderTimeout;
+	
 	this.container;
 
 	this.init3DSceneOnElement=function(container) {
 		that.container=container;
+
+		if(renderer)
+			renderer.domElement.remove()
+		
+		//kill running animation timeout 
+		if(renderTimeout)
+			window.clearTimeout(renderTimeout);
+		
 		//make 3d container resizable
 		//  container.resizable({
 		//   handles: 's',
@@ -35,7 +45,30 @@ var Tower3DObj=function(){
 		if(gup("showFullModel")=="true")
 			showFullModel=true;
 
-		//add scene
+		//read the last used Model from the cookie
+		var cookieModel = readCookie('modelview')
+		if (cookieModel) {
+			if(cookieModel == "fullview"){
+				showFullModel = true;
+				windowVector.hide();
+			}
+			else if (cookieModel == "tower"){
+				showFullModel = false;
+				windowVector.hide();
+			}
+			else if (cookieModel == "vector"){
+				showFullModel = false;
+				windowVector.show();
+				return;
+			}
+		}
+		else{
+			if(checkIfMobileDevice()){
+				// Show Mobile Version
+				return;
+			}
+		}
+
 		scene = new THREE.Scene();
 		
 		//add camera
@@ -237,41 +270,55 @@ var Tower3DObj=function(){
 
 	this.update3DWindowAspectRatio=function() {
 
-		camera.aspect = that.container.width() / that.container.height();
-		camera.updateProjectionMatrix();
-		renderer.setSize(that.container.width(), that.container.height());
-
+		if(camera){
+			camera.aspect = that.container.width() / that.container.height();
+			camera.updateProjectionMatrix();
+			renderer.setSize(that.container.width(), that.container.height());
+		}
 	}
 
 	this.animate=function() {
+// <<<<<<< HEAD
+// =======
+// 		//render with 24 fps
+		renderTimeout=setTimeout( function() {
+			console.log("frame")
+			if(!that.stopAnimation)
+				requestAnimationFrame(that.animate);
+// 		}, 1000 / framerate );
+// >>>>>>> master
 
-		setTimeout( function() {
+// 		setTimeout( function() {
 
-        	requestAnimationFrame(that.animate);
+//         	requestAnimationFrame(that.animate);
 
-			var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
-			if(!(currentFrame.windows===undefined)){
-				$.each(currentFrame.windows,function(i,window){
-					that.setWindowToColor(i,window.color)
-				})
-			}
-			that.render();
+// 			var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
+// 			if(!(currentFrame.windows===undefined)){
+// 				$.each(currentFrame.windows,function(i,window){
+// 					that.setWindowToColor(i,window.color)
+// 				})
+// 			}
+// 			that.render();
 
-    	}, 1000 / framerate);
+//     	}, 1000 / framerate);
 
 	}
 
 	this.setWindowToColor=function(i,newColor){
 		newColor="rgb("+newColor[0]+","+newColor[1]+","+newColor[2]+")";
 		if(showFullModel){
-			windowMaterials[i].color=new THREE.Color(newColor)
+			if(windowMaterials[i])
+				windowMaterials[i].color=new THREE.Color(newColor)
 		}
 		else{
-			 windowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.FrontSide } ); 
+			 if(windowMeshes[i])  
+			    windowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.FrontSide } ); 
 			 if( _withTopWindows == true ) {
-				topWindowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.BackSide } ); 
+			 	if(topWindowMeshes[i])
+					topWindowMeshes[i].material=new THREE.MeshBasicMaterial( {color: newColor, transparent: true, opacity: 0.7, side: THREE.BackSide } ); 
 			}
 			 if( _withGlowingWindows == true ){
+			 	if (glowingBubbles[i])
 				 glowingBubbles[i].material.uniforms.glowColor.value.set( newColor );
 			 }
 		 }
@@ -306,7 +353,8 @@ var Tower3DObj=function(){
 	//reset glowbubbles color
 	this.clearColors=function(){
 		for(var i =0; i<16;i++){
-			glowingBubbles[i].material.uniforms.glowColor.value.set( 0 );
+			if (glowingBubbles[i])
+				glowingBubbles[i].material.uniforms.glowColor.value.set( 0 );
 		}
 	}
 
@@ -317,7 +365,8 @@ var Tower3DObj=function(){
 
 			if(_withTopWindows == false){
 			for(var i =0; i<16;i++){
-				topWindowMeshes[i].material=new THREE.MeshBasicMaterial( {color: 0, transparent: true, opacity: 0.0, side: THREE.BackSide } ); 
+				if(topWindowMeshes[i])
+					topWindowMeshes[i].material=new THREE.MeshBasicMaterial( {color: 0, transparent: true, opacity: 0.0, side: THREE.BackSide } ); 
 			}	}
 		}
 	}

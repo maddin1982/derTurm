@@ -159,13 +159,15 @@ var FileManagerObj = function(fps){
 			}
 			
 		}
-		//reset currentrating of highest ranked scene
-		highestRankedScene.currentRating=0;
-		highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
+		if(highestRankedScene){
+			//reset currentrating of highest ranked scene
+			highestRankedScene.currentRating=0;
+			highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
 
-		console.log("next Scene: "+highestRankedScene.sceneName+", rating values d/s:"+highestRankedScene.dynamicRating+"/"+highestRankedScene.staticRating);
-		
-		return highestRankedScene.sceneName;
+			console.log("next Scene: "+highestRankedScene.sceneName+", rating values d/s:"+highestRankedScene.dynamicRating+"/"+highestRankedScene.staticRating);
+			
+			return highestRankedScene.sceneName;
+		}
 	}
 	
 	this.getNextScheduledScene=function(){
@@ -238,6 +240,7 @@ var FileManagerObj = function(fps){
 		fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, result) {
 			if (err) throw err;
 			  
+			console.log("loadSceneRanking")  
 			var newSceneRanking=JSON.parse(result);
 			
 			if(that.rankingDiffers(sceneRanking,newSceneRanking)){
@@ -297,8 +300,9 @@ var PlayerObj = function(fps,fileManager,serialManager){
 		
 		//refresh Schedule and Scenelist
 		setInterval(that.checkForNewScenes, sceneCheckInterval);
-		that.checkForNewScenes();
-		
+		fileManager.loadSceneRanking();
+		fileManager.loadSchedule(that.setNextScheduledSceneInfo);
+	
 		//interval to send  frames  to arduino
 		setInterval(that.playerTick,1000/fps);
 	}
@@ -397,10 +401,13 @@ var PlayerObj = function(fps,fileManager,serialManager){
 		}
 		//if the current scene endet and was of type rankedScene, sheduledscene or undefined then try to find the next scene and add a blendingscene until loading is done
 		else if(currentsceneType=="rankedScene"||currentsceneType=="scheduledScene"||currentsceneType==""){	
-			//get next ranked scene name 
+			//get next ranked scene name if sceneranking was loaded
+			
 			var nextSceneName=fileManager.getNextSceneNameByRanking();
 			//load the next ranked scene and check if there is a time conflict with a scheduled scene
-			fileManager.loadSceneData(nextSceneName,that.setNextScene)
+			if(nextSceneName){
+				fileManager.loadSceneData(nextSceneName,that.setNextScene)
+			}
 		}
 	}
 

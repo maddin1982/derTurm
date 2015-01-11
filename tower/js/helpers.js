@@ -21,3 +21,11 @@ function intToHex(c) {
 function rgbToHex(r, g, b) {
     return "#" + intToHex(r) + intToHex(g) + intToHex(b);
 }
+
+function checkIfMobileDevice(){
+  if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+   return true
+  }
+  else
+    false
+}
