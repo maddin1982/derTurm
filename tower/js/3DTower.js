@@ -278,36 +278,20 @@ var Tower3DObj=function(){
 	}
 
 	this.animate=function() {
-// <<<<<<< HEAD
-// =======
-// 		//render with 24 fps
+
 		renderTimeout=setTimeout( function() {
 			if(!that.stopAnimation) {
 				requestAnimationFrame(that.animate);
-				var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
-				if(!(currentFrame.windows===undefined)){
-					$.each(currentFrame.windows,function(i,window){
-						that.setWindowToColor(i,window.color)
-					})
-				}
-				that.render();
 			}
  		}, 1000 / framerate );
-// >>>>>>> master
 
-// 		setTimeout( function() {
-
-//         	requestAnimationFrame(that.animate);
-
-// 			var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
-// 			if(!(currentFrame.windows===undefined)){
-// 				$.each(currentFrame.windows,function(i,window){
-// 					that.setWindowToColor(i,window.color)
-// 				})
-// 			}
-// 			that.render();
-
-//     	}, 1000 / framerate);
+		var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
+		if(!(currentFrame.windows===undefined)){
+			$.each(currentFrame.windows,function(i,window){
+				that.setWindowToColor(i,window.color)
+			})
+		}
+		that.render();
 
 	}
 
