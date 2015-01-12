@@ -39,6 +39,7 @@
 		<script src="js/2DWindows.js"></script>
 		<script src="js/3DTower.js"></script>
 		<script src="js/windowVector.js"></script>
+		<script src="js/imageProcessing.js"></script>
 		<script src="js/eventHandling.js"></script>
 		<script src="js/framesManager.js"></script>
 		<script src="js/colorPicker.js"></script>
@@ -83,6 +84,7 @@
 		<div class="nav topnav">
 			<div class="container">	
 				<button id="openColorSelectBtn" type="button"><span><i class="ui-icon ui-icon-pencil f_left"></i>Zeichenfarbe</span></button>
+				<button id="loadImageBtn" type="button"><span><i class="ui-icon ui-icon-image f_left"></i>Bild umwandeln</span></button>
 			</div>
 		</div>
 
@@ -371,7 +373,34 @@
 					</div>
 				</div>
 			</div>
+
+			<!--Image loading Window-->
+			<div id="loadImageModal" class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Header -->
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title">Bild auswählen</h4>
+						</div>
+						<div class="modal-body">
+							<input type="file" id="imageFile"/>
+							<label><input type="text" id="animationTime"/>Animationsdauer in ms</label>
+						</div>
+
+						<img id="loadImagePreview"/>
+							
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="processImageBtn" type="button" class="btn btn-primary">Umwandeln</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
 		</div>
+
     </body>
 	
 		<!-- ---------------- Custom Shader Code ------------------------ -->

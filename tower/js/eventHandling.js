@@ -52,7 +52,11 @@ function initializeEvents(){
 	$("#openColorSelectBtn").on("click",function(event){
 		myColorPicker.moveToPosition(event.pageX ,event.pageY );
 		myColorPicker.show();
-	})
+	});
+
+	$("#loadImageBtn").on("click",function(event) {
+		$("#loadImageModal").modal('show');
+	});
 
 	//load files button
 	$("#loadSceneFilesBtn").on("click",framesManager.getSavedScenes);
@@ -225,6 +229,16 @@ function initializeEvents(){
 		//reset the current row when the modal dialog is hidden
 		currentModalDialogRow = null;
 		currentFrameType = null;
+	});
+
+	$("#loadImageURL").on("input", function() {
+		console.log("changedurl");
+		$("#loadImagePreview").attr("src", $(this).val());
+	});
+
+	$("#processImageBtn").on("click", function() {	
+		imageProcessing.processImage();
+		$("#loadImageModal").modal('hide');
 	});
 
 	$(document).mouseup(function(event) {
