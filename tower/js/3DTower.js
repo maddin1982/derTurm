@@ -7,6 +7,8 @@ var Tower3DObj=function(){
 	var lastFrameStartTime=0;
 	var windowMeshes=[];
 
+	var framerate = 24;
+
 	var windowMaterials=[];
 	var glowingBubbles=[];
 	var topWindowMeshes=[];
@@ -32,12 +34,12 @@ var Tower3DObj=function(){
 			window.clearTimeout(renderTimeout);
 		
 		//make 3d container resizable
-		 container.resizable({
-		  handles: 's',
-		  resize: function( event, ui ) {
-			that.update3DWindowAspectRatio();
-		  }
-		});
+		//  container.resizable({
+		//   handles: 's',
+		//   resize: function( event, ui ) {
+		// 	that.update3DWindowAspectRatio();
+		//   }
+		// });
 
 		//if url parameter showFullModel is true show full model
 		if(gup("showFullModel")=="true")
@@ -70,8 +72,8 @@ var Tower3DObj=function(){
 		scene = new THREE.Scene();
 		
 		//add camera
-		camera = new THREE.PerspectiveCamera(50, container.width() / 200, 1, 10000);
-		camera.position.set(-30,30,-60)
+		camera = new THREE.PerspectiveCamera(26, container.width() / 200, 1, 10000);
+		camera.position.set(-30,-10,-60);
 		scene.add(camera);
 
 		//get standard material
@@ -263,7 +265,7 @@ var Tower3DObj=function(){
 		controls.update();
 		
 		that.animate();
-		window.addEventListener( 'resize', that.update3DWindowAspectRatio, false );
+		//window.addEventListener( 'resize', that.update3DWindowAspectRatio, false );
 	}
 
 	this.update3DWindowAspectRatio=function() {
@@ -276,12 +278,12 @@ var Tower3DObj=function(){
 	}
 
 	this.animate=function() {
-		//render with 24 fps
+
 		renderTimeout=setTimeout( function() {
-			console.log("frame")
-			if(!that.stopAnimation)
+			if(!that.stopAnimation) {
 				requestAnimationFrame(that.animate);
-		}, 1000 / 24 );
+			}
+ 		}, 1000 / framerate );
 
 		var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
 		if(!(currentFrame.windows===undefined)){
@@ -290,6 +292,7 @@ var Tower3DObj=function(){
 			})
 		}
 		that.render();
+
 	}
 
 	this.setWindowToColor=function(i,newColor){

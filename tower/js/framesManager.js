@@ -254,17 +254,20 @@ var framesManagerObj = function(framesContainer){
 
 
 	//generates Frames after change
-	this.generateFrameDisplay=function(){	
+	this.generateFrameDisplay=function() {	
 
 		if(data.length==0){
 			that.framesContainer.empty();
 			var frameContainer = null;
-			var addFrameIcon=document.createElement('i')
+			var addFrameRow = document.createElement('button');
+			var addFrameIcon=document.createElement('i');
 			//$(addFrame).attr("id","addFrameBtn"+j)
-			$(addFrameIcon).attr("class","ui-icon ui-icon-plus f_left")
-			$(addFrameIcon).attr("onclick","framesManager.addFrame()")
+			$(addFrameIcon).attr("class","ui-icon ui-icon-plus f_left");
+			$(addFrameRow).attr("onclick","framesManager.addFrame()");
+			$(addFrameRow).append(addFrameIcon);
+			$(addFrameRow).append("<span>Farbreihe hinzufügen</span>");
 			console.log("aff icon")
-			that.framesContainer.append(addFrameIcon);
+			that.framesContainer.append(addFrameRow);
 		}
 		else{
 			windowManager.updateData();	
@@ -355,5 +358,11 @@ var framesManagerObj = function(framesContainer){
 
 			})
 		}
+	}
+
+	this.clearFrames = function() {
+		data=[];
+		that.generateFrameDisplay();
+		player.reset();
 	}
 }

@@ -1,6 +1,7 @@
-var colorPickerObj=function(colorPickerDiv){
+var colorPickerObj=function(colorPickerDiv, colorViewer){
 	
 	this.colorPickerDiv=colorPickerDiv;
+	this.colorViewer=colorViewer;
 	this.isDragged=false;
 	var that=this;
 
@@ -52,6 +53,7 @@ var colorPickerObj=function(colorPickerDiv){
 				framesManager.currentWindowBrushColor=colorGenerator.parseColor(newColor);
 				//$(framesManager.lastSelectedWindowDiv).css("backgroundColor",newColor)
 				//framesManager.setSingleWindowColor(newColor);
+				that.colorViewer.css("backgroundColor", newColor);
 				that.hide();
 			}
 		})

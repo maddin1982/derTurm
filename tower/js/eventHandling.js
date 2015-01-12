@@ -10,28 +10,60 @@ function initializeEvents(){
 	document.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
 
-	$("#addFrameBtn").on("click",framesManager.addFrame)
-	$("#showInModelBtn").on("click",framesManager.showInModel)
+	$("#addFrameBtn").on("click",framesManager.addFrame);
+	$("#showInModelBtn").on("click",framesManager.showInModel);
 	
 	//save dialog
-	$("#openSaveDialogBtn").on("click",showSaveDialog)
+	$("#openSaveDialogBtn").on("click",showSaveDialog);
 	
 	$("#saveSceneBtn").on("click",function(){
-		framesManager.saveSceneToFile($('#saveDialog_fileName').val())
+		framesManager.saveSceneToFile($('#saveDialog_fileName').val());
 		$('#saveSceneModal').modal('hide');
 	})
+
+	$("#viewModeBtn").on("click", function() {
+		$("#readyEditingBtns").show();
+		$("#showSettingBtn").show();
+		$(this).hide();
+		//show big tower
+		tower3D.container.addClass("fullscreen");
+		tower3D.update3DWindowAspectRatio();
+	});
+
+	$("#editModeBtn").on("click", function() {
+		$("#readyEditingBtns").hide();
+		$("#viewModeBtn").show();
+		$("#showSettingBtn").hide();
+		tower3D.container.removeClass("fullscreen");
+		tower3D.update3DWindowAspectRatio();
+	});
+
+	$("#reloadPageBtn").on("click", function() {
+		framesManager.clearFrames();
+		if($("#readyEditingBtns").is(':visible')) {
+			$("#readyEditingBtns").hide();
+			$("#viewModeBtn").show();
+			$("#showSettingBtn").hide();
+			tower3D.container.removeClass("fullscreen");
+			tower3D.update3DWindowAspectRatio();
+		}
+	});
 	
 	$("#openColorSelectBtn").on("click",function(event){
 		myColorPicker.moveToPosition(event.pageX ,event.pageY );
 		myColorPicker.show();
-	})
+	});
+
+	$("#loadImageBtn").on("click",function(event) {
+		$("#loadImageModal").modal('show');
+	});
 
 	//load files button
-	$("#loadSceneFilesBtn").on("click",framesManager.getSavedScenes)
+	$("#loadSceneFilesBtn").on("click",framesManager.getSavedScenes);
 	
 	// Klick auf dropdown für Fensteranzahl
 	$(".activeWindowsSelect").on("click",function(){	
-		windowManager.setWindowAmount(parseInt($(this).attr("activeWindows")))
+		windowManager.setWindowAmount(parseInt($(this).attr("activeWindows")));
 	});
 	
 	// Klick auf dropdown für Fenster Modus
@@ -197,6 +229,16 @@ function initializeEvents(){
 		//reset the current row when the modal dialog is hidden
 		currentModalDialogRow = null;
 		currentFrameType = null;
+	});
+
+	$("#loadImageURL").on("input", function() {
+		console.log("changedurl");
+		$("#loadImagePreview").attr("src", $(this).val());
+	});
+
+	$("#processImageBtn").on("click", function() {	
+		imageProcessing.processImage();
+		$("#loadImageModal").modal('hide');
 	});
 
 	$(document).mouseup(function(event) {

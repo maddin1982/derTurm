@@ -25,7 +25,7 @@ $(document).ready(function() {
 	windowManager = new windowManagerObj();	
 	
 	//initialize color selection popup
-	myColorPicker= new colorPickerObj($("#colorPicker"));
+	myColorPicker= new colorPickerObj($("#colorPicker"), $("#openColorSelectBtn"));
 	myColorPicker.addColorSelection(colorGenerator.ColorSets.WARM);
 
 	windowVector = 	new WindowVector();
@@ -34,7 +34,7 @@ $(document).ready(function() {
 
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
-	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));	
+	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));
 
 	//Mouse Events Sliders and so on...
 	initializeEvents();
