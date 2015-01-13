@@ -203,6 +203,7 @@ var framesManagerObj = function(framesContainer){
 			divToChange = null;
 
 			if(event.type=="touchmove"){
+				event.preventDefault();
 				divToChange = document.elementFromPoint(event.originalEvent.touches[0].pageX, event.originalEvent.touches[0].pageY)
 			}
 			else{
