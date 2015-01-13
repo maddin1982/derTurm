@@ -24,6 +24,11 @@ app.use('/', express.static(__dirname + '/tower'));
 app.use('/protected', auth);
 app.use('/protected', express.static(__dirname + '/tower'));
 
+//return content with full option set
+app.use('/sceneranking', auth);
+app.use('/sceneranking', express.static(__dirname + '/scenerankingEditor'));
+
+
 
 //todo add other apps
 function getSceneRankingItem(sceneName,dynamicRating,staticRating){
@@ -61,7 +66,7 @@ app.io.route('saveSceneToFile', function(req) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});
-	
+
 	//change sceneranking file!! 
 	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
 		var sceneRanking=[];
@@ -76,7 +81,7 @@ app.io.route('saveSceneToFile', function(req) {
 					sceneRanking.splice(i,1);
 					i--;
 				}
-			}	
+			}
 		}
 		else{
 			//write new sceneRanking File
@@ -93,10 +98,10 @@ app.io.route('saveSceneToFile', function(req) {
 		  console.log('It\'s saved!');
 		});
 	})
-	
+
 	// make a neat commit message to say what happened
 	var commitMessage = "app.js: animation '" + filename.trim() + "' saved";
-	
+
 	// push saved animations
 	gitsync.push( { init: true, message: commitMessage }, function( error )
 	{
@@ -108,7 +113,7 @@ app.io.route('saveSceneToFile', function(req) {
 
 function getAllSceneFileNames(){
 	var sceneNames = fs.readdirSync('savedAnimations/');
-	//remove all filenames beginning with an underscore or a dot
+	//remove all filenames begingetSceneRankingItemning with an underscore or a dot
 	for(var i=0;i<sceneNames.length;i++){
 		if(sceneNames[i].charAt(0)=="_" || sceneNames[i].charAt(0)=="."){
 			sceneNames.splice(i,1)
@@ -118,8 +123,126 @@ function getAllSceneFileNames(){
 	return sceneNames;
 }
 
+
+app.io.route('getSceneRankings', function(req) {
+	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
+	  if (err) throw err;
+	  req.io.emit('sceneRankingsLoaded', data)
+	});
+})
+
+function writeSceneRanking(sceneRanking){
+	fs.writeFile('savedAnimations/_sceneRanking', JSON.stringify(sceneRanking), function (err) {
+	  if (err) throw err;
+	  console.log('It\'s saved!');
+	});
+}
+
+app.io.route('setSceneRanking', function(req) {
+	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
+		if(data){
+			var sceneRanking=[];
+			sceneRanking=JSON.parse(data);
+
+			for (var i in sceneRanking) {
+				if(req.data[0] == sceneRanking[i]["sceneName"]){
+			  		console.log("changing Dynamic setting of " + sceneRanking[i]["sceneName"] + " to " + req.data[1]);
+			  		if (req.data[2] == "static")
+			  			sceneRanking[i]["staticRating"] = req.data[1]
+			  		else if (req.data[2] == "dynamic")
+			  			sceneRanking[i]["dynamicRating"] = req.data[1]
+			  	}
+			}
+			writeSceneRanking(sceneRanking)
+			req.io.emit('sceneRankingsLoaded', JSON.stringify(sceneRanking))
+		}
+	})
+})
+
+function deleteSceneFromRanking(req) {
+	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
+		if(data){
+			var sceneRanking=[];
+			sceneRanking=JSON.parse(data);
+
+			for (var i in sceneRanking) {
+				if(req.data[0] == sceneRanking[i]["sceneName"]){
+			  		console.log("delete scene from ranting " + sceneRanking[i]["sceneName"] + " to " + req.data[1]);
+			  		sceneRanking.splice(i, 1);
+			  	}
+			}
+			writeSceneRanking(sceneRanking)
+			req.io.emit('sceneRankingsLoaded', JSON.stringify(sceneRanking))
+		}
+	})
+}
+
+app.io.route('deleteSceneFromRanking', function(req) {
+	deleteSceneFromRanking(req)
+})
+
+app.io.route('deleteScene', function(req) {
+
+	deleteSceneFromRanking(req)
+
+	var fs = require('fs');
+
+	fs.unlinkSync('savedAnimations/'+req.data[0], function (err) {
+	  if (err) throw err;
+	  console.log('successfully deleted /savedAnimations/'+req.data[0]);
+	});
+	req.io.emit('savedScenesLoaded', getAllSceneFileNames())
+})
+
+function readAndEmitSceneRankings(req){
+	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
+	  if (err) throw err;
+	  req.io.emit('sceneRankingsLoaded', data)
+	});
+}
+
+app.io.route('addToRanking', function(req) {
+	console.log("add a scene to the ranking file")
+	filename=req.data[0]
+	//change sceneranking file!! 
+	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
+		var sceneRanking=[];
+		if(data){
+			//add file-data to existing sceneRanking file
+			console.log("add file to existing sceneRanking file")
+			sceneRanking=JSON.parse(data);
+
+			//check if sceneName exists and remove it
+			for(var i=0;i<sceneRanking.length;i++){
+				if(sceneRanking[i].sceneName==filename){
+					sceneRanking.splice(i,1);
+					i--;
+				}
+			}
+		}
+		else{
+			//write new sceneRanking File
+			var fileNames=getAllSceneFileNames();
+			console.log("add new sceneRanking")
+			for(var i=0;i<fileNames.length;i++)
+				sceneRanking.push(getSceneRankingItem(fileNames[i],1,1))
+		}
+		//add new Scene
+		sceneRanking.push(getSceneRankingItem(filename,10,1))
+
+		fs.writeFile('savedAnimations/_sceneRanking', JSON.stringify(sceneRanking), function (err) {
+		  if (err) throw err;
+		  console.log('It\'s saved!');
+		});
+
+		req.io.emit('sceneRankingsLoaded', JSON.stringify(sceneRanking) )
+	})
+
+})
+
 app.io.route('getSavedScenes', function(req) {
 	req.io.emit('savedScenesLoaded', getAllSceneFileNames())
+	console.log("getSavedScenes")
 })
 
 app.io.route('getSceneData', function(req) {
