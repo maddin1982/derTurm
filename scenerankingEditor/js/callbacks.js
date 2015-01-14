@@ -29,7 +29,7 @@
 		   $("#listOfUnusedFiles").append("<li class=''><div class='sceneNameSpace f_left'> "+sceneName+"</div> \
 		   	<i id='addBtn' class='ui-icon ui-icon-plus f_left' onclick='addToRanking(\""+sceneName+"\")'></i> \
 		   	<i id='addBtn' class='ui-icon ui-icon-clock f_left' onclick='addToŚcheduling(\""+sceneName+"\")'></i> \
-			<i id='delteBtn' class='ui-icon  ui-icon-trash f_left' onclick='deleteScene(\""+sceneName+"\")'></i> \
+			<i id='delteBtn' class=' ui-icon  ui-icon-trash f_left padLeft' onclick='deleteScene(\""+sceneName+"\")'></i> \
 			</li>")
 		 })
 	})
@@ -79,6 +79,18 @@
 			var date = new Date(sceneName["endDate"]);
 			picker.setLocalDate(date);
 
+		    //$('#datetimeEndpicker'+i).on('changeDate','changeEndDate("'+sceneName["sceneName"]+'","'+sceneName["endDate"]+'","'+i+'")')
+
+		    $('#datetimeEndpicker'+i).on('changeDate', function(e) {
+			   timestamp = new Date(e.date).getTime();
+			   changeEndDate(sceneName["sceneName"], timestamp, i)
+			});
+
+		    $('#datetimeStartpicker'+i).on('changeDate', function(e) {
+			  timestamp = new Date(e.date).getTime();
+			  changeStartDate(sceneName["sceneName"], timestamp, i)
+			});
+
 			var spinner = $( "#spinner"+i ).spinner();
 		 })
 	})
@@ -121,5 +133,19 @@ function deleteSceneFromScheduling(scenename, index)
 {
 	console.log("delete Scene from scheduler" + scenename)
 	io.emit("deleteSceneFromScheduling",[scenename, index])
+
+}
+
+function changeStartDate(scenename, timestamp, index)
+{
+	console.log("change start date from scheduler" + scenename)
+	io.emit("changeStartDate",[scenename, timestamp, index])
+
+}
+
+function changeEndDate(scenename, timestamp, index)
+{
+	console.log("change end date from scheduler" + scenename)
+	io.emit("changeEndDate",[scenename, timestamp, index])
 
 }

@@ -305,12 +305,51 @@ function deleteSceneFromScheduling(req, deleteAllfromName) {
 	})
 }
 
-
 app.io.route('deleteSceneFromScheduling', function(req) {
 	deleteSceneFromScheduling(req)
 	console.log("deleteSceneFromScheduling")
 })
 
+//todo:: 
+function changeDateForSceneInScheduler(req, useStartDate){
+	// scenename, timestamp, index, start/enddate
+	var timestamp=req.data[1]
+	fs.readFile('savedAnimations/_schedule', "utf-8", function (err, data) {
+		if(data){
+			var schedule=[];
+			schedule=JSON.parse(data);
+
+			var i = schedule.length
+			//reversed for delting. Deleting more than one item breaks the index calculation
+
+			if(schedule[req.data[2]]){
+				if(schedule[req.data[2]]["sceneName"] == req.data[0]){
+					if(useStartDate==true){
+						schedule[req.data[2]]["startDate"] = timestamp
+						console.log("chagne starttime for scene  "+ req.data[2] + " - "+ schedule[req.data[2]]["sceneName"] +" - "+ timestamp )
+					}
+					else{
+						schedule[req.data[2]]["endDate"] = timestamp
+						console.log("chagne endtime for scene  "+ req.data[2] + " - "+ schedule[req.data[2]]["sceneName"] +" - "+ timestamp)
+					}
+				}
+			}
+			writeScheduleFile(schedule)
+			//req.io.emit('scheduledScenesLoaded', JSON.stringify(schedule))
+		}
+	})
+}
+
+
+app.io.route('changeStartDate', function(req) {
+	changeDateForSceneInScheduler(req, true)
+	console.log("changeStartDate")
+})
+
+app.io.route('changeEndDate', function(req) {
+	changeDateForSceneInScheduler(req, false)
+	console.log("changeEndDate")
+})
 
 
 
