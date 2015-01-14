@@ -1,7 +1,6 @@
 var Windows2DObj=function(){
 
 	var that = this;
-	var PI = 3.14159265359;
 
 	var c;
 	var ctx;
@@ -33,10 +32,11 @@ var Windows2DObj=function(){
 	}
 
 	this.setWindowToColor=function(i,newColor){
+		
 		newColor="rgb("+newColor[0]+","+newColor[1]+","+newColor[2]+")";
 		ctx.fillStyle = newColor;
-		var a1 = 2.*PI/windows_num*i;
-		var a2 = 2.*PI/windows_num*(i+1)-margin/outer_radius;
+		var a1 = (2.*Math.PI)/windows_num*i-(2.*Math.PI)/windows_num*3;
+		var a2 = (2.*Math.PI)/windows_num*(i+1)-(2.*Math.PI)/windows_num*3-margin/outer_radius;
 		var x_inner_1 = center.x + inner_radius*Math.cos(a1);
 		var x_inner_2 = center.x + inner_radius*Math.cos(a2);
 		var x_outer_1 = center.x + outer_radius*Math.cos(a1);
