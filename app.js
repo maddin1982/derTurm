@@ -310,7 +310,6 @@ app.io.route('deleteSceneFromScheduling', function(req) {
 	console.log("deleteSceneFromScheduling")
 })
 
-//todo:: 
 function changeDateForSceneInScheduler(req, useStartDate){
 	// scenename, timestamp, index, start/enddate
 	var timestamp=req.data[1]
@@ -318,9 +317,6 @@ function changeDateForSceneInScheduler(req, useStartDate){
 		if(data){
 			var schedule=[];
 			schedule=JSON.parse(data);
-
-			var i = schedule.length
-			//reversed for delting. Deleting more than one item breaks the index calculation
 
 			if(schedule[req.data[2]]){
 				if(schedule[req.data[2]]["sceneName"] == req.data[0]){
@@ -335,11 +331,9 @@ function changeDateForSceneInScheduler(req, useStartDate){
 				}
 			}
 			writeScheduleFile(schedule)
-			//req.io.emit('scheduledScenesLoaded', JSON.stringify(schedule))
 		}
 	})
 }
-
 
 app.io.route('changeStartDate', function(req) {
 	changeDateForSceneInScheduler(req, true)
@@ -351,6 +345,34 @@ app.io.route('changeEndDate', function(req) {
 	console.log("changeEndDate")
 })
 
+
+function changeRepeatInScheduler(req){
+	// scenename, timestamp, index, start/enddate
+	var sceneName=req.data[0]
+	var repeatValue=req.data[1]
+	var index=req.data[2]
+	fs.readFile('savedAnimations/_schedule', "utf-8", function (err, data) {
+		if(data){
+			var schedule=[];
+			schedule=JSON.parse(data);
+
+			var i = schedule.length
+
+			if(schedule[index]){
+				if(schedule[index]["sceneName"] == sceneName){
+					schedule[index]["repeatEach"] = repeatValue
+					console.log("chagne repeatEach for scene  "+ index + " - "+ sceneName +" - "+ repeatValue )
+				}
+			}
+			writeScheduleFile(schedule)
+		}
+	})
+}
+
+app.io.route('changeRepeatInScheduler', function(req) {
+	changeRepeatInScheduler(req)
+	console.log("changeRepeatInScheduler")
+})
 
 
 app.io.route('getSavedScenes', function(req) {
