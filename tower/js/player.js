@@ -3,7 +3,7 @@ var PlayerObj = function(DataManager){
 	
 	var that=this;
 	
-	var fps=60;
+	var fps=24;
 
 	var frameRendered = false;
 	
