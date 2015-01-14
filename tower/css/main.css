@@ -23,6 +23,7 @@ body {
 
 #scalablePreviewWindow{
 	min-height: 100px;
+	background: url(../img/static_tower.png) no-repeat center center;
 }
 
 .ui-resizable-s{

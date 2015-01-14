@@ -133,6 +133,10 @@ function reload3dModel(){
 	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));
 }
 
+function stop3dModel() {
+	tower3D.stop();
+}
+
 // function createVectorDivWindows(){
 	// for(var i=0;i<16;i++){
 		// $("#windowVector").append("<div id='window"+i+"' class='window'></div>")
