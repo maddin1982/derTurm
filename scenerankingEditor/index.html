@@ -7,14 +7,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		
 		<!-- css includes -->
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/bootstrap/bootstrap.min.css">
         <link rel="stylesheet" href="../css/bootstrap/bootstrap-theme.min.css">
+
         <link rel="stylesheet" href="../css/slider.css">
         <link rel="stylesheet" href="../css/sortable.css">
         <link rel="stylesheet" href="../css/resizable.css">
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="../css/composition.css">
         <link rel="stylesheet" href="../css/jqueryUi/jquery-ui.min.css">
+        <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
 
 		<!-- jQuery includes, include before bootstrap!!!-->
 		<script src="../js/vendor/jquery-1.11.1.min.js"></script>
@@ -25,6 +28,9 @@
 		<!-- Bootstrap includes -->
 		<script src="../js/vendor/bootstrap.min.js"></script>
 		<script src="../js/vendor/bootstrap-slider.js"></script>
+		<script src="js/bootstrap-datetimepicker.min.js"></script>
+		<script src="js/bootstrap-datetimepicker.de.js"></script>
+
 
 		<!-- socket io -->
 		<script src="../../socket.io/socket.io.js"></script>
@@ -37,12 +43,15 @@
 
     </head>
     <body oncontextmenu="return false;">
-
 		<div class="container">	
 			<div id="listOfFiles">
 			</div>
 			<br><br>
-			<div id="listOfUnusedFiles" class="f_left">
+			<div id="listOfUnusedFiles" class="">
+				test
+			</div>
+			<br><br>
+			<div id="scheduledFiles" class="">
 				test
 			</div>
 		</div>

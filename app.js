@@ -39,6 +39,19 @@ function getSceneRankingItem(sceneName,dynamicRating,staticRating){
 	return item;
 }
 
+//todo add other apps
+function getScheduleItem(sceneName){
+	var item={};
+	var d = new Date();
+	var milli = d.getTime();
+
+	item.sceneName=sceneName;
+	item.startDate=milli;
+	item.endDate=milli;
+	item.repeatEach=1;
+	return item;
+}
+
 //save scene to file
 app.io.route('saveSceneToFile', function(req) {
 	//save to file; if no filename is set, make one
@@ -93,10 +106,7 @@ app.io.route('saveSceneToFile', function(req) {
 		//add new Scene
 		sceneRanking.push(getSceneRankingItem(filename,10,1))
 
-		fs.writeFile('savedAnimations/_sceneRanking', JSON.stringify(sceneRanking), function (err) {
-		  if (err) throw err;
-		  console.log('It\'s saved!');
-		});
+		writeSceneRanking(sceneRanking)
 	})
 
 	// make a neat commit message to say what happened
@@ -133,6 +143,13 @@ app.io.route('getSceneRankings', function(req) {
 
 function writeSceneRanking(sceneRanking){
 	fs.writeFile('savedAnimations/_sceneRanking', JSON.stringify(sceneRanking), function (err) {
+	  if (err) throw err;
+	  console.log('It\'s saved!');
+	});
+}
+
+function writeScheduleFile(sceneRanking){
+	fs.writeFile('savedAnimations/_schedule', JSON.stringify(sceneRanking), function (err) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});
@@ -184,6 +201,7 @@ app.io.route('deleteSceneFromRanking', function(req) {
 app.io.route('deleteScene', function(req) {
 
 	deleteSceneFromRanking(req)
+	deleteSceneFromScheduling(req, true)
 
 	var fs = require('fs');
 
@@ -230,15 +248,71 @@ app.io.route('addToRanking', function(req) {
 		//add new Scene
 		sceneRanking.push(getSceneRankingItem(filename,10,1))
 
-		fs.writeFile('savedAnimations/_sceneRanking', JSON.stringify(sceneRanking), function (err) {
-		  if (err) throw err;
-		  console.log('It\'s saved!');
-		});
+		writeSceneRanking(sceneRanking)
 
 		req.io.emit('sceneRankingsLoaded', JSON.stringify(sceneRanking) )
 	})
-
 })
+
+app.io.route('addToŚcheduling', function(req) {
+	console.log("add a scene to the schedule file")
+	filename=req.data[0]
+	//change sceneranking file!! 
+	fs.readFile('savedAnimations/_schedule', "utf-8", function (err, data) {
+		var schedule=[];
+		if(data){
+			//add file-data to existing sceneRanking file
+			console.log("add file to existing schedule file")
+			schedule=JSON.parse(data);
+		}
+		else{
+			//do nothing
+			return;
+		}
+		//add new Scene
+		schedule.push(getScheduleItem(filename))
+
+		writeScheduleFile(schedule)
+
+		req.io.emit('scheduledScenesLoaded', JSON.stringify(schedule) )
+	})
+})
+
+function deleteSceneFromScheduling(req, deleteAllfromName) {
+	// req = Filename, index inside array.
+
+	// default parameter
+	if(typeof(deleteAllfromName)==='undefined') deleteAllfromName = false;
+
+	fs.readFile('savedAnimations/_schedule', "utf-8", function (err, data) {
+		if(data){
+			var schedule=[];
+			schedule=JSON.parse(data);
+
+			var i = schedule.length
+			//reversed for delting. Deleting more than one item breaks the index calculation
+			while (i--) {
+			  		console.log("delete scene from TEST  "+ i + " - "+ schedule[i]["sceneName"]);
+
+				if((req.data[0] == schedule[i]["sceneName"]) && (req.data[1]==i) || ((deleteAllfromName == true) && (req.data[0] == schedule[i]["sceneName"])) )  {
+			  		console.log("delete scene from scheduling " + schedule[i]["sceneName"]);
+			  		schedule.splice(i, 1);
+			  	}
+			}
+			writeScheduleFile(schedule)
+			req.io.emit('scheduledScenesLoaded', JSON.stringify(schedule))
+		}
+	})
+}
+
+
+app.io.route('deleteSceneFromScheduling', function(req) {
+	deleteSceneFromScheduling(req)
+	console.log("deleteSceneFromScheduling")
+})
+
+
+
 
 app.io.route('getSavedScenes', function(req) {
 	req.io.emit('savedScenesLoaded', getAllSceneFileNames())
@@ -252,6 +326,16 @@ app.io.route('getSceneData', function(req) {
 	});
 })
 
+
+
+
+//Scheduled Scenes
+app.io.route('getScheduledScenes', function(req) {
+	fs.readFile('savedAnimations/_schedule', "utf-8", function (err, data) {
+	  if (err) throw err;
+	  req.io.emit('scheduledScenesLoaded', data)
+	});
+})
 
 var server = app.listen(3000, function () {
 

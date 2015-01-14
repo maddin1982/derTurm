@@ -6,6 +6,7 @@
 
 	io.emit("getSceneRankings",[])
 	getSavedScened()
+	getScheduledScenes()
 
 	//io Server Responses
 	io.on('sceneRankingsLoaded', function(data) {
@@ -27,13 +28,70 @@
 		 $.each(data,function(i,sceneName){	
 		   $("#listOfUnusedFiles").append("<li class=''><div class='sceneNameSpace f_left'> "+sceneName+"</div> \
 		   	<i id='addBtn' class='ui-icon ui-icon-plus f_left' onclick='addToRanking(\""+sceneName+"\")'></i> \
+		   	<i id='addBtn' class='ui-icon ui-icon-clock f_left' onclick='addToŚcheduling(\""+sceneName+"\")'></i> \
 			<i id='delteBtn' class='ui-icon  ui-icon-trash f_left' onclick='deleteScene(\""+sceneName+"\")'></i> \
 			</li>")
 		 })
-
-		console.log("sceneDataLoaded")
 	})
 
+
+
+	io.on('scheduledScenesLoaded', function(data) {
+		data = jQuery.parseJSON(data);
+
+		$("#scheduledFiles").empty();
+		 $.each(data,function(i,sceneName){	
+		   $("#scheduledFiles").append("<li class=''><div class='sceneNameSpace f_left'> "+sceneName["sceneName"]+"</div> \
+		   	<i id='delteBtn' class='ui-icon   ui-icon-minus f_left' onclick='deleteSceneFromScheduling(\""+sceneName["sceneName"]+"\","+i+")'></i> \
+			  <div id='datetimeStartpicker"+i+"' class='input-append date f_left'> \
+			    <input type='text'></input>\
+			    <span class='add-on'>\
+			      <i data-time-icon='icon-time' data-date-icon='icon-calendar'>\
+			      </i>\
+			    </span>\
+			  </div>\
+			  <div id='datetimeEndpicker"+i+"' class='input-append date f_left'> \
+			    <input type='text'></input>\
+			    <span class='add-on'>\
+			      <i data-time-icon='icon-time' data-date-icon='icon-calendar'>\
+			      </i>\
+			    </span>\
+			  </div>\
+		    </div> <input class='f_left' id='spinner"+i+"' name='value' value='"+sceneName["repeatEach"]+"'></input> \
+			 </li>")
+
+		    $('#datetimeStartpicker'+i).datetimepicker({
+		      format: 'dd.MM.yyyy hh:mm:ss',
+		      language: 'de'
+		    });
+
+			var picker = $('#datetimeStartpicker'+i).data('datetimepicker');
+			var date = new Date(sceneName["startDate"]);
+			picker.setLocalDate(date);
+
+
+		    $('#datetimeEndpicker'+i).datetimepicker({
+		      format: 'dd.MM.yyyy hh:mm:ss',
+		      language: 'de'
+		    });
+
+			var picker = $('#datetimeEndpicker'+i).data('datetimepicker');
+			var date = new Date(sceneName["endDate"]);
+			picker.setLocalDate(date);
+
+			var spinner = $( "#spinner"+i ).spinner();
+		 })
+	})
+
+function addToŚcheduling(scene){
+ console.log("addToŚcheduling call")
+	io.emit("addToŚcheduling",[scene])
+}
+
+function getScheduledScenes(scene, rating ){
+ console.log("getScheduledScenes call")
+	io.emit("getScheduledScenes",[])
+}
 
 function setSceneRanking(scene, rating ){
  console.log("setSceneRanking call")
@@ -57,4 +115,11 @@ function addToRanking(scenename){
 function deleteScene(scenename){
 	console.log("deleteScene scene" + scenename)
 	io.emit("deleteScene",[scenename])
+}
+
+function deleteSceneFromScheduling(scenename, index)
+{
+	console.log("delete Scene from scheduler" + scenename)
+	io.emit("deleteSceneFromScheduling",[scenename, index])
+
 }
