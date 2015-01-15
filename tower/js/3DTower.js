@@ -103,9 +103,22 @@ var Tower3DObj=function(){
 						return returnMaterial;
 					}
 					
-					for(var i =0; i<16;i++){
-						windowMaterials[i]=getMaterialByName("window_"+(i+1))
-					}	
+						windowMaterials[1]=getMaterialByName("window_11")
+						windowMaterials[2]=getMaterialByName("window_12")
+						windowMaterials[3]=getMaterialByName("window_13")
+						windowMaterials[4]=getMaterialByName("window_14")
+						windowMaterials[5]=getMaterialByName("window_15")
+						windowMaterials[6]=getMaterialByName("window_16")
+						windowMaterials[7]=getMaterialByName("window_1")
+						windowMaterials[8]=getMaterialByName("window_2")
+						windowMaterials[9]=getMaterialByName("window_3")
+						windowMaterials[10]=getMaterialByName("window_4")
+						windowMaterials[11]=getMaterialByName("window_5")
+						windowMaterials[12]=getMaterialByName("window_6")
+						windowMaterials[13]=getMaterialByName("window_7")
+						windowMaterials[14]=getMaterialByName("window_8")
+						windowMaterials[15]=getMaterialByName("window_9")
+						windowMaterials[16]=getMaterialByName("window_10")
 			}
 			var loader = new THREE.JSONLoader();
 			loader.load( "js/3dModels/ernemannturm.json", modelToScene );
