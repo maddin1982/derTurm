@@ -90,6 +90,12 @@ body {
 	float:left;
 	height:30px;
 }
+
+#loadSceneContainer {
+	float: left;
+	position: relative;
+}
+
 #showSettingBtn{
 	position:absolute;
 	top:5px;
