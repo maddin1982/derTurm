@@ -5,8 +5,6 @@ var colorPickerObj=function(colorPickerDiv, colorViewer){
 	this.isDragged=false;
 	var that=this;
 
-	framesManager.currentWindowBrushColor=colorGenerator.parseColor("#ffffff");
-
 	colorPickerDiv.draggable({
 		start: function() {
 			that.isDragged=true;

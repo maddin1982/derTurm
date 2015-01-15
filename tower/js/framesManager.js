@@ -5,7 +5,7 @@ var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
 	this.lastSelectedWindowDiv;
-	this.currentWindowBrushColor=[0,0,0];
+	this.currentWindowBrushColor=[255,255,255];
 	
 	var indexBeforeDrag;
 	makeFramesContainersortable();
