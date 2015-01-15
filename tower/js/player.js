@@ -15,11 +15,6 @@ var PlayerObj = function(DataManager){
 	this.lastFrameStartTime=new Date().getTime();
 	var data=[];
 
-	var windows2D;
-	//initialize 2d Scene
-	windows2D=new Windows2DObj();
-	windows2D.init2DWindows($("#previewCircleWindow"), 16);
-
 	//start framechange with timer if it isnt already running
 	this.start=function(){
 
@@ -91,7 +86,6 @@ var PlayerObj = function(DataManager){
 			}
 			that.currentFrame=tmp;
 			if(changed) {
-				windows2D.animate();
 				frameRendered = false;
 			}
 			

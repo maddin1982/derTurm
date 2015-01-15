@@ -9,7 +9,11 @@ var Windows2DObj=function(){
 	var center = [];
 	var outer_radius = 45;
 	var inner_radius = 31;
-	var margin = 6;
+	var margin = 5;
+
+	var framerate = 24;
+
+	var renderTimeout;
 
 	this.init2DWindows=function(container, windowAmount) {
 
@@ -23,8 +27,14 @@ var Windows2DObj=function(){
 	}
 
 	this.animate=function() {
+
+		renderTimeout=setTimeout( function() {
+			that.animate();
+		}, 1000 / framerate );
+
 		var currentFrame=player.getCurrentFrame();
-		if(!(currentFrame.windows===undefined)){
+		that.clear();
+		if(!(currentFrame.windows===undefined)) {
 			$.each(currentFrame.windows,function(i,window){
 				that.setWindowToColor(i,window.color)
 			})
@@ -53,6 +63,10 @@ var Windows2DObj=function(){
 		ctx.closePath();
 		ctx.fill();
 		
+	}
+
+	this.clear = function() {
+		ctx.clearRect ( 0 , 0 , $(c).width(), $(c).height() );
 	}
 
 }

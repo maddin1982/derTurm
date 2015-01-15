@@ -4,6 +4,7 @@ var framesManager;
 var windowManager;
 var myColorPicker;
 var tower3D;
+var windows2D;
 var player;
 var windowVector;
 
@@ -35,6 +36,11 @@ $(document).ready(function() {
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
 	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));
+
+	//initialize 2d Scene
+	windows2D=new Windows2DObj();
+	windows2D.init2DWindows($("#previewCircleWindow"), 16);
+	windows2D.animate();
 
 	//Mouse Events Sliders and so on...
 	initializeEvents();
