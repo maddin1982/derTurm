@@ -9,3 +9,14 @@
 .padLeft{
 	margin-left: 50px
 }
+
+.col {
+    box-sizing: border-box;
+    float: left;
+    padding: 10px;
+    margin-left: 2%;
+}
+.col:first-child {
+    margin-left: 0;
+}
+

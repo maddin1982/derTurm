@@ -79,19 +79,21 @@
 			var date = new Date(sceneName["endDate"]);
 			picker.setLocalDate(date);
 
-		    //$('#datetimeEndpicker'+i).on('changeDate','changeEndDate("'+sceneName["sceneName"]+'","'+sceneName["endDate"]+'","'+i+'")')
-
 		    $('#datetimeEndpicker'+i).on('changeDate', function(e) {
-			   timestamp = new Date(e.date).getTime();
+			   timestamp = new Date(e.localDate).getTime();
 			   changeEndDate(sceneName["sceneName"], timestamp, i)
 			});
 
 		    $('#datetimeStartpicker'+i).on('changeDate', function(e) {
-			  timestamp = new Date(e.date).getTime();
+			  timestamp = new Date(e.localDate).getTime();
 			  changeStartDate(sceneName["sceneName"], timestamp, i)
 			});
 
 			var spinner = $( "#spinner"+i ).spinner();
+
+			$( "#spinner"+i ).on("spinstop", function(){
+				changeRepeatCount(sceneName["sceneName"],$(this).spinner('value'),i)
+			});
 		 })
 	})
 
@@ -133,19 +135,23 @@ function deleteSceneFromScheduling(scenename, index)
 {
 	console.log("delete Scene from scheduler" + scenename)
 	io.emit("deleteSceneFromScheduling",[scenename, index])
-
 }
 
 function changeStartDate(scenename, timestamp, index)
 {
 	console.log("change start date from scheduler" + scenename)
 	io.emit("changeStartDate",[scenename, timestamp, index])
-
 }
 
 function changeEndDate(scenename, timestamp, index)
 {
 	console.log("change end date from scheduler" + scenename)
 	io.emit("changeEndDate",[scenename, timestamp, index])
-
 }
+
+function changeRepeatCount(scenename, repeatCount, index)
+{
+	console.log("change repeat from scheduler for " + scenename)
+	io.emit("changeRepeatInScheduler",[scenename, repeatCount, index])
+}
+
