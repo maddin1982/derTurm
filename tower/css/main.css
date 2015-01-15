@@ -65,7 +65,7 @@ body {
 	width: 97px;
 	height: 97px;
 	border-radius: 48px;
-	border: 1px solid #212122;
+	overflow: hidden;
 }
 
 #previewCircleWindowContainer {
@@ -76,7 +76,7 @@ body {
 	position: relative;
 	overflow: hidden;
 	padding: 0;
-	height: 97px;
+	height: 100px;
 	width: 331px;
 	background: url(../img/title.png) no-repeat;
 }
