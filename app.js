@@ -79,24 +79,23 @@ app.io.route('saveSceneToFile', function(req) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});
-
 	//change sceneranking file!! 
 	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
 		var sceneRanking=[];
 		if(data){
 			//add file-data to existing sceneRanking file
-			console.log("add file to existing sceneRanking file")
+			console.log("add file to existing sceneRanking file!")
 			sceneRanking=JSON.parse(data);
-
 			//check if sceneName exists and remove it
 			for(var i=0;i<sceneRanking.length;i++){
+				sceneRanking[i].dynamicRating=sceneRanking[i].dynamicRating-5>1?sceneRanking[i].dynamicRating-5:1;
 				if(sceneRanking[i].sceneName==filename){
 					sceneRanking.splice(i,1);
 					i--;
 				}
 			}
 		}
-		else{
+		else{	
 			//write new sceneRanking File
 			var fileNames=getAllSceneFileNames();
 			console.log("add new sceneRanking")
@@ -109,16 +108,7 @@ app.io.route('saveSceneToFile', function(req) {
 		writeSceneRanking(sceneRanking)
 	})
 
-	// make a neat commit message to say what happened
-	var commitMessage = "app.js: animation '" + filename.trim() + "' saved";
 
-	// push saved animations
-	gitsync.push( { init: true, message: commitMessage }, function( error )
-	{
-		// log result
-		!error && console.log( "Directory \"" + gitsync.directory + "\" has been pushed." );
-		error  && console.log( "Error while pushing directory \"" + gitsync.directory + "\":", error );
-	});
 })
 
 function getAllSceneFileNames(){
@@ -141,19 +131,54 @@ app.io.route('getSceneRankings', function(req) {
 	});
 })
 
+function gitCommit(commitMessage){
+	  	// make a neat commit message to say what happened
+		if(!commitMessage) commitMessage= "no details specified";
+
+		// push saved animations
+		gitsync.push( { init: true, message: commitMessage }, function( error )
+		{
+			// log result
+			!error && console.log( "Directory \"" + gitsync.directory + "\" has been pushed." );
+			error  && console.log( "Error while pushing directory \"" + gitsync.directory + "\":", error );
+		});
+
+}
+
+
 function writeSceneRanking(sceneRanking){
+	console.log("try to write scenerankingfile")
+	console.log(sceneRanking)
+
 	fs.writeFile('savedAnimations/_sceneRanking', JSON.stringify(sceneRanking), function (err) {
-	  if (err) throw err;
-	  console.log('It\'s saved!');
-	});
+	  if (err){
+		console.log("-------------ERROR--------------------");
+		console.log(err);
+		console.log("-------------ERROREND------------------");
+	  }
+	  else{
+		console.log('new SceneRanking file was saved');
+		gitCommit("sceneRanking file updated")
+		console.log('It\'s saved!');
+	  }	  
+	});	
 }
 
 function writeScheduleFile(schedule){
 	if(!schedule)schedule=[];
 	console.log("try to write shedule file");
 	fs.writeFile('savedAnimations/_schedule', JSON.stringify(schedule), function (err) {
-	  if (err) throw err;
-	  console.log('new schedule file was saved');
+	  if (err){
+		console.log("-------------ERROR--------------------");
+		console.log(err);
+		console.log("-------------ERROREND------------------");
+	  }
+	  else{
+		console.log('new schedule file was saved');
+		gitCommit("schedule file updated")
+		console.log('It\'s saved!');
+	  }	
+	  
 	});
 }
 
@@ -229,11 +254,15 @@ app.io.route('addToRanking', function(req) {
 		var sceneRanking=[];
 		if(data){
 			//add file-data to existing sceneRanking file
-			console.log("add file to existing sceneRanking file")
+			console.log("add file to existing sceneRanking file!")
 			sceneRanking=JSON.parse(data);
-
+			console.log(sceneRanking);
 			//check if sceneName exists and remove it
 			for(var i=0;i<sceneRanking.length;i++){
+				//set dynamic rating to 1
+				console.log("reset dynamic ratingto 1 "+sceneRanking[i].sceneName); 
+				sceneRanking[i].dynamicRating=1;
+			
 				if(sceneRanking[i].sceneName==filename){
 					sceneRanking.splice(i,1);
 					i--;
