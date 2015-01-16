@@ -121,9 +121,9 @@ function getSavedScened(){
 	io.emit("getSavedScenes",[])
 }
 
-function addToRanking(scenename){
-	console.log("add to scene" + scenename)
-	io.emit("addToRanking",[scenename])
+ function addToRanking(scenename){
+	 console.log("add to scene" + scenename)
+	 io.emit("addToRanking",[scenename])
 }
 
 function deleteScene(scenename){

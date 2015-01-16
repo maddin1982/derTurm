@@ -48,7 +48,7 @@ function getScheduleItem(sceneName){
 	item.sceneName=sceneName;
 	item.startDate=milli;
 	item.endDate=milli;
-	item.repeatEach=1;
+	item.repeatEach=60000;
 	return item;
 }
 
@@ -79,7 +79,13 @@ app.io.route('saveSceneToFile', function(req) {
 	  if (err) throw err;
 	  console.log('It\'s saved!');
 	});
-	//change sceneranking file!! 
+	
+	addFileToSceneRanking(filename);	
+	
+})
+
+function addFileToSceneRanking(newFileName){
+
 	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
 		var sceneRanking=[];
 		if(data){
@@ -89,7 +95,7 @@ app.io.route('saveSceneToFile', function(req) {
 			//check if sceneName exists and remove it
 			for(var i=0;i<sceneRanking.length;i++){
 				sceneRanking[i].dynamicRating=sceneRanking[i].dynamicRating-5>1?sceneRanking[i].dynamicRating-5:1;
-				if(sceneRanking[i].sceneName==filename){
+				if(sceneRanking[i].sceneName==newFileName){
 					sceneRanking.splice(i,1);
 					i--;
 				}
@@ -103,13 +109,14 @@ app.io.route('saveSceneToFile', function(req) {
 				sceneRanking.push(getSceneRankingItem(fileNames[i],1,1))
 		}
 		//add new Scene
-		sceneRanking.push(getSceneRankingItem(filename,10,1))
+		if(newFileName)
+			sceneRanking.push(getSceneRankingItem(newFileName,10,1))
 
-		writeSceneRanking(sceneRanking)
+		writeSceneRanking(sceneRanking);
+		
 	})
+}
 
-
-})
 
 function getAllSceneFileNames(){
 	var sceneNames = fs.readdirSync('savedAnimations/');
@@ -157,11 +164,14 @@ function writeSceneRanking(sceneRanking){
 		console.log("-------------ERROREND------------------");
 	  }
 	  else{
+	  app.io.broadcast('sceneRankingsLoaded', JSON.stringify(sceneRanking) )
 		console.log('new SceneRanking file was saved');
 		gitCommit("sceneRanking file updated")
 		console.log('It\'s saved!');
+		
 	  }	  
 	});	
+	
 }
 
 function writeScheduleFile(schedule){
@@ -246,43 +256,9 @@ function readAndEmitSceneRankings(req){
 	});
 }
 
-app.io.route('addToRanking', function(req) {
-	console.log("add a scene to the ranking file")
+app.io.route('addToRanking', function(req) {	
 	filename=req.data[0]
-	//change sceneranking file!! 
-	fs.readFile('savedAnimations/_sceneRanking', "utf-8", function (err, data) {
-		var sceneRanking=[];
-		if(data){
-			//add file-data to existing sceneRanking file
-			console.log("add file to existing sceneRanking file!")
-			sceneRanking=JSON.parse(data);
-			console.log(sceneRanking);
-			//check if sceneName exists and remove it
-			for(var i=0;i<sceneRanking.length;i++){
-				//set dynamic rating to 1
-				console.log("reset dynamic ratingto 1 "+sceneRanking[i].sceneName); 
-				sceneRanking[i].dynamicRating=1;
-			
-				if(sceneRanking[i].sceneName==filename){
-					sceneRanking.splice(i,1);
-					i--;
-				}
-			}
-		}
-		else{
-			//write new sceneRanking File
-			var fileNames=getAllSceneFileNames();
-			console.log("add new sceneRanking")
-			for(var i=0;i<fileNames.length;i++)
-				sceneRanking.push(getSceneRankingItem(fileNames[i],1,1))
-		}
-		//add new Scene
-		sceneRanking.push(getSceneRankingItem(filename,10,1))
-
-		writeSceneRanking(sceneRanking)
-
-		req.io.emit('sceneRankingsLoaded', JSON.stringify(sceneRanking) )
-	})
+	addFileToSceneRanking(filename);
 })
 
 app.io.route('addToŚcheduling', function(req) {
@@ -421,9 +397,6 @@ app.io.route('getSceneData', function(req) {
 	  req.io.emit('sceneDataLoaded', data)
 	});
 })
-
-
-
 
 //Scheduled Scenes
 app.io.route('getScheduledScenes', function(req) {
