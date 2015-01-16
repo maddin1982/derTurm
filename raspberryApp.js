@@ -164,7 +164,7 @@ var FileManagerObj = function(fps){
 			highestRankedScene.currentRating=0;
 			highestRankedScene.dynamicRating=highestRankedScene.dynamicRating>highestRankedScene.staticRating?(highestRankedScene.dynamicRating-1):highestRankedScene.staticRating;
 
-			console.log("next Scene: "+highestRankedScene.sceneName+", rating values d/s:"+highestRankedScene.dynamicRating+"/"+highestRankedScene.staticRating);
+			console.log("next Scene: --<<"+highestRankedScene.sceneName+">>--, rating values d/s:"+highestRankedScene.dynamicRating+"/"+highestRankedScene.staticRating);
 			
 			return highestRankedScene.sceneName;
 		}
@@ -222,17 +222,18 @@ var FileManagerObj = function(fps){
 	
 	this.loadSchedule=function(callback){
 		fs.readFile('savedAnimations/_schedule', "utf-8", function (err, result) {
-			if (err) throw err;
-			  
-			var newSchedule=JSON.parse(result);
-			
-			if(that.scheduleDiffers(schedule,newSchedule)){
-				schedule=newSchedule;
-				console.log("----------------------------")
-				console.log("--  SCHEDULE GOT UPDATED! --")
-				console.log("----------------------------")				
-			}
+			if (err) console.log(err)
+			else{  
+				var newSchedule=JSON.parse(result);
+				
+				if(that.scheduleDiffers(schedule,newSchedule)){
+					schedule=newSchedule;
+					console.log("----------------------------")
+					console.log("--  SCHEDULE GOT UPDATED! --")
+					console.log("----------------------------")				
+				}
 			callback();
+			}
 		});
 	}
 	//loads json object holding scenenames and time [{startTime:DateObj1,sceneName:name1},{startTime:DateObj2,sceneName:name2}]
@@ -344,8 +345,12 @@ var PlayerObj = function(fps,fileManager,serialManager){
 			{
 				// log error
 				console.log( "Error pulling scenes from remote:", error );
+				fileManager.loadSceneRanking();
+				fileManager.loadSchedule(that.setNextScheduledSceneInfo);
 			}
 		});
+		
+		
 	}
 	
 	this.setNextScene=function(sceneData){	
@@ -354,16 +359,28 @@ var PlayerObj = function(fps,fileManager,serialManager){
 		nextRankedScene=sceneData;	
 		nextSceneType="rankedScene";
 		
-		//check if there is a time conflict with the next sheduled scene
-		var diff = (nextScheduledSceneInfo.nextScheduledTime-(new Date()).getTime())/1000;
-		console.log("the next scheduled scene "+nextScheduledSceneInfo.nextScheduledSceneName+" should start in "+diff+ " seconds. Precisely at "+new Date(nextScheduledSceneInfo.nextScheduledTime));
+		var nextSheduledInSeconds;
 		
-		if(diff < ((nextRankedScene.length/fps)+(blendingScene.length/fps))){
+		//check if there is a time conflict with the next sheduled scene
+		//get timespan till next sheduled scene begins
+		try{
+			if(!nextScheduledSceneInfo) throw "nextScheduledSceneInfo is not defined";
+			if(!nextScheduledSceneInfo.nextScheduledTime) throw "nextScheduledTime is not set for sceneinfo";
+			var nextSheduledInSeconds = (nextScheduledSceneInfo.nextScheduledTime-(new Date()).getTime())/1000;
+			console.log("the next scheduled scene "+nextScheduledSceneInfo.nextScheduledSceneName+" should start in "+nextSheduledInSeconds+ " seconds. Precisely at "+new Date(nextScheduledSceneInfo.nextScheduledTime));
+			
+		}
+		catch(err) {
+			console.log(err)
+			nextSheduledInSeconds=99999;
+		}
+		
+		if(nextSheduledInSeconds < ((nextRankedScene.length/fps)+(blendingScene.length/fps))){
 			console.log("nextscene: "+nextRankedScene.length/fps+" s |"+" blending: "+blendingScene.length/fps +" s are to long")
-			console.log("create a fitting blendingScene with "+(Math.floor(diff)*fps)+" frames")
+			console.log("create a fitting blendingScene with "+(Math.floor(nextSheduledInSeconds)*fps)+" frames")
 			
 			//if there is a conflict create a fitting blending scene to wait for the scheduled scene
-			var fittingBlendingScene=fileManager.getBlendingScene(Math.floor(diff)*fps)
+			var fittingBlendingScene=fileManager.getBlendingScene(Math.floor(nextSheduledInSeconds)*fps)
 			currentsceneType="blendingScene";
 			that.setCurrentScene(fittingBlendingScene);
 			

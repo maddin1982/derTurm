@@ -148,10 +148,12 @@ function writeSceneRanking(sceneRanking){
 	});
 }
 
-function writeScheduleFile(sceneRanking){
-	fs.writeFile('savedAnimations/_schedule', JSON.stringify(sceneRanking), function (err) {
+function writeScheduleFile(schedule){
+	if(!schedule)schedule=[];
+	console.log("try to write shedule file");
+	fs.writeFile('savedAnimations/_schedule', JSON.stringify(schedule), function (err) {
 	  if (err) throw err;
-	  console.log('It\'s saved!');
+	  console.log('new schedule file was saved');
 	});
 }
 
@@ -255,10 +257,14 @@ app.io.route('addToRanking', function(req) {
 })
 
 app.io.route('addToŚcheduling', function(req) {
-	console.log("add a scene to the schedule file")
+	console.log("try to add data to schedule")
 	filename=req.data[0]
 	//change sceneranking file!! 
 	fs.readFile('savedAnimations/_schedule', "utf-8", function (err, data) {
+	
+		if(err)
+			console.log("error: "+err)
+		
 		var schedule=[];
 		if(data){
 			//add file-data to existing sceneRanking file
@@ -393,8 +399,16 @@ app.io.route('getSceneData', function(req) {
 //Scheduled Scenes
 app.io.route('getScheduledScenes', function(req) {
 	fs.readFile('savedAnimations/_schedule', "utf-8", function (err, data) {
-	  if (err) throw err;
-	  req.io.emit('scheduledScenesLoaded', data)
+	  if (err){ 
+		//file does not exist
+		console.log(err);
+		//write file
+		writeScheduleFile();
+		
+	  }
+	  else{
+		req.io.emit('scheduledScenesLoaded', data)
+	  }
 	});
 })
 
