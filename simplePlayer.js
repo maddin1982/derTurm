@@ -13,13 +13,15 @@ var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
 //-----------OPTIONS--------------------------------
 
 //player speed
-var fps = 20;
+var fps = 30;
 
 //create a socket based webserver to show arduino output
 var enableWebInterface = true;
 
 //dmx device
-var dmxDevice="COM6"
+DMX.device = "\\.\COM6";
+DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
+DMX.log=true;
 
 //----------------------------------------------------
 
@@ -30,9 +32,7 @@ var DMXManager=function(){
 
 	//initialize and configure DMX Module
 	this.initialize=function(){
-		//DMX.log = true;
-		DMX.device = dmxDevice;
-		
+	
 		DMX.spawn( null, function( error ){
 			if ( error ){
 				console.log("--------DMX BRIDGE COULD NOT BE INITIALIZED -----------");
@@ -46,6 +46,7 @@ var DMXManager=function(){
 			}
 		});
 	};
+	
 	//send data
 	//data should be array with 4*16 bytes
 	this.send=function(frame){
