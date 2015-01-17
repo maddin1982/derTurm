@@ -1,23 +1,4 @@
-
-//create a socket based webserver to show arduino output
-var enableSimulation=true;
-
-if(enableSimulation){
-	//socket io for debugging and testing interface (tower simulation)
-	var express = require('express.io')
-	var app = express();
-	//open socket
-	app.http().io()
-	app.use(express.static(__dirname + '/towerSimulation'));
-	
-	var server = app.listen(3001, function () {
-	  var host = server.address().address
-	  var port = server.address().port
-	  console.log('tower app listening at http://%s:%s', host, port)
-	})
-}
-
-//file operations
+// load file module
 var fs = require('fs');
 
 // module for synchronization of user content
@@ -26,97 +7,102 @@ gitsync.directory = 'savedAnimations/';
 gitsync.remote    = 'git://localhost:3003/sync';
 gitsync.branch    = 'animations';
 
+// load Render Module
+var Renderer=require('./renderModule.js');
+
+// load DMX serial communication module
+var DMX = require('./node_modules/dmxhost/dmxhost.js');
+// var SerialPort = require("serialport").SerialPort;
+
+
+// enable or disable simulation interface with express io
+var enableSimulation=true;
+
 // time between checks for changed scenes [ms]
 var sceneCheckInterval = 30*1000;
 
-//load Render Module
-var Renderer=require('./renderModule.js');
-
-var DMX = require('./node_modules/dmxhost/dmxhost.js');
-
-//serial communication
-var SerialPort = require("serialport").SerialPort;
-
+// player speed
 var fps=50;
 
-//create new Renderer with 24 Frames
-var myRenderer=new Renderer(fps);
+
+
+
 
 //create serialmanager with library
-var SerialManagerObj =function(){
-	var that=this;
-	var serialport;
-	var serialPortReady=false;
+// var SerialManagerObj =function(){
+	// var that=this;
+	// var serialport;
+	// var serialPortReady=false;
 	
-	this.openSerialport=function(){
-		serialport = new SerialPort("COM8", {
-			baudrate: 115200,
-			dataBits: 8,
-			parity: 'none',
-			stopBits: 1,
-			flowControl: false 
-			},false);
+	// this.openSerialport=function(){
+		// serialport = new SerialPort("COM8", {
+			// baudrate: 115200,
+			// dataBits: 8,
+			// parity: 'none',
+			// stopBits: 1,
+			// flowControl: false 
+			// },false);
 		
-		serialport.open(function (error) {
-			if ( error ) {
-				console.log('failed to open: '+error);
-			} else {
-				serialPortReady=true;
-				console.log('open');
-				serialport.on('data', function(data) {
-					console.log(data)
-				});
-			}
-		})
-	}
+		// serialport.open(function (error) {
+			// if ( error ) {
+				// console.log('failed to open: '+error);
+			// } else {
+				// serialPortReady=true;
+				// console.log('open');
+				// serialport.on('data', function(data) {
+					// console.log(data)
+				// });
+			// }
+		// })
+	// }
 	
-	this.sendFrame=function(frame){
-		var allcolorsSerialized=[];
-		for(var i =0; i<frame.length;i++){
-			allcolorsSerialized.push(frame[i][0]);
-			allcolorsSerialized.push(frame[i][1]);
-			allcolorsSerialized.push(frame[i][2]);					
-		}
+	// this.sendFrame=function(frame){
+		// var allcolorsSerialized=[];
+		// for(var i =0; i<frame.length;i++){
+			// allcolorsSerialized.push(frame[i][0]);
+			// allcolorsSerialized.push(frame[i][1]);
+			// allcolorsSerialized.push(frame[i][2]);					
+		// }
 		
-		var allcolorsSerializedRGBW=[];
-		for(var i =0; i<frame.length;i++){
-			allcolorsSerializedRGBW.push(frame[i][0]);
-			allcolorsSerializedRGBW.push(frame[i][1]);
-			allcolorsSerializedRGBW.push(frame[i][2]);		
-			allcolorsSerializedRGBW.push(0);
-		}
+		// var allcolorsSerializedRGBW=[];
+		// for(var i =0; i<frame.length;i++){
+			// allcolorsSerializedRGBW.push(frame[i][0]);
+			// allcolorsSerializedRGBW.push(frame[i][1]);
+			// allcolorsSerializedRGBW.push(frame[i][2]);		
+			// allcolorsSerializedRGBW.push(0);
+		// }
 		
-		if(enableSimulation){
-			//broadcast to all connected clients
-			app.io.broadcast('newFrame', allcolorsSerialized)
-		}
+		// if(enableSimulation){
+			// //broadcast to all connected clients
+			// app.io.broadcast('newFrame', allcolorsSerialized)
+		// }
 
-		if(serialPortReady){
-			//Serial Messages
-			var buffer = new Buffer(allcolorsSerializedRGBW);
+		// if(serialPortReady){
+			// //Serial Messages
+			// var buffer = new Buffer(allcolorsSerializedRGBW);
 			
-			if(!serialport)
-				throw "serialPort not initialized";
+			// if(!serialport)
+				// throw "serialPort not initialized";
 				
-			serialport.write(buffer, function(err, results) {
-				if(err) throw('err ' + err)
+			// serialport.write(buffer, function(err, results) {
+				// if(err) throw('err ' + err)
 				
-			});
-		}
-	}
+			// });
+		// }
+	// }
 	
-	this.showSerialPorts=function(){
-		//SHOW ALL PORTS
-		var SerialPortObj = require("serialport");
-		SerialPortObj.list(function (err, ports) {
-			ports.forEach(function(port) {
-				console.log(port.comName);
-				console.log(port.pnpId);
-				console.log(port.manufacturer);
-			});
-		})
-	}
-}
+	// this.showSerialPorts=function(){
+		// //SHOW ALL PORTS
+		// var SerialPortObj = require("serialport");
+		// SerialPortObj.list(function (err, ports) {
+			// ports.forEach(function(port) {
+				// console.log(port.comName);
+				// console.log(port.pnpId);
+				// console.log(port.manufacturer);
+			// });
+		// })
+	// }
+// }
 
 var DMXManager=function(){
 	var ready =false;
@@ -336,7 +322,7 @@ var FileManagerObj = function(fps){
 	}	
 }
 
-var PlayerObj = function(fps,fileManager,serialManager){
+var PlayerObj = function(fps,fileManager){
 
 	var fps=fps;
 	var that=this;
@@ -391,21 +377,18 @@ var PlayerObj = function(fps,fileManager,serialManager){
 			{
 				// log success
 				console.log( "Pulled scenes from remote." );
-				
-				// load scenes from files
-				fileManager.loadSceneRanking();
-				fileManager.loadSchedule(that.setNextScheduledSceneInfo);
 			}
 			else
 			{
 				// log error
 				console.log( "Error pulling scenes from remote:", error );
-				fileManager.loadSceneRanking();
-				fileManager.loadSchedule(that.setNextScheduledSceneInfo);
 			}
+			
+			// load scenes from files - TODO: move to if ( !error ) bracket in final version
+			fileManager.loadSceneRanking();
+			fileManager.loadSchedule(that.setNextScheduledSceneInfo);
+			
 		});
-		
-		
 	}
 	
 	this.setNextScene=function(sceneData){	
@@ -507,16 +490,36 @@ var PlayerObj = function(fps,fileManager,serialManager){
 	}
 }
 
-var serialManager=new SerialManagerObj();
+// var serialManager=new SerialManagerObj();
+//serialManager.openSerialport();
 
+//create new Renderer with 24 Frames
+var myRenderer=new Renderer(fps);
+
+//initialize dmx serial manager
 var dmxManager=new DMXManager();
 dmxManager.initialize();
 
+//initialize filemanager
 var fileManager=new FileManagerObj(fps);
 
-
-serialManager.openSerialport();
-
-var player=new PlayerObj(fps,fileManager,serialManager);
-
+//initialize player
+var player=new PlayerObj(fps,fileManager);
 player.start();
+
+//create simulation interface 
+if(enableSimulation){
+	//socket io for debugging and testing interface (tower simulation)
+	var express = require('express.io')
+	var app = express();
+	//open socket
+	app.http().io()
+	app.use(express.static(__dirname + '/towerSimulation'));
+	
+	var server = app.listen(3001, function () {
+	  var host = server.address().address
+	  var port = server.address().port
+	  console.log('tower app listening at http://%s:%s', host, port)
+	})
+}
+
