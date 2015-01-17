@@ -12,8 +12,13 @@ var Renderer=require('./node_modules/renderModule.js');
 
 // load DMX serial communication module
 var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
-// var SerialPort = require("serialport").SerialPort;
 
+//-----------OPTIONS--------------------------------
+
+//dmx device
+DMX.device = "\\.\COM6";
+DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
+DMX.log=true;
 
 // enable or disable simulation interface with express io
 var enableSimulation=true;
@@ -22,104 +27,28 @@ var enableSimulation=true;
 var sceneCheckInterval = 30*1000;
 
 // player speed
-var fps=50;
+var fps=30;
+
+//----------------------------------------------------
 
 
-
-
-
-//create serialmanager with library
-// var SerialManagerObj =function(){
-	// var that=this;
-	// var serialport;
-	// var serialPortReady=false;
-	
-	// this.openSerialport=function(){
-		// serialport = new SerialPort("COM8", {
-			// baudrate: 115200,
-			// dataBits: 8,
-			// parity: 'none',
-			// stopBits: 1,
-			// flowControl: false 
-			// },false);
-		
-		// serialport.open(function (error) {
-			// if ( error ) {
-				// console.log('failed to open: '+error);
-			// } else {
-				// serialPortReady=true;
-				// console.log('open');
-				// serialport.on('data', function(data) {
-					// console.log(data)
-				// });
-			// }
-		// })
-	// }
-	
-	// this.sendFrame=function(frame){
-		// var allcolorsSerialized=[];
-		// for(var i =0; i<frame.length;i++){
-			// allcolorsSerialized.push(frame[i][0]);
-			// allcolorsSerialized.push(frame[i][1]);
-			// allcolorsSerialized.push(frame[i][2]);					
-		// }
-		
-		// var allcolorsSerializedRGBW=[];
-		// for(var i =0; i<frame.length;i++){
-			// allcolorsSerializedRGBW.push(frame[i][0]);
-			// allcolorsSerializedRGBW.push(frame[i][1]);
-			// allcolorsSerializedRGBW.push(frame[i][2]);		
-			// allcolorsSerializedRGBW.push(0);
-		// }
-		
-		// if(enableSimulation){
-			// //broadcast to all connected clients
-			// app.io.broadcast('newFrame', allcolorsSerialized)
-		// }
-
-		// if(serialPortReady){
-			// //Serial Messages
-			// var buffer = new Buffer(allcolorsSerializedRGBW);
-			
-			// if(!serialport)
-				// throw "serialPort not initialized";
-				
-			// serialport.write(buffer, function(err, results) {
-				// if(err) throw('err ' + err)
-				
-			// });
-		// }
-	// }
-	
-	// this.showSerialPorts=function(){
-		// //SHOW ALL PORTS
-		// var SerialPortObj = require("serialport");
-		// SerialPortObj.list(function (err, ports) {
-			// ports.forEach(function(port) {
-				// console.log(port.comName);
-				// console.log(port.pnpId);
-				// console.log(port.manufacturer);
-			// });
-		// })
-	// }
-// }
 
 var DMXManager=function(){
 	var ready =false;
 
 	//initialize and configure DMX Module
 	this.initialize=function(){
-		//DMX.log = true;
-		DMX.device = "COM6";
-		
 		DMX.spawn( null, function( error ){
 			if ( error ){
+				console.log("--------DMX BRIDGE COULD NOT BE INITIALIZED -----------");
 				console.log( "Error:", error );
-				return;
+				console.log("-------------------------------------------------------");
 			}
-			console.log( "Relay spawned." );
-			ready=true;
-		})
+			else{
+				console.log( "Relay spawned." );
+				ready=true;
+			}
+		});
 	}
 	//send data
 	//data should be array with 4*16 bytes
@@ -144,14 +73,12 @@ var DMXManager=function(){
 			app.io.broadcast('newFrame', allcolorsSerialized)
 		}	
 
-		if(!ready){
-			console.log("DMX relay not spawned");
-			return;
+		if(ready==true){
+			DMX.send( {data: allcolorsSerializedRGBW}, function ( error )
+			{
+				error && console.log( "Error:", error);
+			});
 		}
-		DMX.send( {data: allcolorsSerializedRGBW}, function ( error )
-		{
-			 error && console.log( "Error:", error );
-		});
 	} 
 };
 
@@ -287,7 +214,7 @@ var FileManagerObj = function(fps){
 			
 			if(that.rankingDiffers(sceneRanking,newSceneRanking)){
 				sceneRanking=newSceneRanking;
-				//that.getNextSceneNameByRanking();
+				
 				console.log("----------------------------")
 				console.log("FILES OR RANKING CHANGED!!!")
 				console.log("----------------------------")
@@ -334,7 +261,7 @@ var PlayerObj = function(fps,fileManager){
 	var currentSceneFrameNumber=0;
 	var nextScheduledSceneInfo;
 	var currentsceneType="";
-	
+	var nextSceneName="";
 	
 	this.start=function(){
 		//load the blending scene data
@@ -421,7 +348,9 @@ var PlayerObj = function(fps,fileManager){
 			var fittingBlendingScene=fileManager.getBlendingScene(Math.floor(nextSheduledInSeconds)*fps)
 			currentsceneType="blendingScene";
 			that.setCurrentScene(fittingBlendingScene);
-			
+			if(enableSimulation)
+				app.io.broadcast('newSceneInfo', "blendingscene  ("+fittingBlendingScene.length/fps+"s)");
+
 			//and load the next sheduled scene
 			fileManager.loadSceneData(nextScheduledSceneInfo.nextScheduledSceneName,that.setNextScheduledScene)
 		}
@@ -430,7 +359,10 @@ var PlayerObj = function(fps,fileManager){
 			console.log("set currentscene to blendingScene")
 			currentsceneType="blendingScene";
 			that.setCurrentScene(blendingScene);
+			if(enableSimulation)
+				app.io.broadcast('newSceneInfo', "blendingscene  ("+blendingScene.length/fps+"s)");
 		}	
+		
 	}
 	
 	this.setNextScheduledScene=function(sceneData){
@@ -443,10 +375,15 @@ var PlayerObj = function(fps,fileManager){
 	this.loadNewScene=function(){
 		//if the current scene endet and was of type blendingscene load a sheduled or a ranked scene
 		if(currentsceneType=="blendingScene"){
+			
+			if(enableSimulation)
+				app.io.broadcast('newSceneInfo', "scene "+nextSceneName+" ("+nextScheduledScene.length/fps+"s)");
+				
 			if(nextSceneType=="scheduledScene"){
 				console.log("set currentscene to scheduledScene")
 				currentsceneType="scheduledScene"
 				that.setCurrentScene(nextScheduledScene);
+				
 			}
 			if(nextSceneType=="rankedScene"){
 				console.log("set currentscene to rankedScene")
@@ -457,8 +394,8 @@ var PlayerObj = function(fps,fileManager){
 		//if the current scene endet and was of type rankedScene, sheduledscene or undefined then try to find the next scene and add a blendingscene until loading is done
 		else if(currentsceneType=="rankedScene"||currentsceneType=="scheduledScene"||currentsceneType==""){	
 			//get next ranked scene name if sceneranking was loaded
-			
-			var nextSceneName=fileManager.getNextSceneNameByRanking();
+
+			nextSceneName=fileManager.getNextSceneNameByRanking();
 			//load the next ranked scene and check if there is a time conflict with a scheduled scene
 			if(nextSceneName){
 				fileManager.loadSceneData(nextSceneName,that.setNextScene)
@@ -475,7 +412,7 @@ var PlayerObj = function(fps,fileManager){
 			}
 			else{
 				if(currentScene[currentSceneFrameNumber]){
-					//serialManager.sendFrame(currentScene[currentSceneFrameNumber]);	
+
 					dmxManager.send(currentScene[currentSceneFrameNumber])
 				}
 				else
@@ -489,9 +426,6 @@ var PlayerObj = function(fps,fileManager){
 		}
 	}
 }
-
-// var serialManager=new SerialManagerObj();
-//serialManager.openSerialport();
 
 //create new Renderer with 24 Frames
 var myRenderer=new Renderer(fps);
@@ -521,5 +455,7 @@ if(enableSimulation){
 	  var port = server.address().port
 	  console.log('tower app listening at http://%s:%s', host, port)
 	})
+	
+	
 }
 

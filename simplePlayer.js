@@ -199,7 +199,8 @@ var PlayerObj = function(fps,fileManager){
 			currentsceneType="normalScene";
 			currentScene=nextScene;
 			console.log("play scene "+scenelist[currentSceneNumber]+" for "+currentScene.length/fps+" seconds");
-			app.io.broadcast('newSceneInfo', "scene "+scenelist[currentSceneNumber]+" ("+currentScene.length/fps+"s)");
+			if(enableWebInterface)
+				app.io.broadcast('newSceneInfo', "scene "+scenelist[currentSceneNumber]+" ("+currentScene.length/fps+"s)");
 			currentSceneNumber=(currentSceneNumber+1)%scenelist.length;
 		}
 		//if the current scene endet and was of type rankedScene, sheduledscene or undefined then try to find the next scene and add a blendingscene until loading is done
@@ -215,7 +216,8 @@ var PlayerObj = function(fps,fileManager){
 			
 			console.log("play blendingscene for "+blendingScene.length/fps+" seconds")
 			
-			app.io.broadcast('newSceneInfo', "blendingscene ("+blendingScene.length/fps+"s)");
+			if(enableWebInterface)
+				app.io.broadcast('newSceneInfo', "blendingscene ("+blendingScene.length/fps+"s)");
 			
 			currentsceneType="blendingScene";
 			currentScene=blendingScene;

@@ -15,7 +15,7 @@ gitsync.branch    = 'animations';
 app.http().io()
 
 //authentication
-var auth = express.basicAuth('testUser', 'testPass');
+var auth = express.basicAuth('admin', 'admin');
 
 //return cut-down version of site
 app.use('/', express.static(__dirname + '/tower'));
