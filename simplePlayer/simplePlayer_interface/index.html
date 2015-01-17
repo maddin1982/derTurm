@@ -9,6 +9,11 @@
 			#windows {
 				float: left;
 			}
+			#sceneName{
+				height:20px;
+				width:100%;
+				margin-bottom:10px;
+			}
 			.window {
 				height:20px;
 				width:20px;
@@ -43,9 +48,9 @@
 			
 		  var io = io.connect();
 		  
-		  io.on('setsceneName', function (data) {
+		  io.on('newSceneInfo', function (data) {
 			  //console.log(data)
-			  $("#window")
+			  $("#sceneName").html(data)
 		  })
 		  
 		  io.on('newFrame', function (data) {
@@ -78,7 +83,7 @@
 			<div id="pause">pause</div>
 			<div id="play">play</div>
 		</div>
-		<div id="sceneName"><div>
+		<div id="sceneName"></div>
 		<div id="windows"></div>
 	</body>
 </html>

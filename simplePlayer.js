@@ -1,12 +1,14 @@
-//file operations
+//file Module
 var fs = require('fs');
 
-//load Render Module
+//render Module
 var Renderer = require('./node_modules/renderModule.js');
 
 //serial communication
 //var SerialPort = require("serialport").SerialPort;
 var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
+
+
 
 //-----------OPTIONS--------------------------------
 
@@ -14,13 +16,14 @@ var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
 var fps = 20;
 
 //create a socket based webserver to show arduino output
-var enableSimulation = true;
+var enableWebInterface = true;
 
 //dmx device
 var dmxDevice="COM6"
 
-
 //----------------------------------------------------
+
+
 
 var DMXManager=function(){
 	var ready =false;
@@ -61,7 +64,7 @@ var DMXManager=function(){
 			allcolorsSerializedRGBW.push(0);
 		}
 		
-		if(enableSimulation){
+		if(enableWebInterface){
 			//broadcast to all connected clients
 			app.io.broadcast('newFrame', allcolorsSerialized);
 		}	
@@ -79,7 +82,7 @@ var FileManagerObj = function(){
 	var that=this;
 	var blendingScene=[];
 	var scenedirectory="simplePlayer/simpleplayer_scenes/";
-	var defaultblendingscene=[{"duration":1000,"type":1,"windows":[{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]},{"color":[223,223,0]}]}];
+	var defaultblendingscene=[{"duration":1000,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]}]}];
 	
 	
 	//returns blendingscene, if param frame is set function returns blending scene with correct framecount
@@ -186,6 +189,7 @@ var PlayerObj = function(fps,fileManager){
 		console.log("restart");
 		currentSceneNumber=0;
 		currentSceneFrameNumber=0;
+		currentScene=[];
 	}
 	
 	this.loadNextScene=function(){
@@ -194,6 +198,7 @@ var PlayerObj = function(fps,fileManager){
 			currentsceneType="normalScene";
 			currentScene=nextScene;
 			console.log("play scene "+scenelist[currentSceneNumber]+" for "+currentScene.length/fps+" seconds");
+			app.io.broadcast('newSceneInfo', "scene "+scenelist[currentSceneNumber]+" ("+currentScene.length/fps+"s)");
 			currentSceneNumber=(currentSceneNumber+1)%scenelist.length;
 		}
 		//if the current scene endet and was of type rankedScene, sheduledscene or undefined then try to find the next scene and add a blendingscene until loading is done
@@ -208,6 +213,8 @@ var PlayerObj = function(fps,fileManager){
 				console.log("no scenename to load");
 			
 			console.log("play blendingscene for "+blendingScene.length/fps+" seconds")
+			
+			app.io.broadcast('newSceneInfo', "blendingscene ("+blendingScene.length/fps+"s)");
 			
 			currentsceneType="blendingScene";
 			currentScene=blendingScene;
@@ -261,7 +268,7 @@ player.start();
 
 
 
-if(enableSimulation){
+if(enableWebInterface){
 	//socket io for debugging and testing interface (tower simulation)
 	var express = require('express.io');
 	var app = express();
@@ -285,7 +292,4 @@ if(enableSimulation){
 		var port = server.address().port;
 		console.log('tower app listening at http://%s:%s', host, port);
 	});
-	
-
-	
 }
