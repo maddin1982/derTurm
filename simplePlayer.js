@@ -2,7 +2,7 @@
 var fs = require('fs');
 
 //load Render Module
-var Renderer = require('./renderModule.js');
+var Renderer = require('./node_modules/renderModule.js');
 
 //serial communication
 //var SerialPort = require("serialport").SerialPort;
@@ -155,6 +155,8 @@ var PlayerObj = function(fps,fileManager){
 	var scenelist=[];
 	var currentSceneNumber=0;
 	
+	var pausing=true;
+	
 	var currentScene=[];
 	var nextScene=[];
 	var blendingScene=[];
@@ -173,6 +175,18 @@ var PlayerObj = function(fps,fileManager){
 		//interval to send  frames  to arduino
 		setInterval(that.playerTick,1000/fps);
 	};
+	
+	this.pause=function(){
+		pausing=true;
+	}
+	this.play=function(){
+		pausing=false;
+	}	
+	this.restart=function(){
+		console.log("restart");
+		currentSceneNumber=0;
+		currentSceneFrameNumber=0;
+	}
 	
 	this.loadNextScene=function(){
 		//if the current scene endet and was of type blendingscene load a sheduled or a ranked scene
@@ -220,7 +234,8 @@ var PlayerObj = function(fps,fileManager){
 				else{
 					console.log("this frame does not exist in current scene");
 				}
-				currentSceneFrameNumber++;
+				if(!pausing)
+					currentSceneFrameNumber++;
 			}
 		}
 		else{
@@ -254,10 +269,23 @@ if(enableSimulation){
 	app.http().io();
 	app.use(express.static(__dirname + '/simplePlayer/simplePlayer_interface'));
 	
+	
+	app.io.route('play', function(req) {
+		player.play();
+	})
+	app.io.route('pause', function(req) {
+		player.pause();
+	})
+	app.io.route('restart', function(req) {
+		player.restart();
+	})
+	
 	var server = app.listen(3001, function () {
 		var host = server.address().address;
 		var port = server.address().port;
 		console.log('tower app listening at http://%s:%s', host, port);
 	});
+	
+
 	
 }

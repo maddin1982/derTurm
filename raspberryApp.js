@@ -8,10 +8,10 @@ gitsync.remote    = 'git://localhost:3003/sync';
 gitsync.branch    = 'animations';
 
 // load Render Module
-var Renderer=require('./renderModule.js');
+var Renderer=require('./node_modules/renderModule.js');
 
 // load DMX serial communication module
-var DMX = require('./node_modules/dmxhost/dmxhost.js');
+var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
 // var SerialPort = require("serialport").SerialPort;
 
 

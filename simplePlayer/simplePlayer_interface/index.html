@@ -15,17 +15,41 @@
 				float: left;
 				border:1px solid;
 			}
+			#buttonbar{
+				background:#aaa;
+				width:100%;
+				height:40px;
+				margin-bottom:10px;
+			}
+			#buttonbar div{
+				background:#fff;
+				margin:5px;
+				padding:4px;
+				height:22px;
+				border-radius:4px;
+				float:left;
+				cursor:pointer;
+			}
+			#buttonbar div:hover{
+				background:#ccc;
+			}
+			
 		</style>
 		<!-- socket io -->
-		<script src="../socket.io/socket.io.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
 		<script src="jquery-2.1.1.min.js"></script>
 		<script>
 			
 			
-		  var socket = io.connect();
+		  var io = io.connect();
 		  
-		  socket.on('newFrame', function (data) {
-			  console.log(data)
+		  io.on('setsceneName', function (data) {
+			  //console.log(data)
+			  $("#window")
+		  })
+		  
+		  io.on('newFrame', function (data) {
+			  //console.log(data)
 			  
 			  for(var i=0;i<data.length;i=i+3){
 				var currwindow=i/3;
@@ -39,12 +63,22 @@
 			for(var i=0;i<16;i++){
 				$("#windows").append("<div id='window"+i+"' class='window'></div>")
 			}
-			 
+			
+			$("#buttonbar").children().on("click",function(e){
+				var action=$(e.target).attr("id");
+				io.emit(action);
+			}) 
 		  });
 		  
 		</script>
 	</head>
 	<body>
+		<div id="buttonbar">
+			<div id="restart">restart</div>
+			<div id="pause">pause</div>
+			<div id="play">play</div>
+		</div>
+		<div id="sceneName"><div>
 		<div id="windows"></div>
 	</body>
 </html>
