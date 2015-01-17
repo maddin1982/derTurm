@@ -6,90 +6,21 @@ var Renderer = require('./renderModule.js');
 
 //serial communication
 //var SerialPort = require("serialport").SerialPort;
-var DMX = require('./node_modules/dmxhost/dmxhost.js');
+var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
+
+//-----------OPTIONS--------------------------------
 
 //player speed
-var fps = 5;
+var fps = 20;
+
 //create a socket based webserver to show arduino output
 var enableSimulation = true;
 
+//dmx device
+var dmxDevice="COM6"
 
-//create new Renderer with 24 Frames
-var myRenderer = new Renderer(fps);
 
-// var SerialManagerObj =function(){
-	// var that=this;
-	// var serialport;
-	// var serialPortReady=false;	
-	// this.openSerialport=function(){
-		// serialport = new SerialPort("COM8", {
-			// baudrate: 115200,
-			// dataBits: 8,
-			// parity: 'none',
-			// stopBits: 1,
-			// flowControl: false 
-			// },false);
-		
-		// serialport.open(function (error) {
-			// if ( error ) {
-				// console.log('failed to open: '+error);
-			// } else {
-				// serialPortReady=true;
-				// console.log('open');
-				// serialport.on('data', function(data) {
-					// console.log(data)
-				// });
-			// }
-		// })
-	// }
-	
-	// this.sendFrame=function(frame){
-		// var allcolorsSerialized=[];
-		// for(var i =0; i<frame.length;i++){
-			// allcolorsSerialized.push(frame[i][0]);
-			// allcolorsSerialized.push(frame[i][1]);
-			// allcolorsSerialized.push(frame[i][2]);					
-		// }
-		
-		// var allcolorsSerializedRGBW=[];
-		// for(var i =0; i<frame.length;i++){
-			// allcolorsSerializedRGBW.push(frame[i][0]);
-			// allcolorsSerializedRGBW.push(frame[i][1]);
-			// allcolorsSerializedRGBW.push(frame[i][2]);		
-			// allcolorsSerializedRGBW.push(0);
-		// }
-		
-		// if(enableSimulation){
-			// //broadcast to all connected clients
-			// app.io.broadcast('newFrame', allcolorsSerialized)
-		// }
-
-		// if(serialPortReady){
-			// //Serial Messages
-			// var buffer = new Buffer(allcolorsSerializedRGBW);
-			
-			// if(!serialport)
-				// throw "serialPort not initialized";
-				
-			// serialport.write(buffer, function(err, results) {
-				// if(err) throw('err ' + err)
-				
-			// });
-		// }
-	// }
-	
-	// this.showSerialPorts=function(){
-		// //SHOW ALL PORTS
-		// var SerialPortObj = require("serialport");
-		// SerialPortObj.list(function (err, ports) {
-			// ports.forEach(function(port) {
-				// console.log(port.comName);
-				// console.log(port.pnpId);
-				// console.log(port.manufacturer);
-			// });
-		// })
-	// }
-// }
+//----------------------------------------------------
 
 var DMXManager=function(){
 	var ready =false;
@@ -97,7 +28,7 @@ var DMXManager=function(){
 	//initialize and configure DMX Module
 	this.initialize=function(){
 		//DMX.log = true;
-		DMX.device = "COM6";
+		DMX.device = dmxDevice;
 		
 		DMX.spawn( null, function( error ){
 			if ( error ){
@@ -106,8 +37,10 @@ var DMXManager=function(){
 				console.log("-------------------------------------------------------");
 				return;
 			}
-			console.log( "Relay spawned." );
-			ready=true;
+			else{
+				console.log( "Relay spawned." );
+				ready=true;
+			}
 		});
 	};
 	//send data
@@ -297,17 +230,21 @@ var PlayerObj = function(fps,fileManager){
 	};
 };
 
-//var serialManager=new SerialManagerObj();
-//serialManager.openSerialport();
-//initialize dmx serial manager
+//create new Renderer 
+var myRenderer = new Renderer(fps);
 
+//initialize dmx serial manager
 var dmxManager=new DMXManager();
 dmxManager.initialize();
 
+//initialize fileManager
 var fileManager=new FileManagerObj(fps);
 
+//initialize player
 var player=new PlayerObj(fps,fileManager);
 player.start();
+
+
 
 if(enableSimulation){
 	//socket io for debugging and testing interface (tower simulation)
@@ -322,4 +259,5 @@ if(enableSimulation){
 		var port = server.address().port;
 		console.log('tower app listening at http://%s:%s', host, port);
 	});
+	
 }
