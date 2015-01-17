@@ -6,43 +6,44 @@ var Renderer = require('./node_modules/renderModule.js');
 
 //serial communication
 //var SerialPort = require("serialport").SerialPort;
-var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
+var DMX = require('dmxhost');
 
 
 
 //-----------OPTIONS--------------------------------
 
 //player speed
-var fps = 30;
+var fps = 50;
 
 //create a socket based webserver to show arduino output
 var enableWebInterface = true;
 
-//dmx device
-DMX.device = "\\.\COM6";
-DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
-DMX.log=true;
+/* Windows
+	//dmx device
+	DMX.device = "\\.\COM6";
+	DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
+	DMX.log=true;
+*/
+
+// DMX
+DMX.log = true;
+DMX.device = '/dev/ttyACM0';
+DMX.relayPath = './node_modules/dmxhost/dmxhost-serial-relay.py';
 
 //----------------------------------------------------
 
 
 
 var DMXManager=function(){
-	var ready =false;
-
 	//initialize and configure DMX Module
 	this.initialize=function(){
-	
+		
 		DMX.spawn( null, function( error ){
 			if ( error ){
 				console.log("--------DMX BRIDGE COULD NOT BE INITIALIZED -----------");
 				console.log( "Error:", error );
 				console.log("-------------------------------------------------------");
 				return;
-			}
-			else{
-				console.log( "Relay spawned." );
-				ready=true;
 			}
 		});
 	};
@@ -70,12 +71,7 @@ var DMXManager=function(){
 			app.io.broadcast('newFrame', allcolorsSerialized);
 		}	
 
-		if(ready){
-			DMX.send( {data: allcolorsSerializedRGBW}, function ( error )
-			{
-				error && console.log( "Error:", error);
-			});
-		}
+		DMX.ready() && DMX.send( {data: allcolorsSerializedRGBW} );
 	}; 
 };
 

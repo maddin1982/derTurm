@@ -1,0 +1,25 @@
+{
+  "name": "dmxhost",
+  "version": "0.1.0",
+  "description": "node.js wrapper for a serial to DMX interface",
+  "main": "dmxhost.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://bitfasching.de/dmxhost.js"
+  },
+  "keywords": [
+    "dmx",
+    "serial",
+    "usb",
+    "tty",
+    "python"
+  ],
+  "author": "nick@bitfasching.de",
+  "license": "BSD-3-Clause"
+}
