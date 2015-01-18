@@ -79,6 +79,7 @@ var DMXManager=function(){
 		if(enableWebInterface){
 			//broadcast to all connected clients
 			app.io.broadcast('newFrame', allcolorsSerialized);
+			
 		}	
 
 		DMX.ready() && DMX.send( {data: allcolorsSerializedRGBW} );
@@ -114,7 +115,7 @@ var FileManagerObj = function(){
 		}
 		
 		for (var i in files) {
-			if(/\d+_\w+/.test(files[i]))
+			if(/^(\d+_)/.test(files[i]))
 				fileNames.push(files[i]);
 		}
 		fileNames.sort(); 
@@ -192,12 +193,33 @@ var PlayerObj = function(fps,fileManager,playerPaused){
 	this.play=function(){
 		pausing=false;
 	}	
+	
 	this.restart=function(){
 		console.log("restart");
 		currentSceneNumber=0;
 		currentSceneFrameNumber=0;
 		currentScene=[];
 	}
+	this.previous=function(){
+		console.log("previous");
+		currentSceneNumber=((currentSceneNumber-2)+scenelist.length)%scenelist.length;
+		currentSceneFrameNumber=0;
+		currentScene=[];
+		currentsceneType="";
+	}
+	this.next=function(){
+		console.log("next");
+		currentSceneFrameNumber=0;
+		currentScene=[];
+		currentsceneType="";
+	}
+	this.goToScenNr=function(sceneNumber){
+		currentSceneNumber=sceneNumber;
+		currentSceneFrameNumber=0;
+		currentScene=[];
+		currentsceneType="";
+	}
+	
 	
 	this.loadNextScene=function(){
 		//if the current scene endet and was of type blendingscene load a sheduled or a ranked scene
@@ -246,6 +268,9 @@ var PlayerObj = function(fps,fileManager,playerPaused){
 					//console.log("------------ send Frame ----------------");
 					//console.log(currentScene[currentSceneFrameNumber]);
 					dmxManager.send(currentScene[currentSceneFrameNumber]);
+					if(enableWebInterface)
+						app.io.broadcast('percent', currentSceneFrameNumber/currentScene.length);
+					
 				}
 				else{
 					console.log("this frame does not exist in current scene");
@@ -295,6 +320,22 @@ if(enableWebInterface){
 	app.io.route('restart', function(req) {
 		player.restart();
 	})
+	app.io.route('next', function(req) {
+		player.next();
+	})
+	app.io.route('previous', function(req) {
+		player.previous();
+	})	
+	
+	app.io.route('hi', function(req) {
+		req.io.emit('sceneList', fileManager.getOrderedSceneList())
+	})		
+	app.io.route('goto', function(req) {
+		sceneNumber=parseInt(req.data[0]);
+		console.log("goto scene "+sceneNumber)
+		player.goToScenNr(sceneNumber);
+	})	
+	
 	
 	var server = app.listen(3001, function () {
 		var host = server.address().address;

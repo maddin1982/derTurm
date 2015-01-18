@@ -20,12 +20,37 @@
 				float: left;
 				border:1px solid;
 			}
+			#percent{
+				width:100%;
+				height:10px;
+				background:#aaa;
+				margin-bottom:10px;
+			}
 			#buttonbar{
 				background:#aaa;
 				width:100%;
 				height:40px;
-				margin-bottom:10px;
+				
 			}
+			
+			.highlighted{
+				background-color:#faa;
+				backgound:#faa;
+			}
+			
+			#sceneList{
+				position:absolute;
+				backgound:white;
+				margin-top:50px;
+				top:0px;
+				right:0px;
+				float:right;
+			}
+			
+			#sceneList li{
+				cursor:pointer;
+			}
+			
 			#buttonbar div{
 				background:#fff;
 				margin:5px;
@@ -51,7 +76,23 @@
 		  io.on('newSceneInfo', function (data) {
 			  //console.log(data)
 			  $("#sceneName").html(data)
+			
+			if(data.indexOf("blending")==-1){
+				$("#sceneList li").removeClass("highlighted");	
+				
+				var sceneName=(data.split(" "))[1];
+				var id=(sceneName.split("_"))[0]+"_";
+				console.log(id)
+				$( "li:contains('"+id+"')").addClass("highlighted");  
+			}
 		  })
+		  
+		  
+		  io.on('percent', function (data) {
+			  //console.log(data)
+			  $("#percent").css("width",(data*100)+"%");
+		  })
+		  
 		  
 		  io.on('newFrame', function (data) {
 			  //console.log(data)
@@ -61,6 +102,17 @@
 				$("#window"+currwindow).css("background-color","rgb("+data[i]+","+data[i+1]+","+data[i+2]+")")
 			  }
 			  
+		  })
+		  
+		  io.on('sceneList',function (data){
+			for(var i=0;i<data.length;i++){
+				$("#sceneList").append("<li number="+i+">"+data[i]+"</li>")
+			}
+			$("#sceneList").children().on("click",function(e){
+				var id=$(e.target).attr("number");
+				console.log(id)
+				io.emit("goto",id);
+			})
 		  })
 		  
 		  $(document).ready(function() {
@@ -73,6 +125,9 @@
 				var action=$(e.target).attr("id");
 				io.emit(action);
 			}) 
+			
+			io.emit("hi");
+			
 		  });
 		  
 		</script>
@@ -82,8 +137,12 @@
 			<div id="restart">restart</div>
 			<div id="pause">pause</div>
 			<div id="play">play</div>
+			<div id="previous">previous</div>
+			<div id="next">next</div>
 		</div>
+		<div id="percent"></div>
 		<div id="sceneName"></div>
 		<div id="windows"></div>
+		<ul id="sceneList"></ul>
 	</body>
 </html>
