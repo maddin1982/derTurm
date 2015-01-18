@@ -1,9 +1,4 @@
-/**
- * DMX-Controller für den Talking Tower
- *
- * Nick Schwarzenberg,
- * 01/2015, v1.0
- */
+
 
 #include "FastLED.h"
 // DMX-Bibliothek

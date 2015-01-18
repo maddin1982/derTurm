@@ -1,5 +1,5 @@
 # ignore user-generated content
-#savedAnimations/**
+savedAnimations/**
 
 # ignore stuff in synchronization directory
 sync.git/**

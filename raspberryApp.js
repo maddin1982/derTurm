@@ -4,7 +4,7 @@ var fs = require('fs');
 // module for synchronization of user content
 var gitsync = require('gitsync');
 gitsync.directory = 'savedAnimations/';
-gitsync.remote = 'git://neuesvomlicht.de/sync';
+gitsync.remote = 'git://neuesvomlicht.de:4880/sync.git';
 gitsync.branch = 'animations';
 
 // load Render Module
