@@ -4,24 +4,31 @@ var fs = require('fs');
 // module for synchronization of user content
 var gitsync = require('gitsync');
 gitsync.directory = 'savedAnimations/';
-gitsync.remote = 'git://localhost:3003/sync';
+gitsync.remote = 'git://neuesvomlicht.de/sync';
 gitsync.branch = 'animations';
 
 // load Render Module
 var Renderer = require('./node_modules/renderModule.js');
 
 // load DMX serial communication module
-var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
+//var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
+var DMX = require('dmxhost');
 
 //-----------OPTIONS--------------------------------
 
+/*
 //dmx device
 DMX.device = "\\.\COM6";
-DMX.relayPath = "./node_modules/dmxhost.js/dmxhost-serial-relay.py";
+DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
+DMX.log=true;
+*/
+
 DMX.log = true;
+DMX.relayPath = './node_modules/dmxhost/dmxhost-serial-relay.py';
+DMX.relayResponseTimeout = 10000;
 
 // enable or disable simulation interface with express io
-var enableSimulation = true;
+var enableWebInterface = false;
 
 // time between checks for changed scenes [ms]
 var sceneCheckInterval = 30 * 1000;
@@ -49,36 +56,29 @@ var DMXManager = function() {
                 }
             });
         };
-        //send data
-        //data should be array with 4*16 bytes
+     //send data
+	//data should be array with 4*16 bytes
+	var rgbw = new Array(16*4);
+	var frameCounter = 0;	
+		
     this.send = function(frame) {
-        var allcolorsSerialized = [];
-        for (var i = 0; i < frame.length; i++) {
-            allcolorsSerialized.push(frame[i][0]);
-            allcolorsSerialized.push(frame[i][1]);
-            allcolorsSerialized.push(frame[i][2]);
-        }
+		frameCounter++;
+		frameCounter=frameCounter % 3;
+		
+		frame.map( function( rgbWindow, index )
+		{
+			rgbw[ 4*index + 0 ] = rgbWindow[0];
+			rgbw[ 4*index + 1 ] = rgbWindow[1];
+			rgbw[ 4*index + 2 ] = rgbWindow[2];
+			rgbw[ 4*index + 3 ] = 0;
+		});
+		if(enableWebInterface && frameCounter == 0){
+			//broadcast to all connected clients
+			app.io.broadcast('newFrame', rgbw);		
+		}
 
-        var allcolorsSerializedRGBW = [];
-        for (var i = 0; i < frame.length; i++) {
-            allcolorsSerializedRGBW.push(frame[i][0]);
-            allcolorsSerializedRGBW.push(frame[i][1]);
-            allcolorsSerializedRGBW.push(frame[i][2]);
-            allcolorsSerializedRGBW.push(0);
-        }
-
-        if (enableSimulation) {
-            //broadcast to all connected clients
-            app.io.broadcast('newFrame', allcolorsSerialized);
-        }
-
-        if (ready === true) {
-            DMX.send({
-                data: allcolorsSerializedRGBW
-            }, function(error) {
-                error && console.log("Error:", error);
-            });
-        }
+		//DMX.ready() && DMX.send( {data: allcolorsSerializedRGBW} );
+		DMX.ready() && DMX.send( {data: rgbw} );
     };
 };
 
@@ -343,7 +343,7 @@ var PlayerObj = function(fps, fileManager) {
             var fittingBlendingScene = fileManager.getBlendingScene(Math.floor(nextSheduledInSeconds) * fps);
             currentsceneType = "blendingScene";
             that.setCurrentScene(fittingBlendingScene);
-            if (enableSimulation)
+            if (enableWebInterface)
                 app.io.broadcast('newSceneInfo', "blendingscene  (" + fittingBlendingScene.length / fps + "s)");
 
             //and load the next sheduled scene
@@ -353,7 +353,7 @@ var PlayerObj = function(fps, fileManager) {
             console.log("set currentscene to blendingScene");
             currentsceneType = "blendingScene";
             that.setCurrentScene(blendingScene);
-            if (enableSimulation)
+            if (enableWebInterface)
                 app.io.broadcast('newSceneInfo', "blendingscene  (" + blendingScene.length / fps + "s)");
         }
     };
@@ -372,14 +372,14 @@ var PlayerObj = function(fps, fileManager) {
                 console.log("set currentscene to scheduledScene");
                 currentsceneType = "scheduledScene";
                 that.setCurrentScene(nextScheduledScene);
-				if (enableSimulation)
+				if (enableWebInterface)
 					app.io.broadcast('newSceneInfo', "scene " + nextSceneName + " (" + nextScheduledScene.length/fps + "s)");
             }
             if (nextSceneType == "rankedScene") {
                 console.log("set currentscene to rankedScene");
                 currentsceneType = "rankedScene";
                 that.setCurrentScene(nextRankedScene);
-				if (enableSimulation)
+				if (enableWebInterface)
 					app.io.broadcast('newSceneInfo', "scene " + nextSceneName + " (" + nextRankedScene.length/fps + "s)");
             }
         }
@@ -423,27 +423,29 @@ var myRenderer = new Renderer(fps);
 var dmxManager = new DMXManager();
 dmxManager.initialize();
 
-//initialize filemanager
-var fileManager = new FileManagerObj(fps);
+console.log("Wait for dmx bridge for "+DMX.relayResponseTimeout+" ms");
+setTimeout( function()
+{
+	//initialize filemanager
+	var fileManager = new FileManagerObj(fps);
 
-//initialize player
-var player = new PlayerObj(fps, fileManager);
-player.start();
+	//initialize player
+	var player = new PlayerObj(fps, fileManager);
+	player.start();
 
-//create simulation interface 
-if (enableSimulation) {
-    //socket io for debugging and testing interface (tower simulation)
-    var express = require('express.io');
-    var app = express();
-    //open socket
-    app.http().io();
-    app.use(express.static(__dirname + '/towerSimulation'));
+	//create simulation interface 
+	if (enableWebInterface) {
+		//socket io for debugging and testing interface (tower simulation)
+		var express = require('express.io');
+		var app = express();
+		//open socket
+		app.http().io();
+		app.use(express.static(__dirname + '/towerSimulation'));
 
-    var server = app.listen(3001, function() {
-        var host = server.address().address;
-        var port = server.address().port;
-        console.log('tower app listening at http://%s:%s', host, port);
-    });
-
-
-}
+		var server = app.listen(3001, function() {
+			var host = server.address().address;
+			var port = server.address().port;
+			console.log('tower app listening at http://%s:%s', host, port);
+		});
+	}
+}, DMX.relayResponseTimeout );

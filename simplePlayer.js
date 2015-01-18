@@ -65,12 +65,8 @@ var DMXManager=function(){
 	var frameCounter = 0;
 	
 	this.send=function(frame){
-		/*var allcolorsSerialized=[];
-		for(var i =0; i<frame.length;i++){
-			allcolorsSerialized.push(frame[i][0]);
-			allcolorsSerialized.push(frame[i][1]);
-			allcolorsSerialized.push(frame[i][2]);					
-		}*/
+		frameCounter++;
+		frameCounter=frameCounter % 3;
 		
 		frame.map( function( rgbWindow, index )
 		{
@@ -79,19 +75,9 @@ var DMXManager=function(){
 			rgbw[ 4*index + 2 ] = rgbWindow[2];
 			rgbw[ 4*index + 3 ] = 0;
 		});
-		
-		/*var allcolorsSerializedRGBW=[];
-		for(var i=0; i<frame.length;i++){
-			allcolorsSerializedRGBW.push(frame[i][0]);
-			allcolorsSerializedRGBW.push(frame[i][1]);
-			allcolorsSerializedRGBW.push(frame[i][2]);		
-			allcolorsSerializedRGBW.push(0);
-		}*/
-		
-		if(enableWebInterface && frameCounter % 3 == 0){
+		if(enableWebInterface && frameCounter == 0){
 			//broadcast to all connected clients
-			app.io.broadcast('newFrame', rgbw);
-			
+			app.io.broadcast('newFrame', rgbw);		
 		}
 
 		//DMX.ready() && DMX.send( {data: allcolorsSerializedRGBW} );
@@ -104,7 +90,7 @@ var FileManagerObj = function(){
 	var blendingScene=[];
 	var scenedirectory="simplePlayer/simpleplayer_scenes/";
 	var defaultblendingscene=[{"duration":3000,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]}]}];
-	
+	var sceneList=[];
 	
 	//returns blendingscene, if param frame is set function returns blending scene with correct framecount
 	this.getBlendingScene=function(frames){
@@ -119,24 +105,23 @@ var FileManagerObj = function(){
 		}
 	};
 	this.getOrderedSceneList=function(){
-		var fileNames=[];
-		var files = fs.readdirSync(scenedirectory);
-		
-		if(!files||files.length === 0){
-			console.log("no files in directory or failed to load");
-			return;
+		if(sceneList.length==0){
+			var files = fs.readdirSync(scenedirectory);
+			if(!files||files.length === 0){
+				console.log("no files in directory or failed to load");
+				return;
+			}
+			
+			for (var i in files) {
+				if(/^(\d+_)/.test(files[i]))
+					sceneList.push(files[i]);
+			}
+			sceneList.sort(); 
+			
+			console.log("files in scene directory:");
+			console.log(sceneList);
 		}
-		
-		for (var i in files) {
-			if(/^(\d+_)/.test(files[i]))
-				fileNames.push(files[i]);
-		}
-		fileNames.sort(); 
-		
-		console.log("files in scene directory:");
-		console.log(fileNames);
-		
-		return fileNames;
+		return sceneList;
 	};
 
 	this.loadSceneData=function(sceneName,callback) {	
@@ -158,7 +143,7 @@ var FileManagerObj = function(){
 	
 	//initial loading of blending animation
 	this.loadBlendingScene=function(frameCount,callback){
-		fs.readFile(scenedirectory+'_blendingscene', "utf-8", function (err,result) {
+		fs.readFile(scenedirectory+'_blendingScene', "utf-8", function (err,result) {
 			if (err){
 				console.log("there is no blendingSceneFile to load");
 				console.log(err);
@@ -281,8 +266,10 @@ var PlayerObj = function(fps,fileManager,playerPaused){
 					//console.log("------------ send Frame ----------------");
 					//console.log(currentScene[currentSceneFrameNumber]);
 					dmxManager.send(currentScene[currentSceneFrameNumber]);
-					if(enableWebInterface)
-						app.io.broadcast('percent', currentSceneFrameNumber/currentScene.length);
+					
+					//send status in percent, disabled for performance
+					//if(enableWebInterface)
+						//app.io.broadcast('percent', currentSceneFrameNumber/currentScene.length);
 					
 				}
 				else{
@@ -307,8 +294,10 @@ var dmxManager=new DMXManager();
 dmxManager.initialize();
 
 //socket io for debugging and testing interface (tower simulation)
-var express = require('express.io');
-var app = express();
+if(enableWebInterface){
+	var express = require('express.io');
+	var app = express();
+}
 
 setTimeout( function()
 {
