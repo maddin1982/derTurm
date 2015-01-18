@@ -6,33 +6,49 @@ var Renderer = require('./node_modules/renderModule.js');
 
 //serial communication
 //var SerialPort = require("serialport").SerialPort;
-var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
+var DMX = require('dmxhost');
 
 
 
 //-----------OPTIONS--------------------------------
 
 //player speed
-var fps = 30;
+var fps = 40;
 
 //create a socket based webserver to show arduino output
 var enableWebInterface = true;
 
-//dmx device
-DMX.device = "\\.\COM6";
-DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
-DMX.log=true;
+
+if(process.argv[2]=="start"){
+	console.log("start playing")
+	var playerPaused=false;
+}
+else{
+	console.log("pausing player")
+	var playerPaused=true;
+}
+
+/* Windows
+	//dmx device
+	DMX.device = "\\.\COM6";
+	DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
+	DMX.log=true;
+*/
+
+// DMX
+DMX.log = true;
+DMX.device = '/dev/ttyACM0';
+DMX.relayResponseTimeout = 10000;
+DMX.relayPath = './node_modules/dmxhost/dmxhost-serial-relay.py';
 
 //----------------------------------------------------
 
 
 
 var DMXManager=function(){
-	var ready =false;
-
 	//initialize and configure DMX Module
 	this.initialize=function(){
-	
+		
 		DMX.spawn( null, function( error ){
 			if ( error ){
 				console.log("--------DMX BRIDGE COULD NOT BE INITIALIZED -----------");
@@ -40,42 +56,46 @@ var DMXManager=function(){
 				console.log("-------------------------------------------------------");
 				return;
 			}
-			else{
-				console.log( "Relay spawned." );
-				ready=true;
-			}
 		});
 	};
 	
 	//send data
 	//data should be array with 4*16 bytes
+	var rgbw = new Array(16*4);
+	var frameCounter = 0;
+	
 	this.send=function(frame){
-		var allcolorsSerialized=[];
+		/*var allcolorsSerialized=[];
 		for(var i =0; i<frame.length;i++){
 			allcolorsSerialized.push(frame[i][0]);
 			allcolorsSerialized.push(frame[i][1]);
 			allcolorsSerialized.push(frame[i][2]);					
-		}
+		}*/
 		
-		var allcolorsSerializedRGBW=[];
+		frame.map( function( rgbWindow, index )
+		{
+			rgbw[ 4*index + 0 ] = rgbWindow[0];
+			rgbw[ 4*index + 1 ] = rgbWindow[1];
+			rgbw[ 4*index + 2 ] = rgbWindow[2];
+			rgbw[ 4*index + 3 ] = 0;
+		});
+		
+		/*var allcolorsSerializedRGBW=[];
 		for(var i=0; i<frame.length;i++){
 			allcolorsSerializedRGBW.push(frame[i][0]);
 			allcolorsSerializedRGBW.push(frame[i][1]);
 			allcolorsSerializedRGBW.push(frame[i][2]);		
 			allcolorsSerializedRGBW.push(0);
-		}
+		}*/
 		
-		if(enableWebInterface){
+		if(enableWebInterface && frameCounter % 3 == 0){
 			//broadcast to all connected clients
-			app.io.broadcast('newFrame', allcolorsSerialized);
-		}	
-
-		if(ready){
-			DMX.send( {data: allcolorsSerializedRGBW}, function ( error )
-			{
-				error && console.log( "Error:", error);
-			});
+			app.io.broadcast('newFrame', rgbw);
+			
 		}
+
+		//DMX.ready() && DMX.send( {data: allcolorsSerializedRGBW} );
+		DMX.ready() && DMX.send( {data: rgbw} );
 	}; 
 };
 
@@ -83,7 +103,7 @@ var FileManagerObj = function(){
 	var that=this;
 	var blendingScene=[];
 	var scenedirectory="simplePlayer/simpleplayer_scenes/";
-	var defaultblendingscene=[{"duration":1000,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]}]}];
+	var defaultblendingscene=[{"duration":3000,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]}]}];
 	
 	
 	//returns blendingscene, if param frame is set function returns blending scene with correct framecount
@@ -108,7 +128,7 @@ var FileManagerObj = function(){
 		}
 		
 		for (var i in files) {
-			if(/\d+_\w+/.test(files[i]))
+			if(/^(\d+_)/.test(files[i]))
 				fileNames.push(files[i]);
 		}
 		fileNames.sort(); 
@@ -153,19 +173,19 @@ var FileManagerObj = function(){
 	};	
 };
 
-var PlayerObj = function(fps,fileManager){
+var PlayerObj = function(fps,fileManager,playerPaused){
 
 	var that=this;
 	var scenelist=[];
 	var currentSceneNumber=0;
 	
-	var pausing=true;
+	var pausing=playerPaused;
 	
 	var currentScene=[];
 	var nextScene=[];
 	var blendingScene=[];
 	
-	var blendingSceneLengthInSeconds=2;
+	var blendingSceneLengthInSeconds=4;
 	
 	var currentSceneFrameNumber=0;
 	var currentsceneType="";
@@ -186,12 +206,33 @@ var PlayerObj = function(fps,fileManager){
 	this.play=function(){
 		pausing=false;
 	}	
+	
 	this.restart=function(){
 		console.log("restart");
 		currentSceneNumber=0;
 		currentSceneFrameNumber=0;
 		currentScene=[];
 	}
+	this.previous=function(){
+		console.log("previous");
+		currentSceneNumber=((currentSceneNumber-2)+scenelist.length)%scenelist.length;
+		currentSceneFrameNumber=0;
+		currentScene=[];
+		currentsceneType="";
+	}
+	this.next=function(){
+		console.log("next");
+		currentSceneFrameNumber=0;
+		currentScene=[];
+		currentsceneType="";
+	}
+	this.goToScenNr=function(sceneNumber){
+		currentSceneNumber=sceneNumber;
+		currentSceneFrameNumber=0;
+		currentScene=[];
+		currentsceneType="";
+	}
+	
 	
 	this.loadNextScene=function(){
 		//if the current scene endet and was of type blendingscene load a sheduled or a ranked scene
@@ -240,6 +281,9 @@ var PlayerObj = function(fps,fileManager){
 					//console.log("------------ send Frame ----------------");
 					//console.log(currentScene[currentSceneFrameNumber]);
 					dmxManager.send(currentScene[currentSceneFrameNumber]);
+					if(enableWebInterface)
+						app.io.broadcast('percent', currentSceneFrameNumber/currentScene.length);
+					
 				}
 				else{
 					console.log("this frame does not exist in current scene");
@@ -262,37 +306,56 @@ var myRenderer = new Renderer(fps);
 var dmxManager=new DMXManager();
 dmxManager.initialize();
 
-//initialize fileManager
-var fileManager=new FileManagerObj(fps);
+//socket io for debugging and testing interface (tower simulation)
+var express = require('express.io');
+var app = express();
 
-//initialize player
-var player=new PlayerObj(fps,fileManager);
-player.start();
+setTimeout( function()
+{
+	//initialize fileManager
+	var fileManager=new FileManagerObj(fps);
 
+	//initialize player
+	console.log( "Starting player..." );
+	var player=new PlayerObj(fps,fileManager,playerPaused);
+	player.start();
 
-
-if(enableWebInterface){
-	//socket io for debugging and testing interface (tower simulation)
-	var express = require('express.io');
-	var app = express();
-	//open socket
-	app.http().io();
-	app.use(express.static(__dirname + '/simplePlayer/simplePlayer_interface'));
-	
-	
-	app.io.route('play', function(req) {
-		player.play();
-	})
-	app.io.route('pause', function(req) {
-		player.pause();
-	})
-	app.io.route('restart', function(req) {
-		player.restart();
-	})
-	
-	var server = app.listen(3001, function () {
-		var host = server.address().address;
-		var port = server.address().port;
-		console.log('tower app listening at http://%s:%s', host, port);
-	});
-}
+	if(enableWebInterface){
+		//open socket
+		app.http().io();
+		app.use(express.static(__dirname + '/simplePlayer/simplePlayer_interface'));
+		
+		
+		app.io.route('play', function(req) {
+			player.play();
+		})
+		app.io.route('pause', function(req) {
+			player.pause();
+		})
+		app.io.route('restart', function(req) {
+			player.restart();
+		})
+		app.io.route('next', function(req) {
+			player.next();
+		})
+		app.io.route('previous', function(req) {
+			player.previous();
+		})	
+		
+		app.io.route('hi', function(req) {
+			req.io.emit('sceneList', fileManager.getOrderedSceneList())
+		})		
+		app.io.route('goto', function(req) {
+			sceneNumber=parseInt(req.data[0]);
+			console.log("goto scene "+sceneNumber)
+			player.goToScenNr(sceneNumber);
+		})	
+		
+		
+		var server = app.listen(3001, function () {
+			var host = server.address().address;
+			var port = server.address().port;
+			console.log('tower app listening at http://%s:%s', host, port);
+		});
+	}
+}, DMX.relayResponseTimeout );

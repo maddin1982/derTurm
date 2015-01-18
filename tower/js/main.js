@@ -115,7 +115,8 @@ $(document).ready(function() {
 	* Backend Socket Events
 	**************************/
 	
-	io= io.connect()
+	// BEWARE! this call is for the old socket.io API (<1.0)
+	io = io.connect( location.origin, { resource: location.pathname.substring(1) + 'socket.io' } );
 	
 	//io Server Responses
 	io.on('savedScenesLoaded', function(data) {

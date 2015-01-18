@@ -1,2 +1,2 @@
-node simplePlayer.js
+node simplePlayer.js start
 pause
