@@ -9,15 +9,13 @@ var Renderer = require('./node_modules/renderModule.js');
 var DMX = require('dmxhost');
 
 
-
 //-----------OPTIONS--------------------------------
 
 //player speed
-var fps = 40;
+var fps = 30;
 
 //create a socket based webserver to show arduino output
 var enableWebInterface = true;
-
 
 if(process.argv[2]=="start"){
 	console.log("start playing")

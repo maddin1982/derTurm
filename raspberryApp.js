@@ -320,20 +320,19 @@ var PlayerObj = function(fps, fileManager) {
         nextRankedScene = sceneData;
         nextSceneType = "rankedScene";
 
-        var nextSheduledInSeconds;
+        var nextSheduledInSeconds=99999;
 
         //check if there is a time conflict with the next sheduled scene
         //get timespan till next sheduled scene begins
-        try {
-            if (!nextScheduledSceneInfo) throw "nextScheduledSceneInfo is not defined";
-            if (!nextScheduledSceneInfo.nextScheduledTime) throw "nextScheduledTime is not set for sceneinfo";
-            nextSheduledInSeconds = (nextScheduledSceneInfo.nextScheduledTime - (new Date()).getTime()) / 1000;
-            console.log("the next scheduled scene " + nextScheduledSceneInfo.nextScheduledSceneName + " should start in " + nextSheduledInSeconds + " seconds. Precisely at " + new Date(nextScheduledSceneInfo.nextScheduledTime));
-
-        } catch (err) {
-            console.log(err);
-            nextSheduledInSeconds = 99999;
-        }
+        
+        if (nextScheduledSceneInfo){
+            if (nextScheduledSceneInfo.nextScheduledTime){ 
+				nextSheduledInSeconds = (nextScheduledSceneInfo.nextScheduledTime - (new Date()).getTime()) / 1000;
+				console.log("the next scheduled scene " + nextScheduledSceneInfo.nextScheduledSceneName + " should start in " + nextSheduledInSeconds + " seconds. Precisely at " + new Date(nextScheduledSceneInfo.nextScheduledTime));
+				}
+			else
+				console.log("nextScheduledTime is not set for sceneinfo");
+        } 
 
         if (nextSheduledInSeconds < ((nextRankedScene.length / fps) + (blendingScene.length / fps))) {
             console.log("nextscene: " + nextRankedScene.length / fps + " s |" + " blending: " + blendingScene.length / fps + " s are to long");
