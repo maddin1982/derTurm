@@ -18,6 +18,16 @@ var fps = 50;
 //create a socket based webserver to show arduino output
 var enableWebInterface = true;
 
+
+if(process.argv[2]=="start"){
+	console.log("start playing")
+	var playerPaused=false;
+}
+else{
+	console.log("pausing player")
+	var playerPaused=true;
+}
+
 /* Windows
 	//dmx device
 	DMX.device = "\\.\COM6";
@@ -149,13 +159,13 @@ var FileManagerObj = function(){
 	};	
 };
 
-var PlayerObj = function(fps,fileManager){
+var PlayerObj = function(fps,fileManager,playerPaused){
 
 	var that=this;
 	var scenelist=[];
 	var currentSceneNumber=0;
 	
-	var pausing=true;
+	var pausing=playerPaused;
 	
 	var currentScene=[];
 	var nextScene=[];
@@ -262,7 +272,7 @@ dmxManager.initialize();
 var fileManager=new FileManagerObj(fps);
 
 //initialize player
-var player=new PlayerObj(fps,fileManager);
+var player=new PlayerObj(fps,fileManager,playerPaused);
 player.start();
 
 
