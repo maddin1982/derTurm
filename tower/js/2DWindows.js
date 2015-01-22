@@ -45,6 +45,7 @@ var Windows2DObj=function(){
 		
 		newColor="rgb("+newColor[0]+","+newColor[1]+","+newColor[2]+")";
 		ctx.fillStyle = newColor;
+		i = windows_num-i;
 		var a1 = (2.*Math.PI)/windows_num*i-(2.*Math.PI)/windows_num*3;
 		var a2 = (2.*Math.PI)/windows_num*(i+1)-(2.*Math.PI)/windows_num*3-margin/outer_radius;
 		var x_inner_1 = center.x + inner_radius*Math.cos(a1);
