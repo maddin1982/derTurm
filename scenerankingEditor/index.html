@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>Tower</title>
+		
+		<!-- css includes -->
+    	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="../css/bootstrap/bootstrap-theme.min.css">
+
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="../css/jqueryUi/jquery-ui.min.css">
+        <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+
+		<!-- jQuery includes, include before bootstrap!!!-->
+		<script src="../js/vendor/jquery-1.11.1.min.js"></script>
+		<script src="../js/vendor/jquery-ui.min.js"></script>
+
+		<!-- Bootstrap includes -->
+		<script src="../js/vendor/bootstrap.min.js"></script>
+		<script src="../js/vendor/bootstrap-slider.js"></script>
+		<script src="js/bootstrap-datetimepicker.min.js"></script>
+		<script src="js/bootstrap-datetimepicker.de.js"></script>
+
+
+		<!-- socket io -->
+		<script src="../../socket.io/socket.io.js"></script>
+		
+		<!-- own js files -->
+		<script src="js/callbacks.js"></script>
+		<script src="js/main.js"></script>
+
+
+
+    </head>
+    <body oncontextmenu="return false;">
+    		<div class="col">
+	    		<h3>List of scenes:</h3>
+				<div id="listOfUnusedFiles">
+				</div>
+			</div>
+
+			<div class="col">
+				<h3>Ranking:</h3>
+				<div id="listOfFiles" >
+				</div>
+				<br><br><br>
+				<h3>Scheduling:</h3>
+				<div id="scheduledFiles">
+				</div>
+			</div>
+
+    </body>
+</html>

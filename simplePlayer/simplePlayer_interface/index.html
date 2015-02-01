@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>TowerSim</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			#windows {
+				float: left;
+			}
+			#sceneName{
+				height:20px;
+				width:100%;
+				margin-bottom:10px;
+			}
+			.window {
+				height:20px;
+				width:20px;
+				float: left;
+				border:1px solid;
+			}
+			#percent{
+				width:100%;
+				height:10px;
+				background:#aaa;
+				margin-bottom:10px;
+			}
+			#buttonbar{
+				background:#aaa;
+				width:100%;
+				height:40px;
+				
+			}
+			
+			.highlighted{
+				background-color:#faa;
+				backgound:#faa;
+			}
+			
+			#sceneList{
+				position:absolute;
+				backgound:white;
+				margin-top:50px;
+				top:0px;
+				right:0px;
+				float:right;
+			}
+			
+			#sceneList li{
+				cursor:pointer;
+			}
+			
+			#buttonbar div{
+				background:#fff;
+				margin:5px;
+				padding:4px;
+				height:22px;
+				border-radius:4px;
+				float:left;
+				cursor:pointer;
+			}
+			#buttonbar div:hover{
+				background:#ccc;
+			}
+			
+		</style>
+		<!-- socket io -->
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="jquery-2.1.1.min.js"></script>
+		<script>
+			
+			
+		  var io = io.connect();
+		  
+		  io.on('newSceneInfo', function (data) {
+			  //console.log(data)
+			  $("#sceneName").html(data)
+			
+			if(data.indexOf("blending")==-1){
+				$("#sceneList li").removeClass("highlighted");	
+				
+				var sceneName=(data.split(" "))[1];
+				var id=(sceneName.split("_"))[0]+"_";
+				console.log(id)
+				$( "li:contains('"+id+"')").addClass("highlighted");  
+			}
+		  })
+		  
+		  
+		  io.on('percent', function (data) {
+			  //console.log(data)
+			  $("#percent").css("width",(data*100)+"%");
+		  })
+		  
+		  
+		  io.on('newFrame', function (data) {
+			  //console.log(data)
+			  
+			  for(var i=0;i<data.length;i=i+4){
+				var currwindow=i/4;
+				$("#window"+currwindow).css("background-color","rgb("+data[i]+","+data[i+1]+","+data[i+2]+")")
+			  }
+			  
+		  })
+		  
+		  io.on('sceneList',function (data){
+			for(var i=0;i<data.length;i++){
+				$("#sceneList").append("<li number="+i+">"+data[i]+"</li>")
+			}
+			$("#sceneList").children().on("click",function(e){
+				var id=$(e.target).attr("number");
+				console.log(id)
+				io.emit("goto",id);
+			})
+		  })
+		  
+		  $(document).ready(function() {
+			//add windows to main div
+			for(var i=0;i<16;i++){
+				$("#windows").append("<div id='window"+i+"' class='window'></div>")
+			}
+			
+			$("#buttonbar").children().on("click",function(e){
+				var action=$(e.target).attr("id");
+				io.emit(action);
+			}) 
+			
+			io.emit("hi");
+			
+		  });
+		  
+		</script>
+	</head>
+	<body>
+		<div id="buttonbar">
+			<div id="restart">restart</div>
+			<div id="pause">pause</div>
+			<div id="play">play</div>
+			<div id="previous">previous</div>
+			<div id="next">next</div>
+		</div>
+		<div id="percent"></div>
+		<div id="sceneName"></div>
+		<div id="windows"></div>
+		<ul id="sceneList"></ul>
+	</body>
+</html>

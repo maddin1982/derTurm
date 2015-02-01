@@ -5,7 +5,7 @@ var framesManagerObj = function(framesContainer){
 	this.framesContainer=framesContainer;
 	var data=[];
 	this.lastSelectedWindowDiv;
-	this.currentWindowBrushColor=[0,0,0];
+	this.currentWindowBrushColor=[255,255,255];
 	
 	var indexBeforeDrag;
 	makeFramesContainersortable();
@@ -199,18 +199,28 @@ var framesManagerObj = function(framesContainer){
 	}
 	
 	this.setSingleWindowColor=function(event){
-		if(_leftMouseDown == true||event.type=="click") {
-			that.lastSelectedWindowDiv=event.target;
-			color=that.currentWindowBrushColor;
-			frameId=parseInt($(event.target).parents('.frame').attr("frameid"))
+		if(_leftMouseDown == true||event.type=="click"||event.type=="touchmove") {
+			divToChange = null;
 
-			windowId=parseInt($(event.target).attr("windowid"))
+			if(event.type=="touchmove"){
+				event.preventDefault();
+				divToChange = document.elementFromPoint(event.originalEvent.touches[0].pageX, event.originalEvent.touches[0].pageY)
+			}
+			else{
+				divToChange = event.target;
+			}
+
+			that.lastSelectedWindowDiv=divToChange;
+
+			color=that.currentWindowBrushColor;
+			frameId=parseInt($(divToChange).parents('.frame').attr("frameid"))
+
+			windowId=parseInt($(divToChange).attr("windowid"))
 
 			data[frameId].windows[windowId].color = color;
-			
 			//change other windows depending on current windowmode
 			windowManager.updateData();
-			
+
 			that.redrawSingleFrame(frameId)
 			//that.generateFrameDisplay();
 		}
@@ -245,17 +255,20 @@ var framesManagerObj = function(framesContainer){
 
 
 	//generates Frames after change
-	this.generateFrameDisplay=function(){	
+	this.generateFrameDisplay=function() {	
 
 		if(data.length==0){
 			that.framesContainer.empty();
 			var frameContainer = null;
-			var addFrameIcon=document.createElement('i')
+			var addFrameRow = document.createElement('button');
+			var addFrameIcon=document.createElement('i');
 			//$(addFrame).attr("id","addFrameBtn"+j)
-			$(addFrameIcon).attr("class","ui-icon ui-icon-plus f_left")
-			$(addFrameIcon).attr("onclick","framesManager.addFrame()")
+			$(addFrameIcon).attr("class","ui-icon ui-icon-plus f_left");
+			$(addFrameRow).attr("onclick","framesManager.addFrame()");
+			$(addFrameRow).append(addFrameIcon);
+			$(addFrameRow).append("<span>Farbreihe hinzufügen</span>");
 			console.log("aff icon")
-			that.framesContainer.append(addFrameIcon);
+			that.framesContainer.append(addFrameRow);
 		}
 		else{
 			windowManager.updateData();	
@@ -303,7 +316,7 @@ var framesManagerObj = function(framesContainer){
 					if(frameWindow.active!=1)
 						$(windowDiv).css({opacity: 0.2});
 			
-					$(windowDiv).on("click mousemove",that.setSingleWindowColor)
+					$(windowDiv).on("click mousemove touchmove",that.setSingleWindowColor)
 					$(windowsContainerDiv).append(windowDiv)
 				})
 				$(rowDiv).append(windowsContainerDiv)
@@ -346,5 +359,11 @@ var framesManagerObj = function(framesContainer){
 
 			})
 		}
+	}
+
+	this.clearFrames = function() {
+		data=[];
+		that.generateFrameDisplay();
+		player.reset();
 	}
 }

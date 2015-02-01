@@ -4,6 +4,8 @@ var PlayerObj = function(DataManager){
 	var that=this;
 	
 	var fps=24;
+
+	var frameRendered = false;
 	
 	this.lastFrameId;
 	this.currentframeId=0;
@@ -15,6 +17,7 @@ var PlayerObj = function(DataManager){
 
 	//start framechange with timer if it isnt already running
 	this.start=function(){
+
 		//update data
 		data=dataManager.getData();
 		if(!that.frameAnimationRunning&&data.length>1){
@@ -27,6 +30,12 @@ var PlayerObj = function(DataManager){
 	this.restart=function(){
 		that.currentframeId=0;
 	}
+
+	this.reset=function(){
+		that.currentframeId=0;
+		that.data = [];
+	}
+
 	
 	//go to next Frame if there is one
 	this.goToNextFrame=function(){
@@ -35,9 +44,10 @@ var PlayerObj = function(DataManager){
 		if(data.length>1){
 			that.lastFrameStartTime=new Date().getTime();
 			that.currentframeId=that.getNextFrameId();
-			setTimeout(function () {that.goToNextFrame()},data[that.currentframeId].duration)			
+
+			setTimeout(function () {that.goToNextFrame()},data[that.currentframeId].duration);
 		}
-		else //animation stoped
+		else //animation stopped
 			that.frameAnimationRunning=false;
 	}
 	
@@ -57,6 +67,7 @@ var PlayerObj = function(DataManager){
 		}
 		if(data[that.currentframeId].type == 1)
 		{
+			var changed = false;
 			mixValue = (currTime-startTime)/data[that.currentframeId].duration;
 
 			var tmp = jQuery.extend(true, {}, data[that.currentframeId]);
@@ -68,9 +79,16 @@ var PlayerObj = function(DataManager){
 					var c1 = win.color;
 					var c2 = next.windows[i].color;					
 					win.color = [parseInt(c1[0]*(1-mixValue)+c2[0]*(mixValue)),parseInt(c1[1]*(1-mixValue)+c2[1]*(mixValue)),parseInt( c1[2]*(1-mixValue)+c2[2]*(mixValue))]
+					if(c1[0] != win.color[0] || c1[1] != win.color[1] || c1[2] != win.color[2]) {
+						changed = true;
+					}
 				})
 			}
 			that.currentFrame=tmp;
+			if(changed) {
+				frameRendered = false;
+			}
+			
 			return;
 		}
 		that.currentFrame=data[that.currentframeId];

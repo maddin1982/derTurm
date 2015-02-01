@@ -29,17 +29,19 @@
 		<script src="js/vendor/three.orbitctrl.js"></script>
 
 		<!-- socket io -->
-		<script src="../socket.io/socket.io.js"></script>
+		<script src="socket.io/socket.io.js"></script>
 		
 		<!-- own js files -->
 		<script src="js/helpers.js"></script>
 		<script src="js/cookie.js"></script>
 		<script src="js/colorGenerator.js"></script>
+		<script src="js/windowManager.js"></script>
+		<script src="js/2DWindows.js"></script>
 		<script src="js/3DTower.js"></script>
 		<script src="js/windowVector.js"></script>
+		<script src="js/imageProcessing.js"></script>
 		<script src="js/eventHandling.js"></script>
 		<script src="js/framesManager.js"></script>
-		<script src="js/windowManager.js"></script>
 		<script src="js/colorPicker.js"></script>
 		<script src="js/player.js"></script>
 		<script src="js/main.js"></script>
@@ -79,62 +81,92 @@
 		</div>
 		-->
 		
+		<div class="nav topnav">
+			<div class="container">	
+				<button id="openColorSelectBtn" type="button"><span><i class="ui-icon ui-icon-pencil f_left"></i>Zeichenfarbe</span></button>
+				<button id="loadImageBtn" type="button"><span><i class="ui-icon ui-icon-image f_left"></i>Bild umwandeln</span></button>
+			</div>
+		</div>
+
+		<div class="nav bottomnav"> 
+			<div class="container">	
+
+				<!--Save Scene -->
+				<button id="reloadPageBtn" type="button"><span class="ui-icon ui-icon-arrowrefresh-1-w f_left"></span>Neu anfangen</button>
+					
+				<!--Load Scenes -->
+				<div id="loadSceneContainer" class="dropup">
+					<button id="loadSceneFilesBtn" type="button" data-toggle="dropdown"><span class="ui-icon ui-icon-folder-open f_left"></span>Gespeicherte Szene laden</button>
+					<ul id="listOfFiles" class="dropdown-menu scrollable-menu dropup" role="menu">
+						<!--<li><a href="#">Action</a></li>-->
+					</ul>
+				</div>
+
+				<!--switch between edit and view mode -->
+				<button id="viewModeBtn" type="button"><span class="ui-icon ui-icon-check f_left"></span>Fertig!</button>
+				<div id="readyEditingBtns">
+					<!--Save Scene -->
+					<button id="openSaveDialogBtn" type="button"><span class="ui-icon ui-icon-disk f_left"></span>Speichern</button>
+					<!--Edit Scene -->
+					<button id="editModeBtn" type="button"><span class="ui-icon ui-icon-pencil f_left"></span>Ändern</button>
+				</div>
+			</div>
+		</div>
+
 		<div class="container">	
 			<div class="row">
-				<div class="col-md-12 nopadding">
-				  <div id="scalablePreviewWindow">	
-				  
+			  	<div id="scalablePreviewWindow">	
+			  
 					<!--display options in top right corner-->
 					<button id="showSettingBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-gear"></button>
-					
-					<!--button bar in lower left corner -->
-					<div id="buttonBar">
-					
-						<!--Save Scene -->
-						<button id="openSaveDialogBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-disk"></span></button>
-							
-						<!--Load Scenes -->
-						<div class="dropdown">
-							<button id="loadSceneFilesBtn" type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="ui-icon ui-icon-folder-open"></span></button>
-							<ul id="listOfFiles" class="dropdown-menu scrollable-menu" role="menu">
-								<!--<li><a href="#">Action</a></li>-->
-							</ul>
-						</div>
+				
+			  	</div>
+			
+				<div id="previewCircleWindowContainer">
+			  		<canvas width="93" height="93" id="previewCircleWindow"></canvas>
+			  	</div>
 
-						<!--active windows dropdown -->
-						<div class="dropdown">
-							<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dd_WindowAmount" data-toggle="dropdown">
-							Aktive Fenster
-							<span class="caret"></span>
-							</button>
-							<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
-							</ul>
-						</div>
-						
-						<!--window mode dropdown -->
-						<div class="dropdown">
-							<button class="btn btn-default btn-sm dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
-							Fenster Modus
-							<span class="caret"></span>
-							</button>
-							<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
-								<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
-							</ul>
-						</div>				
-						<button id="openColorSelectBtn" type="button" class="btn btn-default btn-sm"><span class="ui-icon ui-icon-pencil"></span></button>
-					  </div>
-					  <div id="windowVector" class="windows">
-					  </div>
-				  </div>
-				</div>			
+			  	<div id="windowVector" class="windows">
+				</div>
+
+				<!--
+				<div id="buttonBar" class="col-md-5 nopadding">-->
+
+					<!--active windows dropdown -->
+					<!--
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dd_WindowAmount" data-toggle="dropdown">
+						Aktive Fenster
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowAmount">
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="1">1 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="2">2 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="3">3 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="4">4 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="8">8 Fenster</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="activeWindowsSelect" activeWindows="16">16 Fenster</a></li>
+						</ul>
+					</div>
+					-->
+					
+					<!--window mode dropdown -->
+					<!--
+					<div class="dropdown">
+						<button class="btn btn-default btn-sm dropdown-toggle inactive" type="button" id="dd_WindowMode" data-toggle="dropdown">
+						Fenster Modus
+						<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dd_WindowMode">
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="1">einfarbig</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="2">wiederholen</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" class="windowModeSelect" mode="3">umlaufend</a></li>
+						</ul>
+					</div>				
+					-->
+					
+					<!--
+				  </div>	-->
 			</div>
 			<div class="spacerdiv"></div>
 
@@ -341,7 +373,34 @@
 					</div>
 				</div>
 			</div>
+
+			<!--Image loading Window-->
+			<div id="loadImageModal" class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- Header -->
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title">Bild auswählen</h4>
+						</div>
+						<div class="modal-body">
+							<input type="file" id="imageFile"/>
+							<label><input type="text" id="animationTime"/>Animationsdauer in ms</label>
+						</div>
+
+						<img id="loadImagePreview"/>
+							
+						<!-- Footer -->	
+						<div class="modal-footer">
+							<button id="cancelModal" type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+							<button id="processImageBtn" type="button" class="btn btn-primary">Umwandeln</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
 		</div>
+
     </body>
 	
 		<!-- ---------------- Custom Shader Code ------------------------ -->

@@ -7,6 +7,8 @@ var Tower3DObj=function(){
 	var lastFrameStartTime=0;
 	var windowMeshes=[];
 
+	var framerate = 24;
+
 	var windowMaterials=[];
 	var glowingBubbles=[];
 	var topWindowMeshes=[];
@@ -32,12 +34,12 @@ var Tower3DObj=function(){
 			window.clearTimeout(renderTimeout);
 		
 		//make 3d container resizable
-		 container.resizable({
-		  handles: 's',
-		  resize: function( event, ui ) {
-			that.update3DWindowAspectRatio();
-		  }
-		});
+		//  container.resizable({
+		//   handles: 's',
+		//   resize: function( event, ui ) {
+		// 	that.update3DWindowAspectRatio();
+		//   }
+		// });
 
 		//if url parameter showFullModel is true show full model
 		if(gup("showFullModel")=="true")
@@ -70,8 +72,8 @@ var Tower3DObj=function(){
 		scene = new THREE.Scene();
 		
 		//add camera
-		camera = new THREE.PerspectiveCamera(50, container.width() / 200, 1, 10000);
-		camera.position.set(-30,30,-60)
+		camera = new THREE.PerspectiveCamera(26, container.width() / 200, 1, 10000);
+		camera.position.set(-30,-10,-60);
 		scene.add(camera);
 
 		//get standard material
@@ -101,9 +103,22 @@ var Tower3DObj=function(){
 						return returnMaterial;
 					}
 					
-					for(var i =0; i<16;i++){
-						windowMaterials[i]=getMaterialByName("window_"+(i+1))
-					}	
+						windowMaterials[1]=getMaterialByName("window_11")
+						windowMaterials[2]=getMaterialByName("window_12")
+						windowMaterials[3]=getMaterialByName("window_13")
+						windowMaterials[4]=getMaterialByName("window_14")
+						windowMaterials[5]=getMaterialByName("window_15")
+						windowMaterials[6]=getMaterialByName("window_16")
+						windowMaterials[7]=getMaterialByName("window_1")
+						windowMaterials[8]=getMaterialByName("window_2")
+						windowMaterials[9]=getMaterialByName("window_3")
+						windowMaterials[10]=getMaterialByName("window_4")
+						windowMaterials[11]=getMaterialByName("window_5")
+						windowMaterials[12]=getMaterialByName("window_6")
+						windowMaterials[13]=getMaterialByName("window_7")
+						windowMaterials[14]=getMaterialByName("window_8")
+						windowMaterials[15]=getMaterialByName("window_9")
+						windowMaterials[16]=getMaterialByName("window_10")
 			}
 			var loader = new THREE.JSONLoader();
 			loader.load( "js/3dModels/ernemannturm.json", modelToScene );
@@ -152,7 +167,7 @@ var Tower3DObj=function(){
 				group.add( mittelBalkenMesh );
 
 				var windowMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, transparent: true, opacity: 0.7, side: THREE.FrontSide } );
-				var windowGlass= new THREE.PlaneGeometry(2, 2);
+				var windowGlass= new THREE.PlaneBufferGeometry(2, 2);
 				windowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0,1,0), 90* Math.PI / 180));	
 				windowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
 				//windlow plane 
@@ -161,7 +176,7 @@ var Tower3DObj=function(){
 				windowMeshes[i]=plane;
 
 				
-				var topWindowGlass= new THREE.PlaneGeometry(2, 2);
+				var topWindowGlass= new THREE.PlaneBufferGeometry(2, 2);
 				topWindowGlass.applyMatrix( new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1,0,0), 90* Math.PI / 180));	
 				topWindowGlass.applyMatrix( new THREE.Matrix4().makeTranslation( 6.7, 5, 0 ) );		
 				var topPlane = new THREE.Mesh(topWindowGlass,windowMaterial);
@@ -263,7 +278,7 @@ var Tower3DObj=function(){
 		controls.update();
 		
 		that.animate();
-		window.addEventListener( 'resize', that.update3DWindowAspectRatio, false );
+		//window.addEventListener( 'resize', that.update3DWindowAspectRatio, false );
 	}
 
 	this.update3DWindowAspectRatio=function() {
@@ -276,12 +291,12 @@ var Tower3DObj=function(){
 	}
 
 	this.animate=function() {
-		//render with 24 fps
+
 		renderTimeout=setTimeout( function() {
-			console.log("frame")
-			if(!that.stopAnimation)
+			if(!that.stopAnimation) {
 				requestAnimationFrame(that.animate);
-		}, 1000 / 24 );
+			}
+ 		}, 1000 / framerate );
 
 		var currentFrame=player.getCurrentFrame(lastFrameStartTime,new Date().getTime());
 		if(!(currentFrame.windows===undefined)){
@@ -290,6 +305,7 @@ var Tower3DObj=function(){
 			})
 		}
 		that.render();
+
 	}
 
 	this.setWindowToColor=function(i,newColor){
@@ -358,4 +374,12 @@ var Tower3DObj=function(){
 			}	}
 		}
 	}
+
+	this.stop=function() {
+		//kill running animation timeout 
+		if(renderTimeout)
+			window.clearTimeout(renderTimeout);
+
+	}
+	
 }

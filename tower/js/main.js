@@ -4,6 +4,7 @@ var framesManager;
 var windowManager;
 var myColorPicker;
 var tower3D;
+var windows2D;
 var player;
 var windowVector;
 
@@ -25,7 +26,7 @@ $(document).ready(function() {
 	windowManager = new windowManagerObj();	
 	
 	//initialize color selection popup
-	myColorPicker= new colorPickerObj($("#colorPicker"));
+	myColorPicker= new colorPickerObj($("#colorPicker"), $("#openColorSelectBtn"));
 	myColorPicker.addColorSelection(colorGenerator.ColorSets.WARM);
 
 	windowVector = 	new WindowVector();
@@ -34,7 +35,12 @@ $(document).ready(function() {
 
 	//initialize 3d Scene
 	tower3D=new Tower3DObj();
-	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));	
+	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));
+
+	//initialize 2d Scene
+	windows2D=new Windows2DObj();
+	windows2D.init2DWindows($("#previewCircleWindow"), 16);
+	windows2D.animate();
 
 	//Mouse Events Sliders and so on...
 	initializeEvents();
@@ -109,7 +115,8 @@ $(document).ready(function() {
 	* Backend Socket Events
 	**************************/
 	
-	io= io.connect()
+	// BEWARE! this call is for the old socket.io API (<1.0)
+	io = io.connect( location.origin, { resource: location.pathname.substring(1) + 'socket.io' } );
 	
 	//io Server Responses
 	io.on('savedScenesLoaded', function(data) {
@@ -131,6 +138,10 @@ $(document).ready(function() {
 
 function reload3dModel(){
 	tower3D.init3DSceneOnElement($("#scalablePreviewWindow"));
+}
+
+function stop3dModel() {
+	tower3D.stop();
 }
 
 // function createVectorDivWindows(){

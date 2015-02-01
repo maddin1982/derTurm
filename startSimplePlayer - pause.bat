@@ -1,0 +1,2 @@
+node simplePlayer.js
+pause
