@@ -34,7 +34,6 @@ body {
 .logo {
 	width: 100px !important;
 }
-
 .actionarea {
 	height: 400px;
 	-moz-border-radius: 15px;
@@ -48,7 +47,7 @@ body {
 } 
 /****************** COLORS ***************/
 .color {
-	background: #138f80;
+	background: #31ae9e;
 }
 
 .button.color:hover {
@@ -69,6 +68,18 @@ body {
 
 .button.darkcolor:hover {
 	background-color: #222424 !important; 
+}
+/****************** COLORS ***************/
+.splash {
+	-webkit-transition: opacity 0.4s, height 0.4s; /* For Safari 3.1 to 6.0 */
+    transition: opacity 0.4s, height 0.4s;
+}
+.hidden {
+    opacity: 0;
+    height: 0px;
+}
+.shown {
+	opacity: 1;
 }
 
 .logocol {
