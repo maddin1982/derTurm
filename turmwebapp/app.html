@@ -1,0 +1,142 @@
+<!doctype html>
+
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<title>TALK TO ME - TALKIN TOWER APP</title>
+
+	<meta name="description" content="This website lets you interact with an artinstallation in the Ernemannturm. Please go near and start the 3-step wizard to control the installation yourself." />
+	<meta name="keywords" content="responsive, mobile, grid, layout, system, framework, fluid, web design, design" />
+	<meta name="author" content="KAZOOSH! neuesvomlicht.de © 2015" />
+
+	<link rel="shortcut icon" href="img/favicon2.ico" />
+
+	<meta name="viewport" content="width=device-width"/>
+
+	<!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+	<link href='http://fonts.googleapis.com/css?family=Quattrocento' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Roboto:100,300,400,500' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="css/onepcssgrid.css" />
+	<link rel="stylesheet" href="css/style.css" />
+
+	<script language="javascript" type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
+	<script language="javascript" type="text/javascript" src="js/geoPosition.js"></script>
+	<script language="javascript" type="text/javascript" src="js/main.js"></script>
+
+</head>
+
+	<body>
+		<div class="onepcssgrid-1000">
+			<div class="onerow">
+				<div class="col2 empty"></div>
+				<div class="col2 logocol"><img width="100" class="logocol logo" src="img/Logo_100px_new.png" onClick="startSituation();"></img></div></a>
+				<div class="col4 head">TALKING</br>TOWER</div>
+				<div class="col4 empty last"></div>
+			</div>
+			<!-- STEP 1 -->
+			<div id="step1">
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col6 calltoaction">Klicke auf die Karte um deine Position anzugeben oder nutze GPS dafür.</div>
+					<div class="col2 specialcolor button" onClick="getLocation()";>GPS</div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">					
+					<div class="col2 empty"></div>
+					<div class="col8 calltoaction" ><img id="mapImg" src="img/map_with_tower.png"></img></div>
+					<div class="col2 empty last"></div>
+					<img id="highlight" src="img/highlighter.png"></img>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col8 button darkcolor splash hidden" id="splash1"></div>
+					<div class="col2 darkcolor button last" id="stepButton1" onClick="btn_weiter_step1();">Weiter</div>
+				</div>
+			</div>
+			<!-- STEP 2 -->
+			<div id="step2">
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col8 calltoaction">Wähle deine Lieblingsfarbe.</div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col1 colorselector" style="background: #002AD1; height:20px;"></div>
+					<div class="col1 colorselector" style="background: #082F97;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #03484D;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #00BFCC;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #8F0E97;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #630D8D;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #330220;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #D10052;  height:20px;"></div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col1 colorselector" style="background: #8D1800;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #97270E;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #8D520D;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #CCA20A;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #F0D10C;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #579E10;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #1A8012;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #043300;  height:20px;"></div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col1 colorselector" style="background: #008458;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #BC5FD1;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #759E4C;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #404D84;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #E5E5E4;  height:20px;"></div>
+					<div class="col1 colorselector" style="background: #D9625E;  height:20px;"></div>
+					<div class="col2 empty"></div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col8 darkcolor button splash hidden" id="splash2">Erfolg!</div>
+					<div class="col2 color button last" id="stepButton2" onClick="btn_weiter_step2();">Weiter</div></a>
+				</div>
+			</div>
+			<!-- STEP 3 -->
+			<div id="step3">
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col8 darkcolor button splash shown">Bewege deinen Finger vertikal um die Helligkeit einzustellen.</div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col8 darkcolor button splash hidden empty">Tappe 2 mal um ein Blinken auszusenden.</div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col8 darkcolor button splash hidden empty">Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen.</div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<div class="col8 actionarea"></div>
+					<div class="col2 empty last"></div>
+				</div>
+				<div class="onerow">
+					<div class="col2 empty"></div>
+					<a href="http://neuesvomlicht.de"><div class="col2 darkcolor button ">Neues vom Licht</div></a>
+					<a href="http://www.tsd.de/"><div class="col2 darkcolor button ">Technische Sammlungen</div></a>
+					<a href="http://www.dresdner-lichtjahr.de/"><div class="col2 darkcolor button ">Dresdner Lichtjahr</div></a>
+					<a href="http://www.kazoosh.com"><div class="col2 darkcolor button last">KAZOOSH!</div></a>
+					<div class="col2 empty last"></div>
+				</div>
+			</div>
+		</div>
+
+	</body>
+
+</html>
