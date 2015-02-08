@@ -1,3 +1,8 @@
+//enable socet io
+io = io.connect()
+//process incomming io Events
+addIoEvents();
+
 $( document ).ready(function() {
 	//Set Eventhandlers
 	$("#mapImg").on("click", function(event) { clickOnImage(event, $(this).offset()); });
@@ -8,6 +13,10 @@ $( document ).ready(function() {
 
 	//Set Start Situation of StepWizard
     startSituation();
+
+	//add Gesture Recognition on action area
+	startGestureRecognizer();
+	
   });
 
 var TOO_FAR_AWAY = 10.0; //distance in KM where we ignore the user
@@ -22,6 +31,45 @@ var prefered_user_color = null;
 	// West 8 . 0 East 
 	// South  4
 
+	
+function addIoEvents(){
+	//testMessage
+	 io.emit('processGesture',{"name":"myGesture","options":[]});
+	
+	//error Message
+	io.on('error', function(data) {
+		console.log(data);
+	})  
+	//success Message
+	io.on('success', function(data) {
+		console.log(data);
+	})  
+}	
+	
+	
+function startGestureRecognizer(){
+ 
+	 var options={ 
+		dragLockToAxis:true,
+		dragBlockVertical: true,
+		preventDefault: true
+	}
+	
+	//prevent site from scrolling when touching the actionarea
+	$("#actionArea").on('touchstart', function (evt) {
+		evt.preventDefault();
+	});
+	
+	//add hammer event listeners
+	$("#actionArea").hammer(options).on("pan", function(event) {
+            if (event.gesture.direction == Hammer.DIRECTION_UP || event.gesture.direction == Hammer.DIRECTION_DOWN){
+                 io.emit('processGesture',{"name":"myGesture","windowId":prefered_user_window});
+            }
+     });
+	
+}	
+
+	
 function startSituation(){
 	//STEP 1
 	$( "#step1" ).fadeIn();
