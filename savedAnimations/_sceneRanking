@@ -1,1 +1,1 @@
-[{"sceneName":"pure","dynamicRating":1,"staticRating":1},{"sceneName":"redyellow","dynamicRating":1,"staticRating":1},{"sceneName":"greenblue","dynamicRating":5,"staticRating":1},{"sceneName":"round","dynamicRating":10,"staticRating":1}]
+[{"sceneName":"pure","staticRating":1},{"sceneName":"redyellow","staticRating":1},{"sceneName":"greenblue","staticRating":1},{"sceneName":"round","staticRating":1}]

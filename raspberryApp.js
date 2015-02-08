@@ -1,27 +1,20 @@
 // load file module
 var fs = require('fs');
 
-// module for synchronization of user content
-var gitsync = require('gitsync');
-gitsync.directory = 'savedAnimations/';
-gitsync.remote = 'git://neuesvomlicht.de:4880/sync.git';
-gitsync.branch = 'animations';
-
 // load Render Module
 var Renderer = require('./node_modules/renderModule.js');
 
+// module for synchronization of user content
+var gitsync = require('gitsync');
+
 // load DMX serial communication module
-//var DMX = require('./node_modules/dmxhost.js/dmxhost.js');
 var DMX = require('dmxhost');
 
 //-----------OPTIONS--------------------------------
 
-/*
-//dmx device
-DMX.device = "\\.\COM6";
-DMX.relayPath="./node_modules/dmxhost.js/dmxhost-serial-relay.py";
-DMX.log=true;
-*/
+gitsync.directory = 'savedAnimations/';
+gitsync.remote = 'git://neuesvomlicht.de:4880/sync.git';
+gitsync.branch = 'animations';
 
 DMX.log = true;
 DMX.relayPath = './node_modules/dmxhost/dmxhost-serial-relay.py';
@@ -33,15 +26,16 @@ var enableWebInterface = false;
 // time between checks for changed scenes [ms]
 var sceneCheckInterval = 30 * 1000;
 
+//default blending scene 4s black
+var defaultBlendingScene=[{"duration":4000,"type":1,"windows":[{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1},{"color":[0,0,0],"active":1}]}];
+var scenePath="savedAnimations/";	
+
 // player speed
 var fps = 30;
 
 //----------------------------------------------------
 
-
-
 var DMXManager = function() {
-    var ready = false;
 
     //initialize and configure DMX Module
     this.initialize = function() {
@@ -52,19 +46,18 @@ var DMXManager = function() {
                     console.log("-------------------------------------------------------");
                 } else {
                     console.log("Relay spawned.");
-                    ready = true;
                 }
             });
         };
-     //send data
+ 
 	//data should be array with 4*16 bytes
 	var rgbw = new Array(16*4);
+	
 	var frameCounter = 0;	
 		
     this.send = function(frame) {
-		frameCounter++;
-		frameCounter=frameCounter % 3;
-		
+	
+		//fill rgb array
 		frame.map( function( rgbWindow, index )
 		{
 			rgbw[ 4*index + 0 ] = rgbWindow[0];
@@ -72,39 +65,62 @@ var DMXManager = function() {
 			rgbw[ 4*index + 2 ] = rgbWindow[2];
 			rgbw[ 4*index + 3 ] = 0;
 		});
+		
+		//update web interface every 3 frames
+		frameCounter++;
+		frameCounter=frameCounter % 3;
 		if(enableWebInterface && frameCounter == 0){
 			//broadcast to all connected clients
 			app.io.broadcast('newFrame', rgbw);		
 		}
 
-		//DMX.ready() && DMX.send( {data: allcolorsSerializedRGBW} );
 		DMX.ready() && DMX.send( {data: rgbw} );
     };
 };
 
+var SceneManagerObj =function(fileManager){
 
-var FileManagerObj = function(fps) {
-    var that = this;
-    var sceneRanking = [];
-    var schedule = [];
-    var nextScheduledTime = null;
-    var nextScheduledSceneName = null;
-    var blendingScene = [];
+	var that = this;
+	var sceneRankingData,scheduleData;
+	var sceneRankingFilename="_schedule";
+	var scheduleFileName="_schedule";
 
+	//next sheduled file data
+    var nextScheduledTime, nextScheduledSceneName;
+	
+	var setScheneRankingData=function(data){
+		sceneRankingData=data;
+	}
+	var setscheduleData=function(data){
+		scheduleData=data;
+	}	
+	
+	//load blending, sceneranking and shedule
+	this.initialize = function(){
+		
+		
+		
+	}
+	
     //returns blendingscene, if param frame is set function returns blending scene with correct framecount
-    this.getBlendingScene = function(frames) {
-        if (!frames)
+    this.getBlendingScene = function(frameCount) {    
+		if (!frameCount){
+			 //return default length
             return blendingScene;
+		}
         else {
-            newBlendingScene = [];
-            for (var i = 0; i < frames; i++) {
-                newBlendingScene.push(blendingScene[i % blendingScene.length]);
+			//return a custom scene	
+            newBlendingScene = new Array(frameCount);;
+			var defaultLength=blendingScene.length;
+			
+            for (var i = 0; i < frameCount; i++) {
+                newBlendingScene[i]=blendingScene[i % defaultLength];
             }
             return newBlendingScene;
         }
     };
-
-    this.getNextSceneNameByRanking = function() {
+	
+	this.getNextSceneNameByRanking = function() {
         var highestRanking = 0;
         var highestRankedScene;
 
@@ -163,89 +179,79 @@ var FileManagerObj = function(fps) {
             }
         }
     };
+}
 
-    this.scheduleDiffers = function(json1, json2) {
-        if (json1.length != json2.length)
-            return true;
-
-        for (var i = 0; i < json1.length; i++) {
-            if (json1[i].startDate != json2[i].startDate || json1[i].sceneName != json2[i].sceneName || json1[i].endDate != json2[i].endDate || json1[i].repeatEach != json2[i].repeatEach)
-                return true;
-        }
-        return false;
-    };
-
-    //return if files differ or not
-    this.rankingDiffers = function(json1, json2) {
-        if (json1.length != json2.length)
-            return true;
-
-        for (var i = 0; i < json1.length; i++) {
-            if (json1[i].staticRating != json2[i].staticRating || json1[i].sceneName != json2[i].sceneName)
-                return true;
-        }
-        return false;
-    };
-
-    this.loadSchedule = function(callback) {
-		fs.readFile('savedAnimations/_schedule', "utf-8", function(err, result) {
-			if (err) console.log(err);
-			else {
-				var newSchedule = JSON.parse(result);
-
-				if (that.scheduleDiffers(schedule, newSchedule)) {
-					schedule = newSchedule;
-					console.log("----------------------------");
-					console.log("--  SCHEDULE GOT UPDATED! --");
-					console.log("----------------------------");
-				}
-				callback();
-			}
-		});
-	};
+var FileManagerObj = function(scenePath) {
+    
+	var that = this;
+	//keepPreviouslyCachedObjects 
+	var rawCache=[];
 	
-	//loads json object holding scenenames and time [{startTime:DateObj1,sceneName:name1},{startTime:DateObj2,sceneName:name2}]
-    this.loadSceneRanking = function() {
-        fs.readFile('savedAnimations/_sceneRanking', "utf-8", function(err, result) {
-            if (err) throw err;
+	this.loadFileAndStartWatch(filename, callback){
+		that.loadAndParseFile(fileName,function(data){
+			callback(data);
+			that.watchFileForChanges(fileName,function(data){
+				callback(data);
+			})
+		})
+	}
 
-            console.log("loadSceneRanking");
-            var newSceneRanking = JSON.parse(result);
-
-            if (that.rankingDiffers(sceneRanking, newSceneRanking)) {
-                sceneRanking = newSceneRanking;
-
-                console.log("----------------------------");
-                console.log("FILES OR RANKING CHANGED!!!");
-                console.log("----------------------------");
-            }
-        });
-    };
+	this.watchFileForChanges(filename, callback){
+		fs.watch(fileName, {
+		  persistent: true
+		}, function(event, filename,callback) {
+		   console.log(event + " event occurred on " + filename);
+		   that.loadAndParseFile(filename,callback);
+		});
+	}
+	
+	this.loadAndParseFile(fileName,callback){
+		fs.readFile(scenePath+fileName, "utf-8", function(err, result, callback) {
+			if (err){ 
+				console.log(fileName+" corrupt or not existent")
+				console.log(err);
+			}
+			else {
+				var data;
+				try{
+					data = JSON.parse(result);
+					}catch(e){
+						console.log("Error while parsing shedule file contents");
+						console.log(e);
+				}
+				if(data){
+					callback(data)
+				}
+				else{
+					console.log("no data could be loaded")
+				}
+			}
+	})
+	
 
     this.loadSceneData = function(sceneName, callback) {
         //load file 
-        fs.readFile('savedAnimations/' + sceneName, "utf-8", function(err, result) {
+        fs.readFile(scenePath + sceneName, "utf-8", function(err, result) {
             if (err) {
+				console.log("Can not load scene "+sceneName+", get default-blendingscene instead");
                 console.log("error: " + err);
                 //todo: add errorscene
                 sceneData = blendingScene;
             } else {
                 //transform scene from fronted json format to simple array with all frames
-                sceneData = myRenderer.parse(JSON.parse(result));
-                callback(sceneData);
+                try{
+					sceneData = myRenderer.parse(JSON.parse(result));
+                }catch(e){
+					console.log("Can not load scene "+sceneName+", load blendingscene instead");
+					console.log("error: " + e);
+					sceneData = blendingScene;
+				}
+				callback(sceneData);
             }
-            //todo: add default animation if file could not be loaded
         });
     };
 
-    //initial loading of blending animation
-    this.loadBlendingScene = function(callback) {
-        fs.readFile('savedAnimations/_blendingScene', "utf-8", function(err, result) {
-            if (err) throw err;
-            blendingScene = myRenderer.parse(JSON.parse(result));
-            callback(blendingScene);
-        });
-    };
+
 };
 
 var PlayerObj = function(fps, fileManager) {
@@ -267,8 +273,8 @@ var PlayerObj = function(fps, fileManager) {
 
         //refresh Schedule and Scenelist
         setInterval(that.checkForNewScenes, sceneCheckInterval);
-        fileManager.loadSceneRanking();
-        fileManager.loadSchedule(that.setNextScheduledSceneInfo);
+        // fileManager.loadSceneRanking();
+        // fileManager.loadSchedule(that.setNextScheduledSceneInfo);
 
         //interval to send  frames  to arduino
         setInterval(that.playerTick, 1000 / fps);
@@ -426,8 +432,11 @@ console.log("Wait for dmx bridge for "+DMX.relayResponseTimeout+" ms");
 setTimeout( function()
 {
 	//initialize filemanager
-	var fileManager = new FileManagerObj(fps);
-
+	var fileManager = new FileManagerObj();
+    
+	
+	var scenemanager = new SceneManager(fileManager);
+	
 	//initialize player
 	var player = new PlayerObj(fps, fileManager);
 	player.start();
