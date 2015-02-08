@@ -1,0 +1,122 @@
+body {
+	background-color: #313637;
+	margin-top: 20px;
+	font-family: Roboto;
+
+}
+
+.head {
+	font-weight: 100;
+	font-size: 40px;
+}
+
+.button {
+	font-weight: 300;
+	font-size: 20px;
+}
+
+.empty {
+	padding-top: 0px !important; 
+	padding-bottom: 0px !important; 
+}
+.calltoaction {
+	text-align: left !important;
+	padding-top: 0px !important; 
+	font-weight: 300;
+	font-size: 20px;
+}
+
+.top
+{
+	vertical-align: text-top;
+	padding-top: 0px !important; 
+}
+.logo {
+	width: 100px !important;
+}
+.actionarea {
+	height: 400px;
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+	border-style: dashed;
+	background-color: #525f62;
+	border-color: #32b0a1;
+	box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box;
+} 
+
+#highlight{
+	position: absolute;
+}
+/****************** VISBILITY ***************/
+.invisible{
+	visibility: hidden;
+	height: 0px;
+}
+
+/****************** COLORS ***************/
+.color {
+	background: #31ae9e;
+}
+
+.button.color:hover {
+	background-color: #0a796c !important; 
+}
+
+.specialcolor {
+	background-color: #801255;
+}
+
+.button.specialcolor:hover {
+	background-color: #670842 !important; 
+}
+
+.darkcolor {
+	background-color: #1d1e1e;
+}
+
+.button.darkcolor:hover {
+	background-color: #222424 !important; 
+}
+/****************** COLORS ***************/
+.splash {
+	-webkit-transition: opacity 0.4s;* For Safari 3.1 to 6.0 */
+    transition: opacity 0.4s;
+}
+.hidden {
+    opacity: 0;
+    height: 0px;
+    padding-top: 0px !important; 
+	padding-bottom: 0px !important; 
+}
+.shown {
+	opacity: 1;
+	height: auto;;
+}
+
+.logocol {
+	margin-left: auto;
+    margin-right: auto;
+}
+
+.col1, .col2, .col3, .col4, .col5, .col6, .col7, .col8, .col9, .col10, .col11, .col12 {
+	
+	color: #fff;
+	margin-bottom: 10px;
+	text-align: center;
+	padding: 10px 0 10px 0;
+}
+
+@media all and (max-width: 768px) {
+	.onerow {
+		margin: 0 0 15px;
+	}
+}
+
+@media all and (max-width: 768px) {
+	.colorselector {
+		float: left;
+		width: 22%;
+	}
+}
