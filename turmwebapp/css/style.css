@@ -34,6 +34,9 @@ body {
 .logo {
 	width: 100px !important;
 }
+.actionarea:active {
+		background-color: #5c6a6d;
+	}
 .actionarea {
 	height: 400px;
 	-moz-border-radius: 15px;
