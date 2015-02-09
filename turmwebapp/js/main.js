@@ -4,10 +4,15 @@ io = io.connect()
 addIoEvents();
 
 $( document ).ready(function() {
-	//Set Eventhandlers
+	
+	//prevent Map from dragging
+	$("#mapImg").on('dragstart', function(event) { event.preventDefault(); });
+
+	//Set Input-handlers on Map
 	$("#mapImg").on("click", function(event) { clickOnImage(event, $(this).offset()); });
 	$("#mapImg").on("tap", function(event) { clickOnImage(event, $(this).offset()); });
 
+	//Set Input-handlers on Colorselectors
 	$(".colorselector").on("click", function(event) { var color = $( this ).css( "background-color" ); selectColor(event,color); });
 	$(".colorselector").on("tap", function(event) { var color = $( this ).css( "background-color" ); selectColor(event,color); });
 
@@ -45,6 +50,27 @@ function addIoEvents(){
 		console.log(data);
 	})  
 }	
+
+// Io Calls When the User Made Selections
+function ioSendCurrentWindowNumber (inWindownumber) {
+	console.log("current window number: "+inWindownumber);
+}
+
+function ioSendFinalWindowNumber (inWindownumber) {
+	console.log("final window number: "+inWindownumber);
+}
+
+function ioSendCurrentWindowColor (inWindowcolor) {
+	console.log("current window color: "+inWindowcolor);
+}
+
+function ioSendFinalWindowColor (inWindowcolor) {
+	console.log("final window color: "+inWindowcolor);
+}
+
+function ioSendGesture (inGestureType) {
+	console.log("we have a gesture:"+inGestureType);
+}
 	
 	
 function startGestureRecognizer(){
@@ -79,6 +105,8 @@ function startSituation(){
     prohibit_btn_step1();;
 	$( "#splash1" ).addClass("hidden");
 	$( "#splash1" ).removeClass("show");
+	$( "#splash1" ).addClass("darkcolor");
+	$( "#splash1" ).removeClass("specialcolor");
 	user_position = null;
 	user_dist = null;
 	prefered_user_window = null; 
@@ -87,6 +115,8 @@ function startSituation(){
 	prohibit_btn_step2
 	$( "#splash2" ).addClass("hidden");
 	$( "#splash2" ).removeClass("show");
+	$( "#splash2" ).addClass("darkcolor");
+	$( "#splash2" ).removeClass("specialcolor");
 }
 
 function allow_btn_step1(){
@@ -108,8 +138,15 @@ function prohibit_btn_step2(){
 
 function btn_weiter_step1() {
 	if( prefered_user_window == null)
+	{
+		$( "#splash1" ).removeClass("hidden");
+		$( "#splash1" ).removeClass("darkcolor");
+		$( "#splash1" ).addClass("show");
+		$( "#splash1" ).addClass("specialcolor");
+		$( "#splash1" ).html("Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
 		return;
-
+	}
+	ioSendFinalWindowNumber(prefered_user_window);
 	$( "#step1" ).hide();
 	$( "#step2" ).fadeIn();
 	$( "#step3" ).hide();
@@ -117,24 +154,36 @@ function btn_weiter_step1() {
 
 function btn_weiter_step2() {
 	if( prefered_user_window == null)
+	{
+		$( "#splash2" ).removeClass("hidden");
+		$( "#splash2" ).removeClass("darkcolor");
+		$( "#splash2" ).addClass("show");
+		$( "#splash2" ).addClass("specialcolor");
+		$( "#splash2" ).html("Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
 		return;
+	}
+	ioSendFinalWindowColor(prefered_user_color);
 	$( "#step1" ).hide();
 	$( "#step2" ).hide();
 	$( "#step3" ).fadeIn();
 }
 
 function selectColor(e,inColor){
-	 console.log( inColor);
-	 var u = getRGB(inColor)
-	 var v = rgbToHex(u[0],u[1],u[2])
-	 console.log( u );
-	 console.log( v );
-	//var color= e.target.css("background");
-	//console.log(e.target.style.background);
+	// compute the HexValue
+	var rgbArray = getRGB(inColor)
+	var hexValue = rgbToHex(rgbArray[0],rgbArray[1],rgbArray[2])
+
+	// Show the Splash
 	$( "#splash2" ).removeClass("hidden");
 	$( "#splash2" ).addClass("show");
 	$( "#splash2" ).html(" Gute Wahl.");
 	$( "#splash2" ).css({background: inColor});
+
+	// Set the Color als prefered
+	prefered_user_color = hexValue;
+
+	//Send Current prefered Color to Socket
+	ioSendCurrentWindowColor(prefered_user_color);
 }
 
 function clickOnImage(e, inOffset){
@@ -155,17 +204,24 @@ function clickOnImage(e, inOffset){
 	allow_btn_step1();
 	$( "#splash1" ).removeClass("hidden");
 	$( "#splash1" ).addClass("show");
+	$( "#splash1" ).addClass("darkcolor");
+	$( "#splash1" ).removeClass("specialcolor");
 	$( "#splash1" ).html(" Ah ja, da drüben! Ich kann dich sehen.");
+
+	ioSendCurrentWindowNumber(prefered_user_window);
 }
 
 /********************* GPS STUFF ************************/
 function getLocation() {
 	//set everything back
 	prohibit_btn_step1();
+	prefered_user_window = null;
 	$("#highlight").hide();
 
 	$( "#splash1" ).removeClass("hidden");
 	$( "#splash1" ).addClass("show");
+	$( "#splash1" ).addClass("darkcolor");
+	$( "#splash1" ).removeClass("specialcolor");
     if (geoPosition.init()) {
 	  geoPosition.getCurrentPosition(geoSuccess, geoError);
 	}
@@ -194,7 +250,9 @@ function setDistanceSplash()
 			$( "#splash1" ).html("Erfolg! Du stehst nur "+parseFloat(user_dist*1000.0).toFixed(0)+"m vom Turm entfernt.");
 		else	
 			$( "#splash1" ).html("Erfolg! Du stehst "+parseFloat(user_dist).toFixed(1)+"km vom Turm entfernt.");
-	
+
+		// send the computed Window Number to the Socket
+		ioSendCurrentWindowNumber(prefered_user_window);
 	}
 }
 function computeUserAndTower()
