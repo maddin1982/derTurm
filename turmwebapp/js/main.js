@@ -26,16 +26,18 @@ $( document ).ready(function() {
 
 var TOO_FAR_AWAY = 10.0; //distance in KM where we ignore the user
 var WINDOW_OFFSET = 0; //max. 16! positive or negativ to shift the Start-Window away from East ( positive = towards north, negativ = towards south)
+var SPLASH3_TEXT = ["Bewege deinen Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Blinken auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
 
 var user_position = null;
 var user_dist = null;
 var prefered_user_window = null; 
 var prefered_user_color = null;
+var splash3_hint = 0;
   	// Windownumber
   	// North  12
 	// West 8 . 0 East 
 	// South  4
-
+var color_percent = 0.5;
 	
 function addIoEvents(){
 	//testMessage
@@ -67,35 +69,113 @@ function ioSendCurrentWindowColor (inWindowcolor) {
 function ioSendFinalWindowColor (inWindowcolor) {
 	console.log("final window color: "+inWindowcolor);
 }
+// gesture type: tap
+GESTURETYPES = {
+    DOUBLETAP : 0,
+    SWIPE_LEFT : 1,
+    SWIPE_RIGHT: 2,
+    DRAG_UP: 3,
+    DRAG_DOWN: 4
+}
 
-function ioSendGesture (inGestureType) {
+function ioSendGesture (inGestureType,inColor) {
 	console.log("we have a gesture:"+inGestureType);
 }
 	
-	
+var mc = null;
 function startGestureRecognizer(){
- 
-	 var options={ 
-		dragLockToAxis:true,
-		dragBlockVertical: true,
-		preventDefault: true
-	}
-	
+
 	//prevent site from scrolling when touching the actionarea
 	$("#actionArea").on('touchstart', function (evt) {
 		evt.preventDefault();
 	});
 	
-	//add hammer event listeners
-	$("#actionArea").hammer(options).on("pan", function(event) {
-            if (event.gesture.direction == Hammer.DIRECTION_UP || event.gesture.direction == Hammer.DIRECTION_DOWN){
-                 io.emit('processGesture',{"name":"myGesture","windowId":prefered_user_window});
-            }
-     });
-	
+	//add Hammer JS to actionArea
+	var actionArea = document.getElementById('actionArea');
+	mc = new Hammer(actionArea);
+
+	// SWIPE LEFT / RIGHT GESTURE!
+	mc.on("panleft panright", function(event) {
+		if(event.eventType == 4) // Gesture Ended
+		{
+			if( splash3_hint == 2)
+				setSplash3To(3);
+
+			if( event.deltaX > 0)
+				ioSendGesture(GESTURETYPES.SWIPE_RIGHT,prefered_user_color);
+			else
+				ioSendGesture(GESTURETYPES.SWIPE_LEFT,prefered_user_color);
+		}
+	});
+	// DRAG UP / DOWN GESTURE!
+	mc.on("panup pandown", function(event) {
+		if( splash3_hint == 0)
+			setSplash3To(1);
+		//continous Color fading between prefered_color and Black ( 1.0 ) and White ( 0.0 )
+		color_percent += parseFloat(event.deltaY)/8000.0;  
+		var tmpColor = computeColor();
+
+		if( event.deltaY > 0)
+		{
+			ioSendGesture(GESTURETYPES.DRAG_DOWN,tmpColor);
+		}
+		else
+			ioSendGesture(GESTURETYPES.DRAG_UP,tmpColor);
+	});
+	// DOUBLE TAP GESTURE!
+	mc.on("doubletap", function(event) {
+		if(event.eventType == 4) // Gesture Ended
+		{
+			if( splash3_hint == 1)
+				setSplash3To(2);
+		}
+		//Reset Color
+		color_percent = 0.5;
+		ioSendGesture(GESTURETYPES.DOUBLETAP,prefered_user_color);
+	});
 }	
 
-	
+function computeColor(){
+	var init = getRGB(prefered_user_color);
+	if ( color_percent == 0.5)
+		return (prefered_user_color);
+
+	if(color_percent > 1.0)
+		color_percent = 1.0;
+	if(color_percent < 0.0)
+		color_percent = 0.0;
+
+	var tmp = color_percent;
+	if( tmp > 0.5)
+	{
+		tmp *= 2; // 1.0 ... 2.0
+		tmp -= 1; // 0.0 ... 1.0
+		init[0] *= (1.0-tmp);
+		init[0] += 0*tmp;
+		init[0] = parseInt(init[0]);
+		init[1] *= (1.0-tmp);
+		init[1] += 0*tmp;
+		init[1] = parseInt(init[1]);
+		init[2] *= (1.0-tmp);
+		init[2] += 0*tmp;
+		init[2] = parseInt(init[2]);
+	}
+	else if( tmp < 0.5)
+	{
+		tmp *= -2; // 0.0 ... -1.0
+		tmp += 1;
+		init[0] *= (1.0-tmp);
+		init[0] += 255*tmp;
+		init[0] = parseInt(init[0]);
+		init[1] *= (1.0-tmp);
+		init[1] += 255*tmp;
+		init[1] = parseInt(init[1]);
+		init[2] *= (1.0-tmp);
+		init[2] += 255*tmp;
+		init[2] = parseInt(init[2]);
+	}
+	return rgbToHex(init[0],init[1],init[2]);
+}
 function startSituation(){
 	//STEP 1
 	$( "#step1" ).fadeIn();
@@ -104,7 +184,7 @@ function startSituation(){
     $("#highlight").hide();
     prohibit_btn_step1();;
 	$( "#splash1" ).addClass("hidden");
-	$( "#splash1" ).removeClass("show");
+	$( "#splash1" ).removeClass("shown");
 	$( "#splash1" ).addClass("darkcolor");
 	$( "#splash1" ).removeClass("specialcolor");
 	user_position = null;
@@ -114,9 +194,14 @@ function startSituation(){
 	var prefered_user_color = null;
 	prohibit_btn_step2
 	$( "#splash2" ).addClass("hidden");
-	$( "#splash2" ).removeClass("show");
+	$( "#splash2" ).removeClass("shown");
 	$( "#splash2" ).addClass("darkcolor");
 	$( "#splash2" ).removeClass("specialcolor");
+	//STEP 3
+	splash3_hint = 0;
+	setSplash3To(0);
+	color_percent = 0.5;
+
 }
 
 function allow_btn_step1(){
@@ -141,7 +226,7 @@ function btn_weiter_step1() {
 	{
 		$( "#splash1" ).removeClass("hidden");
 		$( "#splash1" ).removeClass("darkcolor");
-		$( "#splash1" ).addClass("show");
+		$( "#splash1" ).addClass("shown");
 		$( "#splash1" ).addClass("specialcolor");
 		$( "#splash1" ).html("Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
 		return;
@@ -157,7 +242,7 @@ function btn_weiter_step2() {
 	{
 		$( "#splash2" ).removeClass("hidden");
 		$( "#splash2" ).removeClass("darkcolor");
-		$( "#splash2" ).addClass("show");
+		$( "#splash2" ).addClass("shown");
 		$( "#splash2" ).addClass("specialcolor");
 		$( "#splash2" ).html("Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
 		return;
@@ -175,7 +260,7 @@ function selectColor(e,inColor){
 
 	// Show the Splash
 	$( "#splash2" ).removeClass("hidden");
-	$( "#splash2" ).addClass("show");
+	$( "#splash2" ).addClass("shown");
 	$( "#splash2" ).html(" Gute Wahl.");
 	$( "#splash2" ).css({background: inColor});
 
@@ -203,7 +288,7 @@ function clickOnImage(e, inOffset){
 	prefered_user_window = computeWindowFromAngle(parseFloat(angle));
 	allow_btn_step1();
 	$( "#splash1" ).removeClass("hidden");
-	$( "#splash1" ).addClass("show");
+	$( "#splash1" ).addClass("shown");
 	$( "#splash1" ).addClass("darkcolor");
 	$( "#splash1" ).removeClass("specialcolor");
 	$( "#splash1" ).html(" Ah ja, da drüben! Ich kann dich sehen.");
@@ -219,7 +304,7 @@ function getLocation() {
 	$("#highlight").hide();
 
 	$( "#splash1" ).removeClass("hidden");
-	$( "#splash1" ).addClass("show");
+	$( "#splash1" ).addClass("shown");
 	$( "#splash1" ).addClass("darkcolor");
 	$( "#splash1" ).removeClass("specialcolor");
     if (geoPosition.init()) {
@@ -331,4 +416,33 @@ function rgbToHex(r, g, b) {
 function componentToHex(c) {
     var hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
+}
+
+function setSplash3To(newState)
+{
+	if(splash3_hint == newState)
+		return;
+
+	switch(newState) {
+	    case 0:
+	        $( "#splash3" ).removeClass("hidden");
+			$( "#splash3" ).addClass("shown");
+	        $( "#splash3" ).html(SPLASH3_TEXT[0]);
+	        break;
+	    case 1:
+	        $( "#splash3" ).removeClass("hidden");
+			$( "#splash3" ).addClass("shown");
+	        $( "#splash3" ).html(SPLASH3_TEXT[1]);
+	        break;
+	    case 2:
+	        $( "#splash3" ).removeClass("hidden");
+			$( "#splash3" ).addClass("shown");
+	        $( "#splash3" ).html(SPLASH3_TEXT[2]);
+	        break;
+	    default:
+	        $( "#splash3" ).addClass("hidden");
+			$( "#splash3" ).removeClass("shown");
+	}
+
+	splash3_hint = newState;
 }
