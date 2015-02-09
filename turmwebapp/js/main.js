@@ -49,30 +49,42 @@ function addIoEvents(){
 	io.on('success', function(data) {
 		console.log(data);
 	})  
+	
+	
+	io.on('windowinUse', function(data) {
+		//todo: window already used
+	})  
+	io.on('gestureAnimationFinished', function(data) {
+		//todo: gestureAnimationFinished
+	})  
 }	
 
 // Io Calls When the User Made Selections
 function ioSendCurrentWindowNumber (inWindownumber) {
 	console.log("current window number: "+inWindownumber);
+	io.emit('selectWindowNumber',inWindownumber);
 }
 
 function ioSendFinalWindowNumber (inWindownumber) {
 	console.log("final window number: "+inWindownumber);
+	io.emit('selectWindowNumberFinal',inWindownumber);
 }
 
 function ioSendCurrentWindowColor (inWindowcolor) {
 	console.log("current window color: "+inWindowcolor);
+	io.emit('selectWindowColor',inWindownumber);
 }
 
 function ioSendFinalWindowColor (inWindowcolor) {
 	console.log("final window color: "+inWindowcolor);
+	io.emit('selectWindowColorFinal',inWindownumber);
 }
 
 function ioSendGesture (inGestureType) {
 	console.log("we have a gesture:"+inGestureType);
+	io.emit('processGesture',{"name":inGestureType});
 }
-	
-	
+		
 function startGestureRecognizer(){
  
 	 var options={ 

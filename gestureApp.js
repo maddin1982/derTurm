@@ -122,6 +122,8 @@ var TcpSocketManagerObj=function(){
 }
 
 
+
+
 var express = require('express.io');
 var app = express();
 var tcpSocketManager=new TcpSocketManagerObj();
@@ -134,6 +136,40 @@ app.http().io()
 
 //return static folder
 app.use('/', express.static(__dirname + '/turmwebapp'));
+
+var clients=[];
+
+function removeItemById(array,id) {
+    for (var i in array) {
+        if (array[i].id == id) {
+            array.splice(i, 1);
+            return true;
+        }
+    }
+    return false;
+}
+
+app.io.sockets.on('connection', function(socket) {
+  // make your connection actions
+  clients.push({"id":socket.id,"window":1});
+  console.log(clients)
+  // and attach the disconnect event
+  socket.on('disconnect', function() {
+    // make your disconnection actions
+	removeItemById(clients,socket.id)
+	console.log(clients)
+  })
+})
+
+app.io.route('selectWindowNumber', function(req) {
+}
+app.io.route('selectWindowNumberFinal', function(req) {
+}
+app.io.route('selectWindowColor', function(req) {
+}
+app.io.route('selectWindowColorFinal', function(req) {
+}
+
 
 app.io.route('processGesture', function(req) {
 	var gesture=req.data;
