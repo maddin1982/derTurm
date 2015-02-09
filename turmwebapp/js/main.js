@@ -41,7 +41,7 @@ var color_percent = 0.5;
 	
 function addIoEvents(){
 	//testMessage
-	 io.emit('processGesture',{"name":"myGesture","options":[]});
+	// io.emit('processGesture',{"name":"myGesture","options":[]});
 	
 	//error Message
 	io.on('error', function(data) {
@@ -74,12 +74,12 @@ function ioSendFinalWindowNumber (inWindownumber) {
 
 function ioSendCurrentWindowColor (inWindowcolor) {
 	console.log("current window color: "+inWindowcolor);
-	io.emit('selectWindowColor',inWindownumber);
+	io.emit('selectWindowColor',inWindowcolor);
 }
 
 function ioSendFinalWindowColor (inWindowcolor) {
 	console.log("final window color: "+inWindowcolor);
-	io.emit('selectWindowColorFinal',inWindownumber);
+	io.emit('selectWindowColorFinal',inWindowcolor);
 }
 // gesture type: tap
 GESTURETYPES = {

@@ -162,18 +162,21 @@ app.io.sockets.on('connection', function(socket) {
 })
 
 app.io.route('selectWindowNumber', function(req) {
-}
+console.log(req.data)
+})
 app.io.route('selectWindowNumberFinal', function(req) {
-}
+console.log(req.data)
+})
 app.io.route('selectWindowColor', function(req) {
-}
+console.log(req.data)
+})
 app.io.route('selectWindowColorFinal', function(req) {
-}
+console.log(req.data)
+})
 
 
 app.io.route('processGesture', function(req) {
 	var gesture=req.data;
-	console.log(gesture.name)
 	console.log("window :"+gesture.name)
 	player.playAnimation(gesture,req);
 })
