@@ -51,8 +51,7 @@ function addIoEvents(){
 	io.on('success', function(data) {
 		console.log(data);
 	})  
-	
-	
+
 	io.on('windowinUse', function(data) {
 		//todo: window already used
 	})  

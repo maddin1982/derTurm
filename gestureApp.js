@@ -122,8 +122,6 @@ var TcpSocketManagerObj=function(){
 }
 
 
-
-
 var express = require('express.io');
 var app = express();
 var tcpSocketManager=new TcpSocketManagerObj();
@@ -137,27 +135,60 @@ app.http().io()
 //return static folder
 app.use('/', express.static(__dirname + '/turmwebapp'));
 
-var clients=[];
-
-function removeItemById(array,id) {
-    for (var i in array) {
-        if (array[i].id == id) {
-            array.splice(i, 1);
-            return true;
-        }
-    }
-    return false;
+var clientsManagerObj=function(){
+	var clients=[];
+	var that=this;
+	
+	this.getClients=function(){
+		return clients;
+	}	
+	
+	// this.setWindow=function(id,window){
+	    // for (var i in clients) {
+			// if (clients[i][attr] == value) 
+	// }
+	
+	this.setColor=function(id,color){
+		if(that.getClientBy(id)!=null)
+			(that.getClientBy(id))[color]=color;
+	}
+	
+	this.getClientBy=function(attr,value){
+		for (var i in clients) {
+			if (clients[i][attr] == value) 
+				return clients[i];
+		}
+		return null;
+	}
+	
+	this.removeClient=function(id){
+		for (var i in clients) {
+			if (clients[i].id == id) {
+				clients.splice(i, 1);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	this.addClient=function(id){
+		clients.push({"id":id,"window":-1,"color":"#000000"});
+	}
 }
+
+var clientsManager=new clientsManagerObj();
+
 
 app.io.sockets.on('connection', function(socket) {
   // make your connection actions
-  clients.push({"id":socket.id,"window":1});
-  console.log(clients)
+  clientsManager.addClient(socket.id);
+  console.log(clientsManager.getClients())
+  
   // and attach the disconnect event
   socket.on('disconnect', function() {
     // make your disconnection actions
-	removeItemById(clients,socket.id)
-	console.log(clients)
+	clientsManager.removeClient(socket.id)
+	console.log(clientsManager.getClients())
   })
 })
 
