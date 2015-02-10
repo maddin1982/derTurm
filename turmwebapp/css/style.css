@@ -41,7 +41,7 @@ body {
 	height: 400px;
 	-moz-border-radius: 15px;
 	border-radius: 15px;
-	border-style: dashed;
+	border-style: solid;
 	background-color: #525f62;
 	border-color: #32b0a1;
 	box-sizing:border-box;

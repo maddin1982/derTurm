@@ -164,6 +164,7 @@ function startGestureRecognizer(){
 		var tmpColor = computeColor();
 		//send new WindowColors to Socket
 		ioSendCurrentWindowColor(tmpColor);
+		setActionAreaHighlight(tmpColor);
 	});
 	// DOUBLE TAP GESTURE!
 	mc.on("doubletap", function(event) {
@@ -176,9 +177,13 @@ function startGestureRecognizer(){
 		color_percent = 0.5;
 		ioSendGesture(GESTURETYPES.DOUBLETAP);
 		ioSendCurrentWindowColor(prefered_user_color);
+		setActionAreaHighlight(prefered_user_color);
 	});
 }	
-
+function setActionAreaHighlight(inColor)
+{
+	$( ".actionarea").css('border-color', inColor);
+}
 function computeColor(){
 	var init = getRGB(prefered_user_color);
 	if ( color_percent == 0.5)
@@ -297,6 +302,7 @@ function btn_weiter_step2() {
 	$( "#step1" ).hide();
 	$( "#step2" ).hide();
 	$( "#step3" ).fadeIn();
+	setActionAreaHighlight(prefered_user_color);
 }
 
 function selectColor(e,inColor){
