@@ -43,20 +43,28 @@ function addIoEvents(){
 	//testMessage
 	// io.emit('processGesture',{"name":"myGesture","options":[]});
 	
-	//error Message
+	//generic error Message
 	io.on('error', function(data) {
 		console.log(data);
 	})  
-	//success Message
+	//generic success Message
 	io.on('success', function(data) {
 		console.log(data);
 	})  
 
-	io.on('windowinUse', function(data) {
-		//todo: window already used
+	io.on('connectionToTowerFailed'function(data) {
+		// irgendwas stimmt mit der tcp verbindung nicht
+	}
+	
+	io.on('windowAssigned', function(WindowId) {
+		//fenster konnte zugewiesen werden
+		//wenn fenster nicht frei gib maximal 3 fenster in beide richtungen zurück
+		
+		// -1 wenn keins gefunden werden kann
 	})  
-	io.on('gestureAnimationFinished', function(data) {
-		//todo: gestureAnimationFinished
+
+	io.on('timeout', function(data) {
+		//todo: timeout nutzer war zu lange inaktiv, fenster wird freigegeben
 	})  
 }	
 
