@@ -83,6 +83,10 @@ body {
 	background-color: #222424 !important; 
 }
 /****************** COLORS ***************/
+div {
+	-webkit-transition: opacity 1s;* For Safari 3.1 to 6.0 */
+    transition: opacity 1s;
+}
 .splash {
 	-webkit-transition: opacity 0.4s;* For Safari 3.1 to 6.0 */
     transition: opacity 0.4s;

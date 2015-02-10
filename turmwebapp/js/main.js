@@ -25,20 +25,24 @@ $( document ).ready(function() {
   });
 
 var TOO_FAR_AWAY = 10.0; //distance in KM where we ignore the user
-var WINDOW_OFFSET = 0; //max. 16! positive or negativ to shift the Start-Window away from East ( positive = towards north, negativ = towards south)
+var WINDOW_OFFSET = -4; //max. 16! positive or negativ to shift the Start-Window away from East ( positive = towards north, negativ = towards south)
+	// Windownumber
+  	// North    12(-4)
+	// West 8(-4) . 0(-4) East 
+	// South    4(-4)
 var SPLASH3_TEXT = ["Bewege deinen Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Blinken auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
 
+var current_step = 1;
 var user_position = null;
 var user_dist = null;
 var prefered_user_window = null; 
 var prefered_user_color = null;
 var splash3_hint = 0;
-  	// Windownumber
-  	// North  12
-	// West 8 . 0 East 
-	// South  4
+var	app_error = false;
+
 var color_percent = 0.5;
-	
+var mc = null;
+
 function addIoEvents(){
 	//testMessage
 	// io.emit('processGesture',{"name":"myGesture","options":[]});
@@ -52,18 +56,37 @@ function addIoEvents(){
 		console.log(data);
 	})  
 
-	io.on('connectionToTowerFailed'function(data) {
+	io.on('connectionToTowerFailed', function(data) {
+		showAlert("specialcolor","Ich habe gerade leichte Verbindungsprobleme.");
 		// irgendwas stimmt mit der tcp verbindung nicht
-	}
+	})
 	
 	io.on('windowAssigned', function(WindowId) {
 		//fenster konnte zugewiesen werden
 		//wenn fenster nicht frei gib maximal 3 fenster in beide richtungen zurück
-		
+		if ( WindowId < 0)
+		{
+			var tmpUP = user_position;
+			var tmpDist = user_dist;
+			startSituation();
+			showAlert("specialcolor","Derzeit sind keine Fenster in deiner Richtung frei.");
+			user_position = tmpUP
+			user_dist = tmpDist;
+		}
+		else 
+		{
+			showAlert("darkcolor","Das Fenster welches in deine Richtung zeigt ist besetzt. Du hast eins daneben bekommen.");
+		}
 		// -1 wenn keins gefunden werden kann
 	})  
 
 	io.on('timeout', function(data) {
+		showAlert("specialcolor","Du warst jetzt länger inaktiv. Lade die Seite erneut.");
+		app_error = true;
+		//Set all Elements faded out! execept the splash!
+		$("div[class*='col']:not(.splash)").css("opacity",0.2);
+		prohibit_btn_step1();
+		prohibit_btn_step2();
 		//todo: timeout nutzer war zu lange inaktiv, fenster wird freigegeben
 	})  
 }	
@@ -97,12 +120,10 @@ GESTURETYPES = {
     DRAG_DOWN: 4
 }
 
-function ioSendGesture (inGestureType,inColor) {
-	console.log("we have a gesture:"+inGestureType);
+function ioSendGesture (inGestureType,inVelocity) {
+	console.log("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
 	io.emit('processGesture',{"name":inGestureType});
 }
-
-var mc = null;
 
 function startGestureRecognizer(){
 
@@ -121,11 +142,17 @@ function startGestureRecognizer(){
 		{
 			if( splash3_hint == 2)
 				setSplash3To(3);
-
+			//compute Velocity
+			var tmpVelo = event.velocity/8.0;
+			tmpVelo = Math.abs(tmpVelo); 
+			if(tmpVelo > 1.0)
+				tmpVelo = 1.0;
+					
+			// send Gesture Events to SocketIO		
 			if( event.deltaX > 0)
-				ioSendGesture(GESTURETYPES.SWIPE_RIGHT,prefered_user_color);
+				ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
 			else
-				ioSendGesture(GESTURETYPES.SWIPE_LEFT,prefered_user_color);
+				ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
 		}
 	});
 	// DRAG UP / DOWN GESTURE!
@@ -135,13 +162,8 @@ function startGestureRecognizer(){
 		//continous Color fading between prefered_color and Black ( 1.0 ) and White ( 0.0 )
 		color_percent += parseFloat(event.deltaY)/8000.0;  
 		var tmpColor = computeColor();
-
-		if( event.deltaY > 0)
-		{
-			ioSendGesture(GESTURETYPES.DRAG_DOWN,tmpColor);
-		}
-		else
-			ioSendGesture(GESTURETYPES.DRAG_UP,tmpColor);
+		//send new WindowColors to Socket
+		ioSendCurrentWindowColor(tmpColor);
 	});
 	// DOUBLE TAP GESTURE!
 	mc.on("doubletap", function(event) {
@@ -152,7 +174,8 @@ function startGestureRecognizer(){
 		}
 		//Reset Color
 		color_percent = 0.5;
-		ioSendGesture(GESTURETYPES.DOUBLETAP,prefered_user_color);
+		ioSendGesture(GESTURETYPES.DOUBLETAP);
+		ioSendCurrentWindowColor(prefered_user_color);
 	});
 }	
 
@@ -199,25 +222,21 @@ function computeColor(){
 }
 function startSituation(){
 	//STEP 1
+	current_step = 1
+	app_error = false;
 	$( "#step1" ).fadeIn();
 	$( "#step2" ).hide();
     $( "#step3" ).hide();
     $("#highlight").hide();
-    prohibit_btn_step1();;
-	$( "#splash1" ).addClass("hidden");
-	$( "#splash1" ).removeClass("shown");
-	$( "#splash1" ).addClass("darkcolor");
-	$( "#splash1" ).removeClass("specialcolor");
+    prohibit_btn_step1();
+    hideAlert(1);
 	user_position = null;
 	user_dist = null;
 	prefered_user_window = null; 
 	//STEP 2
 	var prefered_user_color = null;
 	prohibit_btn_step2
-	$( "#splash2" ).addClass("hidden");
-	$( "#splash2" ).removeClass("shown");
-	$( "#splash2" ).addClass("darkcolor");
-	$( "#splash2" ).removeClass("specialcolor");
+	hideAlert(2);
 	//STEP 3
 	splash3_hint = 0;
 	setSplash3To(0);
@@ -226,6 +245,9 @@ function startSituation(){
 }
 
 function allow_btn_step1(){
+	if( app_error )
+		return;
+
 	$("#stepButton1" ).removeClass("darkcolor");
 	$("#stepButton1" ).addClass("color");
 }
@@ -234,6 +256,9 @@ function prohibit_btn_step1(){
 	$("#stepButton1" ).removeClass("color");
 }
 function allow_btn_step2(){
+	if( app_error )
+		return;
+
 	$("#stepButton2" ).removeClass("darkcolor");
 	$("#stepButton2" ).addClass("color");
 }
@@ -243,15 +268,15 @@ function prohibit_btn_step2(){
 }
 
 function btn_weiter_step1() {
+	if( app_error )
+		return;
+
 	if( prefered_user_window == null)
 	{
-		$( "#splash1" ).removeClass("hidden");
-		$( "#splash1" ).removeClass("darkcolor");
-		$( "#splash1" ).addClass("shown");
-		$( "#splash1" ).addClass("specialcolor");
-		$( "#splash1" ).html("Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
+		showAlert("specialcolor","Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
 		return;
 	}
+	current_step = 2;
 	ioSendFinalWindowNumber(prefered_user_window);
 	$( "#step1" ).hide();
 	$( "#step2" ).fadeIn();
@@ -259,15 +284,15 @@ function btn_weiter_step1() {
 }
 
 function btn_weiter_step2() {
-	if( prefered_user_window == null)
+	if( app_error )
+		return;
+
+	if( prefered_user_color == null)
 	{
-		$( "#splash2" ).removeClass("hidden");
-		$( "#splash2" ).removeClass("darkcolor");
-		$( "#splash2" ).addClass("shown");
-		$( "#splash2" ).addClass("specialcolor");
-		$( "#splash2" ).html("Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
+		showAlert("specialcolor","Wähle eine Farbe aus. Mir gefällt grün.");
 		return;
 	}
+	current_step = 3;
 	ioSendFinalWindowColor(prefered_user_color);
 	$( "#step1" ).hide();
 	$( "#step2" ).hide();
@@ -275,14 +300,15 @@ function btn_weiter_step2() {
 }
 
 function selectColor(e,inColor){
+	if( app_error )
+		return;
+
 	// compute the HexValue
 	var rgbArray = getRGB(inColor)
 	var hexValue = rgbToHex(rgbArray[0],rgbArray[1],rgbArray[2])
 
 	// Show the Splash
-	$( "#splash2" ).removeClass("hidden");
-	$( "#splash2" ).addClass("shown");
-	$( "#splash2" ).html(" Gute Wahl.");
+	showAlert("darkcolor","Gute Wahl.");
 	$( "#splash2" ).css({background: inColor});
 
 	// Set the Color als prefered
@@ -293,6 +319,9 @@ function selectColor(e,inColor){
 }
 
 function clickOnImage(e, inOffset){
+	if( app_error )
+		return;
+
 	var onPicX = (e.pageX-inOffset.left);
 	var onPicY = (e.pageY-inOffset.top);
 	
@@ -308,15 +337,39 @@ function clickOnImage(e, inOffset){
 
 	prefered_user_window = computeWindowFromAngle(parseFloat(angle));
 	allow_btn_step1();
-	$( "#splash1" ).removeClass("hidden");
-	$( "#splash1" ).addClass("shown");
-	$( "#splash1" ).addClass("darkcolor");
-	$( "#splash1" ).removeClass("specialcolor");
-	$( "#splash1" ).html(" Ah ja, da drüben! Ich kann dich sehen.");
-
+	showAlert("darkcolor"," Ah ja, da drüben! Ich kann dich sehen.");
 	ioSendCurrentWindowNumber(prefered_user_window);
 }
+function hideAlert(inSplashNumber)
+{
+	inSplashNumber = typeof inSplashNumber !== 'undefined' ? inSplashNumber : current_step;
 
+	$( "#splash"+inSplashNumber  ).removeClass("darkcolor");
+	$( "#splash"+inSplashNumber  ).removeClass("specialcolor");
+	$( "#splash"+inSplashNumber  ).removeClass("color");
+	$( "#splash"+inSplashNumber  ).removeClass("shown");
+	$( "#splash"+inSplashNumber  ).css( "background", "" );
+
+	$( "#splash"+inSplashNumber  ).addClass("hidden");
+	$( "#splash"+inSplashNumber  ).html("");
+}
+
+function showAlert(inColor,inText,inSplashNumber)
+{
+	if( app_error )
+		return;
+	//default value is currentStep
+	inSplashNumber = typeof inSplashNumber !== 'undefined' ? inSplashNumber : current_step;
+	//reset it
+	$( "#splash"+inSplashNumber  ).removeClass("hidden");
+	$( "#splash"+inSplashNumber  ).removeClass("darkcolor");
+	$( "#splash"+inSplashNumber  ).removeClass("specialcolor");
+	$( "#splash"+inSplashNumber  ).removeClass("color");
+	//now skin it
+	$( "#splash"+inSplashNumber  ).addClass("shown");
+	$( "#splash"+inSplashNumber  ).addClass(inColor);
+	$( "#splash"+inSplashNumber  ).html(inText);
+}
 /********************* GPS STUFF ************************/
 function getLocation() {
 	//set everything back
@@ -324,10 +377,7 @@ function getLocation() {
 	prefered_user_window = null;
 	$("#highlight").hide();
 
-	$( "#splash1" ).removeClass("hidden");
-	$( "#splash1" ).addClass("shown");
-	$( "#splash1" ).addClass("darkcolor");
-	$( "#splash1" ).removeClass("specialcolor");
+
     if (geoPosition.init()) {
 	  geoPosition.getCurrentPosition(geoSuccess, geoError);
 	}
@@ -344,18 +394,18 @@ function geoSuccess(p) {
   	allow_btn_step1();
 }
 function geoError() {
-   $( "#splash1" ).html("Deine Position konnte nicht ermittelt werden.");
+	showAlert("darkcolor","Deine Position konnte nicht ermittelt werden.");
 }
 function setDistanceSplash()
 {
 	if( user_dist > TOO_FAR_AWAY)
-		$( "#splash1" ).html("Komm näher! Du bist "+parseFloat(user_dist).toFixed(1)+"km weit vom Turm entfernt.");
+		showAlert("darkcolor","Komm näher! Du bist "+parseFloat(user_dist).toFixed(1)+"km weit vom Turm entfernt.");
 	else
 	{
 		if ( user_dist < 1.0)
-			$( "#splash1" ).html("Erfolg! Du stehst nur "+parseFloat(user_dist*1000.0).toFixed(0)+"m vom Turm entfernt.");
+			showAlert("darkcolor","Erfolg! Du stehst nur "+parseFloat(user_dist*1000.0).toFixed(0)+"m vom Turm entfernt.");
 		else	
-			$( "#splash1" ).html("Erfolg! Du stehst "+parseFloat(user_dist).toFixed(1)+"km vom Turm entfernt.");
+			showAlert("darkcolor","Erfolg! Du stehst "+parseFloat(user_dist).toFixed(1)+"km vom Turm entfernt.");
 
 		// send the computed Window Number to the Socket
 		ioSendCurrentWindowNumber(prefered_user_window);
@@ -441,29 +491,14 @@ function componentToHex(c) {
 
 function setSplash3To(newState)
 {
+	console.log("newState: "+newState+ " splash3_hint:"+splash3_hint+" - "+current_step);
 	if(splash3_hint == newState)
 		return;
 
-	switch(newState) {
-	    case 0:
-	        $( "#splash3" ).removeClass("hidden");
-			$( "#splash3" ).addClass("shown");
-	        $( "#splash3" ).html(SPLASH3_TEXT[0]);
-	        break;
-	    case 1:
-	        $( "#splash3" ).removeClass("hidden");
-			$( "#splash3" ).addClass("shown");
-	        $( "#splash3" ).html(SPLASH3_TEXT[1]);
-	        break;
-	    case 2:
-	        $( "#splash3" ).removeClass("hidden");
-			$( "#splash3" ).addClass("shown");
-	        $( "#splash3" ).html(SPLASH3_TEXT[2]);
-	        break;
-	    default:
-	        $( "#splash3" ).addClass("hidden");
-			$( "#splash3" ).removeClass("shown");
-	}
+	if( newState >= 0 && newState<3) // 0,1,2,
+	   showAlert("darkcolor",SPLASH3_TEXT[newState]);
+	else
+		hideAlert();
 
 	splash3_hint = newState;
 }
