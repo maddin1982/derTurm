@@ -39,18 +39,13 @@ var PlayerObj=function(tcpSocketManager,animationManager){
 	var playerTick=function(){
 		if (typeof currentAnimationData[that.curentFrame] !== 'undefined' && currentAnimationData[that.curentFrame] !== null) {
 		
-			if(that.curentFrame==0){
-				currentAnimationId=tcpSocketManager.sendAnimationStart(currentGesture.name);
-			}
 			if(that.curentFrame==currentAnimationData.length-1){
 				//last frame
 				currentreq.io.emit('success', "finished playing "+currentGesture.name);
-				tcpSocketManager.sendAnimationFinished(currentAnimationId,currentGesture.name);
 				resetAnimation();
 				return;
 			}
 			else{
-				//hand frame to callback function
 				tcpSocketManager.sendFrameToTower(currentAnimationData[that.curentFrame],currentAnimationId);
 			}
 			
@@ -68,25 +63,34 @@ var PlayerObj=function(tcpSocketManager,animationManager){
 	    currentGestureName=null;
 		currentAnimationId=null;
 		currentreq=null;
-		
 	}	
 }
 
 var AnimationManagerObj=function(){
 
-	var animations=[];
+	//erstelle animation für gestennamen
+	//animation ist objekt mit startzeit,dauer und einer function die den frame für den aktuellen zeitpunkt zurückgibt
+	
+	//animationen sollen in player eingereiht werden können
+	//player mischt animationen die gleichzeitig laufen und sendet pro zeiteinheit ein gemischtes frame an den tcpmanager
+
+	 var animations=[];
 	
 	//predefined Gestures
-	animations["myGesture"]=[
-		[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-		[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-		[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-		[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-		[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-		[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]
-	]
+	// animations["myGesture"]=[
+		// [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
+		// [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	// ]
+	
+	
+	this.getAnimation=function(gestureName, color){
+
+		var start=new Date();
+		
+		this.frames
+	}
+	
+	
 
 	this.getFrames=function(gesture){
 	
@@ -107,15 +111,6 @@ var AnimationManagerObj=function(){
 var TcpSocketManagerObj=function(){
 	var that=this;
 	
-	this.sendAnimationStart=function(animationName){
-		var animationId=Math.random().toString(36).substring(7);
-		console.log("start id:"+ animationId + " animation: " + animationName);
-		return animationId;
-	}
-	
-	this.sendAnimationFinished=function(animationId,animationName){
-		console.log("stop id:"+ animationId + " animation:" + animationName);
-	}
 	
 	this.sendFrameToTower=function(frame,animationId){
 		console.log(frame);
@@ -138,37 +133,56 @@ app.http().io()
 //return static folder
 app.use('/', express.static(__dirname + '/turmwebapp'));
 
+
 var clientsManagerObj=function(){
 	var clients=[];
 	var that=this;
+
+	var checkForInactiveClients=function(){
+		var TimeOutInMilliseconds=60000;
+		var currentTime=new Date();
+		for (var i in clients) {
+			if (currentTime-clients[i].lastActivity>TimeOutInMilliseconds&&clients[i].window!=-1){ 
+				//free window due to inactivity
+				that.setClientAttr(clients[i].id,"window",-1);
+				app.io.sockets.socket(clients[i].id).emit("timeout");
+				console.log("reset Window for client "+clients[i].id+" due to "+TimeOutInMilliseconds/1000+" seconds inactivity")
+				console.log(that.getClients())
+			}
+		}
+	}
+	//check for inactive clients and remove from list
+	var clientInactivityCheck=setInterval(checkForInactiveClients, 2000);
 	
 	this.getClients=function(){
 		return clients;
 	}	
 	
 	this.setWindow=function(id,window){
-	     //check if any client already owns this window
-		var clientOnWindow=that.getClientBy("window",window);
+	    //update timeout for client inactivity
+		that.clientAction(id);
 		
-		if(clientOnWindow==false||clientOnWindow["id"]==id)
-			return that.setClientAttr(id,"window",window)
-		else
-			return false;
-				
+		var preferedWindows=[window,myMod(window-1),myMod(window+1),myMod(window-2),myMod(window+2)]
+
+		//check if any client already owns this window
+		for(var i=0;i<preferedWindows.length;i++){
+			var clientOnWindow=that.getClientBy("window",preferedWindows[i]);
+			if(clientOnWindow==false||clientOnWindow["id"]==id){
+				if(that.setClientAttr(id,"window",preferedWindows[i]))
+					return preferedWindows[i];
+			}
+		}
+		return -1;
 	 }
 	
 	this.setColor=function(id,color){
-		console.log("---------------");
-		console.log(color);
-		console.log("---------------");
-		if(that.getClientBy(id)!==false){
-			(that.getClientBy(id))["color"]=color;
-			return true;
-		}
-		return false;
+		//update timeout for client inactivity
+		that.clientAction(id);
+		return that.setClientAttr(id,"color",color)
 	}
 	
 	this.setClientAttr=function(id,attr,value){
+
 		for (var i in clients) {
 			if (clients[i].id == id){ 
 				clients[i][attr]=value;
@@ -177,6 +191,7 @@ var clientsManagerObj=function(){
 		}
 		return false;
 	}	
+	
 	this.getClientBy=function(attr,value){
 		for (var i in clients) {
 			if (clients[i][attr] == value) 
@@ -195,8 +210,13 @@ var clientsManagerObj=function(){
 		return false;
 	}
 	
+	//update last active to prevent client timeout
+	this.clientAction=function(id){
+		that.setClientAttr(id,"lastActivity",new Date());
+	}
+	
 	this.addClient=function(id){
-		clients.push({"id":id,"window":-1,"color":"#000000"});
+		clients.push({"id":id,"window":-1,"color":"#000000","lastActivity":new Date()});
 	}
 }
 
@@ -214,32 +234,24 @@ app.io.sockets.on('connection', function(socket) {
   })
 })
 
+
 app.io.route('selectWindowNumber', function(req) {
-	var windowFree=clientsManager.setWindow(req.socket.id,req.data);
-	req.io.emit('windowFree', windowFree);
+	var freeWindow=clientsManager.setWindow(req.socket.id,req.data);
+	req.io.emit('windowAssigned', freeWindow);
 	console.log(clientsManager.getClients());
 })
-
-// app.io.route('selectWindowNumberFinal', function(req) {
-	// var windowFree=clientsManager.setWindow(req.socket.id,req.data);
-	// req.io.emit('windowFree', windowFree);
-	// console.log(req.data)
-// })
 
 app.io.route('selectWindowColor', function(req) {
 	clientsManager.setColor(req.socket.id,req.data);
 	console.log(clientsManager.getClients());
 })
 
-// app.io.route('selectWindowColorFinal', function(req) {
-// console.log(req.data)
-// })
-
-
 app.io.route('processGesture', function(req) {
+	clientsManager.clientAction(req.socket.id);
 	var gesture=req.data;
-	console.log("window :"+gesture.name)
-	player.addAnimation(gesture,req);
+	console.log("gesture id :"+gesture.type)
+	
+	//player.addAnimation(gesture,req);
 })
 
 
@@ -251,3 +263,10 @@ var server = app.listen(3003, function () {
   console.log('tower app listening at http://%s:%s', host, port)
 
 })
+
+
+
+//helpers
+function myMod(x) {
+        return ((x % 16) + 16) % 16;
+}

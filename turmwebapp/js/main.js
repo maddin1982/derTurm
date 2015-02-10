@@ -46,26 +46,29 @@ function addIoEvents(){
 	//generic error Message
 	io.on('error', function(data) {
 		console.log(data);
-	})  
+	});  
 	//generic success Message
 	io.on('success', function(data) {
 		console.log(data);
-	})  
+	});  
 
-	io.on('connectionToTowerFailed'function(data) {
+	io.on('connectionToTowerFailed', function(data) {
 		// irgendwas stimmt mit der tcp verbindung nicht
-	}
+	});
 	
 	io.on('windowAssigned', function(WindowId) {
+		console.log("FENSTER "+ WindowId +" ZUGEWIESEN")
 		//fenster konnte zugewiesen werden
 		//wenn fenster nicht frei gib maximal 3 fenster in beide richtungen zurück
 		
 		// -1 wenn keins gefunden werden kann
-	})  
+	});  
 
 	io.on('timeout', function(data) {
+		console.log("TIMEOUT!!!!")
 		//todo: timeout nutzer war zu lange inaktiv, fenster wird freigegeben
-	})  
+		// umleiten des nutzers auf gps kartenseite damit er neues fenster zugewiesen bekommt
+	});  
 }	
 
 // Io Calls When the User Made Selections
@@ -99,7 +102,7 @@ GESTURETYPES = {
 
 function ioSendGesture (inGestureType,inColor) {
 	console.log("we have a gesture:"+inGestureType);
-	io.emit('processGesture',{"name":inGestureType});
+	io.emit('processGesture',{"type":inGestureType});
 }
 
 var mc = null;
