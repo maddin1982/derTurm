@@ -1,71 +1,3 @@
-// var PlayerObj=function(tcpSocketManager,animationManager){
-	// var that=this;
-	// //public
-	// this.curentFrame=0;
-	// this.fps=24;
-	
-	// //private
-	// var currentGesture=null;
-	// var currentAnimationData=null;
-	// var currentAnimationId=null;
-	// var intervalId;
-	// var currentreq=null;
-
-	
-	// this.playAnimation=function(gesture,req){
-	
-		// var frames=animationManager.getFrames(gesture);
-
-		// if (frames instanceof Array&&frames.length>0) {
-			// if(currentAnimationData===null){
-				// currentreq=req;
-				// currentAnimationData=frames;
-				// currentGesture=gesture;
-				// intervalId=setInterval(playerTick, 1000 / that.fps);
-				// currentreq.io.emit('success', "start playing animation for "+gesture.name);
-			// }
-			// else{
-				// console.log("animation already running");
-				// req.io.emit('error', "animation already running");
-			// }
-		// }
-		// else{
-			// console.log("cant play because parameter is no array or array is empty");
-			// console.log("parameter:"+ frames);
-			// req.io.emit('error', "cannot load animation");
-		// }
-	// }
-	
-	// var playerTick=function(){
-		// if (typeof currentAnimationData[that.curentFrame] !== 'undefined' && currentAnimationData[that.curentFrame] !== null) {
-		
-			// if(that.curentFrame==currentAnimationData.length-1){
-				// //last frame
-				// currentreq.io.emit('success', "finished playing "+currentGesture.name);
-				// resetAnimation();
-				// return;
-			// }
-			// else{
-				// tcpSocketManager.sendFrameToTower(currentAnimationData[that.curentFrame],currentAnimationId);
-			// }
-			
-		// }
-		// else{
-			// console.log("Error in Player, currentFrameId not in frames Array")
-		// }
-		// that.curentFrame++;
-	// }
-	
-	// var resetAnimation=function(){
-		// clearInterval(intervalId);
-		// that.curentFrame=0;
-		// currentAnimationData=null;
-	    // currentGestureName=null;
-		// currentAnimationId=null;
-		// currentreq=null;
-	// }	
-// }
-
 var AnimationManagerObj=function(){
 
 	//erstelle animation für gestennamen
@@ -80,10 +12,15 @@ var AnimationManagerObj=function(){
 		return [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
 	 }
 	 var getPercentualColor=function(rgbColorArray,percent){
+		//console.log("in")
+		//console.log(rgbColorArray)
+		var newRgbColorArray=[];
 		for(var i=0;i<rgbColorArray.length;i++){
-			rgbColorArray[i]=Math.floor(rgbColorArray[i]*percent);
+			newRgbColorArray[i]=Math.floor(rgbColorArray[i]*percent);
 		}
-		return rgbColorArray;
+		//console.log("out")
+		//console.log(rgbColorArray)
+		return newRgbColorArray;
 	 }
 
 	
@@ -96,71 +33,69 @@ var AnimationManagerObj=function(){
 	}
 	
 	var DoubleTapGesture=function(color,windowId){
+		var that=this;
 		//short flash
-		var colorArray=getRGB(color);
-		var length=500; //in milliseconds
+		this.colorArray=getRGB(color);
+		var length=1000; //in milliseconds
 		var startTime=new Date();
 		var range=3;
-
 		
 		//get frame for time
-		this.getFrame=function(time){
-			animationProgressInPercent=(time-startTime)/length;
+		this.getFrame=function(){
+
+			animationProgressInPercent=(new Date()-startTime)/length;
 			if(animationProgressInPercent>1){
 				return false; //animation finished
 			}
 			else{
-				var frame=getBasicFrame();
-				var startwindow=windowId-range;
-				
+				var frame=getBasicFrame();	
 				//umrechnung der zeit in einen sinus funktionsverlauf
 				var lightness=Math.sin(Math.PI*animationProgressInPercent)
-				
-				for(var i=startwindow;i<windowId+range;i++){
-					frame[myMod(i)]=getPercentualColor(colorArray,lightness);
+				//console.log("lightness "+lightness)
+				for(var i=windowId-range;i<windowId+range;i++){
+					frame[myMod(i)]=getPercentualColor(that.colorArray,lightness);
 				}
+				frame[windowId]=that.colorArray;
 				return frame;
 			}
 		}
 	}
 	
 	
-	this.createAnimation=function(gestureId,client){
-		console.log("GESTURETYPES.DOUBLETAP "+GESTURETYPES.DOUBLETAP)
-		console.log("gestureId "+gestureId)
-		if(GESTURETYPES.DOUBLETAP==gestureId){
-				console.log("DOUBLETAP")
+	this.createAnimation=function(gestureType,client){
+		if(GESTURETYPES.DOUBLETAP==gestureType){
 			return new DoubleTapGesture(client.color,client.window)
 		}
 		return false;
 	}
-	
-	
-
-	this.getFrames=function(gesture){
-	
-		//TODO : Process Gesture 
-	
-		if (typeof animations[gesture.name] !== 'undefined' && animations[gesture.name] !== null) {
-			return animations[gesture.name];
-		}
-		else{
-			console.log("Animation not found")
-			return [];
-		}		
-	}
 }
 
 //send data to tower over tcp socket
-var TcpSocketManagerObj=function(){
+var TcpSocketManagerObj=function(clientsManager){
 	
 	//add interval to check if clients have animations
 	//mix all current clients and windows 
 	//send mixed frame to server
 	
 	var that=this;
+	this.fps=20;
 	
+	//check clients for animations, delete finished animations, mix current animations, hand micex frame to tower
+	var watcherTick=function(){
+		//clientsManager.deleteFinishedAnimations();
+		var frames=clientsManager.getCurrentFrames();
+		if(frames.length>0)
+			console.log(frames[0])
+		
+		
+		//mix all frames additiv and send to tower
+			
+	}
 	
+	this.startWatcher=function(){
+		setInterval(watcherTick, 1000 / that.fps);
+	}
+
 	this.sendFrameToTower=function(frame,animationId){
 		console.log(frame);
 		
@@ -243,6 +178,25 @@ var clientsManagerObj=function(){
 		return false;
 	}
 	
+	//gets all current frames of all animations in all clients and removes finished animations
+	this.getCurrentFrames=function(){
+		var frames=[];
+		for(var i in clients){
+			for(var j in clients[i].animations){
+				frame=clients[i].animations[j].getFrame();
+				//if getFrame returns false animation is finished, so remove it
+				if(!frame){
+					clients[i].animations.splice(j, 1);
+					j--;
+				}
+				else{
+					frames[frames.length]=frame;
+				}
+			}
+		}
+		return frames;
+	}
+	
 	//update last active to prevent client timeout
 	this.clientAction=function(id){
 		that.setClientAttr(id,"lastActivity",new Date());
@@ -256,11 +210,12 @@ var clientsManagerObj=function(){
 
 var express = require('express.io');
 var app = express();
-var tcpSocketManager=new TcpSocketManagerObj();
+
 var animationManager=new AnimationManagerObj();
 //var player=new PlayerObj(tcpSocketManager,animationManager);
 var clientsManager=new clientsManagerObj();
-
+var tcpSocketManager=new TcpSocketManagerObj(clientsManager);
+tcpSocketManager.startWatcher();
 //open socket
 app.http().io()
 
@@ -280,7 +235,6 @@ app.io.sockets.on('connection', function(socket) {
   })
 })
 
-
 app.io.route('selectWindowNumber', function(req) {
 	var freeWindow=clientsManager.setWindow(req.socket.id,req.data);
 	req.io.emit('windowAssigned', freeWindow);
@@ -298,10 +252,13 @@ app.io.route('processGesture', function(req) {
 	console.log("gestureType: "+gesture.type+" "+"velocity: "+gesture.velocity)
 	var client=clientsManager.getClientBy("id",req.socket.id)
 	
-	animation=animationManager.createAnimation(client,gesture.type);
+	//create animation
+	animation=animationManager.createAnimation(gesture.type,client);
+	//push animation to client
 	if(animation){
 		client.animations.push(animation);
-		console.log(client);
+		//setTimeout(function(){ console.log(animation.getFrame()) }, 200);
+
 	}
 })
 
