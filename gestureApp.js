@@ -69,18 +69,23 @@
 var AnimationManagerObj=function(){
 
 	//erstelle animation für gestennamen
-	//animation ist objekt mit startzeit,dauer und einer function die den frame für den aktuellen zeitpunkt zurückgibt
+	//animation ist objekt mit startzeit,dauer und einer funktion die den frame für den aktuellen zeitpunkt zurückgibt
 	
 	//animationen sollen in player eingereiht werden können
 	//player mischt animationen die gleichzeitig laufen und sendet pro zeiteinheit ein gemischtes frame an den tcpmanager
 
 	 var animations=[];
 	
-	//predefined Gestures
-	// animations["myGesture"]=[
-		// [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-		// [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	// ]
+	 var getBasicFrame=function(){
+		return [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
+	 }
+	 var getPercentualColor=function(rgbColorArray,percent){
+		for(var i=0;i<rgbColorArray.length;i++){
+			rgbColorArray[i]=Math.floor(rgbColorArray[i]*percent);
+		}
+		return rgbColorArray;
+	 }
+
 	
 	GESTURETYPES = {
 		DOUBLETAP : 0,
@@ -90,14 +95,44 @@ var AnimationManagerObj=function(){
 		DRAG_DOWN: 4
 	}
 	
+	var DoubleTapGesture=function(color,windowId){
+		//short flash
+		var colorArray=getRGB(color);
+		var length=500; //in milliseconds
+		var startTime=new Date();
+		var range=3;
+
+		
+		//get frame for time
+		this.getFrame=function(time){
+			animationProgressInPercent=(time-startTime)/length;
+			if(animationProgressInPercent>1){
+				return false; //animation finished
+			}
+			else{
+				var frame=getBasicFrame();
+				var startwindow=windowId-range;
+				
+				//umrechnung der zeit in einen sinus funktionsverlauf
+				var lightness=Math.sin(Math.PI*animationProgressInPercent)
+				
+				for(var i=startwindow;i<windowId+range;i++){
+					frame[myMod(i)]=getPercentualColor(colorArray,lightness);
+				}
+				return frame;
+			}
+		}
+	}
+	
 	
 	this.createAnimation=function(gestureId,client){
-		
-		
-		
-		var start=new Date();
-		
-		this.frames
+		console.log("GESTURETYPES.DOUBLETAP "+GESTURETYPES.DOUBLETAP)
+		console.log("gestureId "+gestureId)
+		if(GESTURETYPES.DOUBLETAP==gestureId){
+				console.log("DOUBLETAP")
+			return new DoubleTapGesture(client.color,client.window)
+		}
+		return false;
 	}
 	
 	
@@ -264,9 +299,10 @@ app.io.route('processGesture', function(req) {
 	var client=clientsManager.getClientBy("id",req.socket.id)
 	
 	animation=animationManager.createAnimation(client,gesture.type);
-	
-	
-	//player.addAnimation(gesture,req);
+	if(animation){
+		client.animations.push(animation);
+		console.log(client);
+	}
 })
 
 
@@ -281,7 +317,27 @@ var server = app.listen(3003, function () {
 
 
 
-//helpers
+/**************************************************************
+* HELPERS
+**************************************************************/
 function myMod(x) {
+	//modulo fix for 16 windows
         return ((x % 16) + 16) % 16;
+}
+function getRGB(color) {
+
+	// Function used to determine the RGB colour value that was passed as HEX
+    var result;
+	
+    // Look for rgb(num,num,num)
+    if (result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(color)) return [parseInt(result[1]), parseInt(result[2]), parseInt(result[3])];
+
+    // Look for rgb(num%,num%,num%)
+    if (result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(color)) return [parseFloat(result[1]) * 2.55, parseFloat(result[2]) * 2.55, parseFloat(result[3]) * 2.55];
+
+    // Look for #a0b1c2
+    if (result = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(color)) return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
+
+    // Look for #fff
+    if (result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(color)) return [parseInt(result[1] + result[1], 16), parseInt(result[2] + result[2], 16), parseInt(result[3] + result[3], 16)];
 }
