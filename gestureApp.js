@@ -1,70 +1,70 @@
-var PlayerObj=function(tcpSocketManager,animationManager){
-	var that=this;
-	//public
-	this.curentFrame=0;
-	this.fps=24;
+// var PlayerObj=function(tcpSocketManager,animationManager){
+	// var that=this;
+	// //public
+	// this.curentFrame=0;
+	// this.fps=24;
 	
-	//private
-	var currentGesture=null;
-	var currentAnimationData=null;
-	var currentAnimationId=null;
-	var intervalId;
-	var currentreq=null;
+	// //private
+	// var currentGesture=null;
+	// var currentAnimationData=null;
+	// var currentAnimationId=null;
+	// var intervalId;
+	// var currentreq=null;
 
 	
-	this.playAnimation=function(gesture,req){
+	// this.playAnimation=function(gesture,req){
 	
-		var frames=animationManager.getFrames(gesture);
+		// var frames=animationManager.getFrames(gesture);
 
-		if (frames instanceof Array&&frames.length>0) {
-			if(currentAnimationData===null){
-				currentreq=req;
-				currentAnimationData=frames;
-				currentGesture=gesture;
-				intervalId=setInterval(playerTick, 1000 / that.fps);
-				currentreq.io.emit('success', "start playing animation for "+gesture.name);
-			}
-			else{
-				console.log("animation already running");
-				req.io.emit('error', "animation already running");
-			}
-		}
-		else{
-			console.log("cant play because parameter is no array or array is empty");
-			console.log("parameter:"+ frames);
-			req.io.emit('error', "cannot load animation");
-		}
-	}
+		// if (frames instanceof Array&&frames.length>0) {
+			// if(currentAnimationData===null){
+				// currentreq=req;
+				// currentAnimationData=frames;
+				// currentGesture=gesture;
+				// intervalId=setInterval(playerTick, 1000 / that.fps);
+				// currentreq.io.emit('success', "start playing animation for "+gesture.name);
+			// }
+			// else{
+				// console.log("animation already running");
+				// req.io.emit('error', "animation already running");
+			// }
+		// }
+		// else{
+			// console.log("cant play because parameter is no array or array is empty");
+			// console.log("parameter:"+ frames);
+			// req.io.emit('error', "cannot load animation");
+		// }
+	// }
 	
-	var playerTick=function(){
-		if (typeof currentAnimationData[that.curentFrame] !== 'undefined' && currentAnimationData[that.curentFrame] !== null) {
+	// var playerTick=function(){
+		// if (typeof currentAnimationData[that.curentFrame] !== 'undefined' && currentAnimationData[that.curentFrame] !== null) {
 		
-			if(that.curentFrame==currentAnimationData.length-1){
-				//last frame
-				currentreq.io.emit('success', "finished playing "+currentGesture.name);
-				resetAnimation();
-				return;
-			}
-			else{
-				tcpSocketManager.sendFrameToTower(currentAnimationData[that.curentFrame],currentAnimationId);
-			}
+			// if(that.curentFrame==currentAnimationData.length-1){
+				// //last frame
+				// currentreq.io.emit('success', "finished playing "+currentGesture.name);
+				// resetAnimation();
+				// return;
+			// }
+			// else{
+				// tcpSocketManager.sendFrameToTower(currentAnimationData[that.curentFrame],currentAnimationId);
+			// }
 			
-		}
-		else{
-			console.log("Error in Player, currentFrameId not in frames Array")
-		}
-		that.curentFrame++;
-	}
+		// }
+		// else{
+			// console.log("Error in Player, currentFrameId not in frames Array")
+		// }
+		// that.curentFrame++;
+	// }
 	
-	var resetAnimation=function(){
-		clearInterval(intervalId);
-		that.curentFrame=0;
-		currentAnimationData=null;
-	    currentGestureName=null;
-		currentAnimationId=null;
-		currentreq=null;
-	}	
-}
+	// var resetAnimation=function(){
+		// clearInterval(intervalId);
+		// that.curentFrame=0;
+		// currentAnimationData=null;
+	    // currentGestureName=null;
+		// currentAnimationId=null;
+		// currentreq=null;
+	// }	
+// }
 
 var AnimationManagerObj=function(){
 
@@ -82,9 +82,19 @@ var AnimationManagerObj=function(){
 		// [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	// ]
 	
+	GESTURETYPES = {
+		DOUBLETAP : 0,
+		SWIPE_LEFT : 1,
+		SWIPE_RIGHT: 2,
+		DRAG_UP: 3,
+		DRAG_DOWN: 4
+	}
 	
-	this.getAnimation=function(gestureName, color){
-
+	
+	this.createAnimation=function(gestureId,client){
+		
+		
+		
 		var start=new Date();
 		
 		this.frames
@@ -102,13 +112,17 @@ var AnimationManagerObj=function(){
 		else{
 			console.log("Animation not found")
 			return [];
-		}
-		
+		}		
 	}
 }
 
 //send data to tower over tcp socket
 var TcpSocketManagerObj=function(){
+	
+	//add interval to check if clients have animations
+	//mix all current clients and windows 
+	//send mixed frame to server
+	
 	var that=this;
 	
 	
@@ -118,21 +132,6 @@ var TcpSocketManagerObj=function(){
 		//
 	}
 }
-
-
-var express = require('express.io');
-var app = express();
-var tcpSocketManager=new TcpSocketManagerObj();
-var animationManager=new AnimationManagerObj();
-var player=new PlayerObj(tcpSocketManager,animationManager);
-
-
-//open socket
-app.http().io()
-
-//return static folder
-app.use('/', express.static(__dirname + '/turmwebapp'));
-
 
 var clientsManagerObj=function(){
 	var clients=[];
@@ -182,7 +181,6 @@ var clientsManagerObj=function(){
 	}
 	
 	this.setClientAttr=function(id,attr,value){
-
 		for (var i in clients) {
 			if (clients[i].id == id){ 
 				clients[i][attr]=value;
@@ -216,11 +214,24 @@ var clientsManagerObj=function(){
 	}
 	
 	this.addClient=function(id){
-		clients.push({"id":id,"window":-1,"color":"#000000","lastActivity":new Date()});
+		clients.push({"id":id,"window":-1,"color":"#000000","lastActivity":new Date(),"animations":[]});
 	}
 }
 
+
+var express = require('express.io');
+var app = express();
+var tcpSocketManager=new TcpSocketManagerObj();
+var animationManager=new AnimationManagerObj();
+//var player=new PlayerObj(tcpSocketManager,animationManager);
 var clientsManager=new clientsManagerObj();
+
+//open socket
+app.http().io()
+
+//return static folder
+app.use('/', express.static(__dirname + '/turmwebapp'));
+
 
 
 app.io.sockets.on('connection', function(socket) {
@@ -249,7 +260,11 @@ app.io.route('selectWindowColor', function(req) {
 app.io.route('processGesture', function(req) {
 	clientsManager.clientAction(req.socket.id);
 	var gesture=req.data;
-	console.log("gesture id :"+gesture.type)
+	console.log("gestureType: "+gesture.type+" "+"velocity: "+gesture.velocity)
+	var client=clientsManager.getClientBy("id",req.socket.id)
+	
+	animation=animationManager.createAnimation(client,gesture.type);
+	
 	
 	//player.addAnimation(gesture,req);
 })

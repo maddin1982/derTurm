@@ -126,7 +126,7 @@ GESTURETYPES = {
 
 function ioSendGesture (inGestureType,inVelocity) {
 	console.log("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
-	io.emit('processGesture',{"name":inGestureType});
+	io.emit('processGesture',{"type":inGestureType,"velocity":inVelocity});
 
 }
 
