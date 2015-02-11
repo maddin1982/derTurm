@@ -8,6 +8,7 @@ body {
 .head {
 	font-weight: 100;
 	font-size: 40px;
+	margin: 0px;
 }
 
 .button {
@@ -81,6 +82,24 @@ body {
 
 .button.darkcolor:hover {
 	background-color: #222424 !important; 
+}
+/****************** IMAGES ***************/
+#mapImg {
+	z-index: 1;
+}
+#overlay {
+	opacity: 0.0;
+	pointer-events: none;
+	position: relative;
+	top: -442px;
+	padding-right:320px;
+	padding-top:122px;
+	width: 50%;
+	z-index: 10;
+}
+#heightlimiter {
+	overflow: hidden;
+	height: 630px;
 }
 /****************** COLORS ***************/
 div {

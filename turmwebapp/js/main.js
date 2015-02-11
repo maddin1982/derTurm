@@ -31,6 +31,7 @@ var WINDOW_OFFSET = -4; //max. 16! positive or negativ to shift the Start-Window
 	// West 8(-4) . 0(-4) East 
 	// South    4(-4)
 var SPLASH3_TEXT = ["Bewege deinen Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Blinken auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
+var WINDOW_ANGLE = -79; // window = 0 has this Angle
 
 var current_step = 1;
 var user_position = null;
@@ -63,9 +64,15 @@ function addIoEvents(){
 
 	
 	io.on('windowAssigned', function(WindowId) {
-		console.log("FENSTER "+ WindowId +" ZUGEWIESEN")
 		//fenster konnte zugewiesen werden
-		//wenn fenster nicht frei gib maximal 3 fenster in beide richtungen zurück
+		if( prefered_user_window == WindowId)
+		{
+
+			rotateOverlay(WINDOW_ANGLE+prefered_user_window*22.5);
+			showAlert("darkcolor","Das Fenster gehört nun Dir!");
+			return;
+		}
+		// kein Fenster zugewiesen
 		if ( WindowId < 0)
 		{
 			var tmpUP = user_position;
@@ -77,21 +84,16 @@ function addIoEvents(){
 		}
 		else 
 		{
-			showAlert("darkcolor","Das Fenster welches in deine Richtung zeigt ist besetzt. Du hast eins daneben bekommen.");
+			rotateOverlay(WINDOW_ANGLE+WindowId*22.5);
+			showAlert("darkcolor","Das Fenster welches in deine Richtung zeigt ist besetzt. Du hast Das daneben bekommen.");
 		}
-		// -1 wenn keins gefunden werden kann
 	});  
 
 	io.on('timeout', function(data) {
-
-		showAlert("specialcolor","Du warst jetzt länger inaktiv. Lade die Seite erneut.");
-		app_error = true;
-		//Set all Elements faded out! execept the splash!
-		$("div[class*='col']:not(.splash)").css("opacity",0.2);
-		prohibit_btn_step1();
-		prohibit_btn_step2();
-		//todo: timeout nutzer war zu lange inaktiv, fenster wird freigegeben
-		// umleiten des nutzers auf gps kartenseite damit er neues fenster zugewiesen bekommt
+		//reset the App
+		startSituation();
+		//show that you were timed out
+		showAlert("specialcolor","Du warst jetzt länger inaktiv. Wähle bitte erneut ein Fenster.");		
 	});  
 }	
 
@@ -185,6 +187,7 @@ function startGestureRecognizer(){
 		setActionAreaHighlight(prefered_user_color);
 	});
 }	
+
 function setActionAreaHighlight(inColor)
 {
 	$( ".actionarea").css('border-color', inColor);
@@ -251,6 +254,7 @@ function startSituation(){
 	splash3_hint = 0;
 	setSplash3To(0);
 	color_percent = 0.5;
+	$( ".logocol").removeClass("hidden");
 
 }
 
@@ -307,6 +311,7 @@ function btn_weiter_step2() {
 	$( "#step1" ).hide();
 	$( "#step2" ).hide();
 	$( "#step3" ).fadeIn();
+	$( ".logocol").addClass("hidden");
 	setActionAreaHighlight(prefered_user_color);
 }
 
@@ -328,8 +333,14 @@ function selectColor(e,inColor){
 	//Send Current prefered Color to Socket
 	ioSendCurrentWindowColor(prefered_user_color);
 }
-
+function rotateOverlay(inAngle)
+{	
+	$( "#overlay" ).css({opacity: 0.2});
+	$( "#overlay" ).css({ WebkitTransform: 'rotate(' + inAngle + 'deg)'});/* Chrome, Safari, Opera */
+    $( "#overlay" ).css({ '-moz-transform': 'rotate(' + inAngle + 'deg)'});
+}
 function clickOnImage(e, inOffset){
+
 	if( app_error )
 		return;
 
@@ -348,7 +359,7 @@ function clickOnImage(e, inOffset){
 
 	prefered_user_window = computeWindowFromAngle(parseFloat(angle));
 	allow_btn_step1();
-	showAlert("darkcolor"," Ah ja, da drüben! Ich kann dich sehen.");
+	showAlert("darkcolor"," Mal sehen ob das Fenster frei ist.");
 	ioSendCurrentWindowNumber(prefered_user_window);
 }
 function hideAlert(inSplashNumber)
@@ -502,7 +513,6 @@ function componentToHex(c) {
 
 function setSplash3To(newState)
 {
-	console.log("newState: "+newState+ " splash3_hint:"+splash3_hint+" - "+current_step);
 	if(splash3_hint == newState)
 		return;
 
