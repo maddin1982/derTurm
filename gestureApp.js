@@ -1,37 +1,31 @@
 var AnimationManagerObj=function(){
 
-	//erstelle animation für gestennamen
-	//animation ist objekt mit startzeit,dauer und einer funktion die den frame für den aktuellen zeitpunkt zurückgibt
-	
-	//animationen sollen in player eingereiht werden können
-	//player mischt animationen die gleichzeitig laufen und sendet pro zeiteinheit ein gemischtes frame an den tcpmanager
-
 	 var animations=[];
 
-	 var getPercentualColor=function(rgbColorArray,percent){
-		//console.log("in")
-		//console.log(rgbColorArray)
-		var newRgbColorArray=[];
-		for(var i=0;i<rgbColorArray.length;i++){
-			newRgbColorArray[i]=Math.floor(rgbColorArray[i]*percent);
-		}
-		//console.log("out")
-		//console.log(rgbColorArray)
-		return newRgbColorArray;
-	 }
-
-	
-	GESTURETYPES = {
+	 GESTURETYPES = {
 		DOUBLETAP : 0,
 		SWIPE_LEFT : 1,
 		SWIPE_RIGHT: 2,
 		DRAG_UP: 3,
 		DRAG_DOWN: 4
 	}
-	
-	var DoubleTapGesture=function(color,windowId){
+
+	 //clone color and multiply by percent value
+	 var getPercentualColor=function(rgbColorArray,percent){
+		var newRgbColorArray=[];
+		for(var i=0;i<rgbColorArray.length;i++){
+			newRgbColorArray[i]=Math.floor(rgbColorArray[i]*percent);
+		}
+		return newRgbColorArray;
+	 }
+	 
+	/**
+	 * DoubleTapAnimationObject
+	 * @param {Array.<number>} color
+	 * @param {number} windowId
+	 */
+	var DoubleTapAnimation=function(color,windowId){
 		var that=this;
-		//short flash
 		this.colorArray=color;
 		var length=1000; //in milliseconds
 		var startTime=new Date();
@@ -58,10 +52,51 @@ var AnimationManagerObj=function(){
 		}
 	}
 	
+	/**
+	 * SwipeAnimationObject
+	 * @param {Array.<number>} color
+	 * @param {number} windowId
+	 * @param {1|-1} direction, 
+	 * @param {number} speed 
+	 */
+	var SwipeAnimation=function(color,windowId,direction,speed){
+		var that=this;
+		this.colorArray=color;
+
+		var length=Math.min(5000,100/speed); 
+		var startTime=new Date();
+
+		//get frame for time
+		this.getFrame=function(){
+			animationProgressInPercent=(new Date()-startTime)/length;
+			
+			if(animationProgressInPercent>1){
+				return false; //animation finished
+			}
+			else{
+				var frame=getBasicFrame();	
+				//get current rotating Animation windowId
+				currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*16))));
+				frame[currWindowId]=that.colorArray;
+				return frame;
+			}
+		}
+	}
 	
-	this.createAnimation=function(gestureType,client){
+	
+	this.createAnimation=function(gestureType,client,speed){
+		if(speed===null||speed===""||speed===undefined)
+			var speed=0.5;
+	
 		if(GESTURETYPES.DOUBLETAP==gestureType){
-			return new DoubleTapGesture(client.color,client.window)
+			return new DoubleTapAnimation(client.color,client.window)
+		}
+		if(GESTURETYPES.SWIPE_LEFT==gestureType){
+			
+			return new SwipeAnimation(client.color,client.window,-1,speed)
+		}
+		if(GESTURETYPES.SWIPE_RIGHT==gestureType){
+			return new SwipeAnimation(client.color,client.window,1,speed)
 		}
 		return false;
 	}
@@ -73,11 +108,10 @@ var TcpSocketManagerObj=function(clientsManager){
 	var that=this;
 	this.lastSentFrame=[];
 	this.fps=20;
-	
 	var sendframenomaterwhatinterval=this.fps*10;
-	
 	this.frameCounter=0;
 	
+	//start timer interval to check and mix animations and send to tower
 	this.startWatcher=function(){
 		setInterval(watcherTick, 1000 / that.fps);
 	}
@@ -85,11 +119,12 @@ var TcpSocketManagerObj=function(clientsManager){
 	//check clients for animations, delete finished animations, mix current animations, hand micex frame to tower
 	var watcherTick=function(){
 		that.frameCounter++;
-		console.log(that.frameCounter)
 		//get all frames of all clients
 		var frames=clientsManager.getCurrentFrames();
 		
+		//get basic black frame
 		var resultFrame=getBasicFrame();
+		
 		//simply summ all color values of all current frames
 		var window;
 		for (var i=0;i<frames.length;i++){
@@ -109,7 +144,7 @@ var TcpSocketManagerObj=function(clientsManager){
 		if(that.frameCounter>sendframenomaterwhatinterval){
 			that.frameCounter=0;
 		}
-	
+		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 			console.log(frame);
 
@@ -118,9 +153,12 @@ var TcpSocketManagerObj=function(clientsManager){
 }
 
 var clientsManagerObj=function(){
-	var clients=[];
 	var that=this;
-
+	
+	//array to hold all connected clients
+	var clients=[];
+	
+	//check for inactive clients and reset Window id to -1
 	var checkForInactiveClients=function(){
 		var TimeOutInMilliseconds=60000;
 		var currentTime=new Date();
@@ -134,7 +172,8 @@ var clientsManagerObj=function(){
 			}
 		}
 	}
-	//check for inactive clients and remove from list
+	
+	//activate clinetcheckinterval
 	var clientInactivityCheck=setInterval(checkForInactiveClients, 2000);
 	
 	this.getClients=function(){
@@ -252,39 +291,45 @@ app.use('/', express.static(__dirname + '/turmwebapp'));
 app.io.sockets.on('connection', function(socket) {
 
   clientsManager.addClient(socket.id);
-  console.log(clientsManager.getClients())
+  //console.log(clientsManager.getClients())
 
   socket.on('disconnect', function() {
 	clientsManager.removeClient(socket.id)
-	console.log(clientsManager.getClients())
+	//console.log(clientsManager.getClients())
   })
 })
 
 app.io.route('selectWindowNumber', function(req) {
 	var freeWindow=clientsManager.setWindow(req.socket.id,req.data);
 	req.io.emit('windowAssigned', freeWindow);
-	console.log(clientsManager.getClients());
+	//console.log(clientsManager.getClients());
 })
 
 app.io.route('selectWindowColor', function(req) {
 	var color=getRGB(req.data)
 	clientsManager.setColor(req.socket.id,color);
-	console.log(clientsManager.getClients());
+	//console.log(clientsManager.getClients());
 })
 
 app.io.route('processGesture', function(req) {
+	
+	//client was active reset death-timeout
 	clientsManager.clientAction(req.socket.id);
+	
 	var gesture=req.data;
-	console.log("gestureType: "+gesture.type+" "+"velocity: "+gesture.velocity)
+	//console.log("gestureType: "+gesture.type+" "+"velocity: "+gesture.velocity)
+	
 	var client=clientsManager.getClientBy("id",req.socket.id)
 	
 	//create animation
-	animation=animationManager.createAnimation(gesture.type,client);
-	//push animation to client
+	animation=animationManager.createAnimation(gesture.type,client,gesture.velocity);
+	
 	if(animation){
+		//push animation to client
 		client.animations.push(animation);
-		//setTimeout(function(){ console.log(animation.getFrame()) }, 200);
-
+	}
+	else{
+		console.log("animation could not be created, maybe "+gesture.type+" is not defined yet")
 	}
 })
 
