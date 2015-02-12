@@ -7,10 +7,7 @@ var AnimationManagerObj=function(){
 	//player mischt animationen die gleichzeitig laufen und sendet pro zeiteinheit ein gemischtes frame an den tcpmanager
 
 	 var animations=[];
-	
-	 var getBasicFrame=function(){
-		return [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
-	 }
+
 	 var getPercentualColor=function(rgbColorArray,percent){
 		//console.log("in")
 		//console.log(rgbColorArray)
@@ -35,7 +32,7 @@ var AnimationManagerObj=function(){
 	var DoubleTapGesture=function(color,windowId){
 		var that=this;
 		//short flash
-		this.colorArray=getRGB(color);
+		this.colorArray=color;
 		var length=1000; //in milliseconds
 		var startTime=new Date();
 		var range=3;
@@ -72,34 +69,51 @@ var AnimationManagerObj=function(){
 
 //send data to tower over tcp socket
 var TcpSocketManagerObj=function(clientsManager){
-	
-	//add interval to check if clients have animations
-	//mix all current clients and windows 
-	//send mixed frame to server
-	
+
 	var that=this;
+	this.lastSentFrame=[];
 	this.fps=20;
 	
-	//check clients for animations, delete finished animations, mix current animations, hand micex frame to tower
-	var watcherTick=function(){
-		//clientsManager.deleteFinishedAnimations();
-		var frames=clientsManager.getCurrentFrames();
-		if(frames.length>0)
-			console.log(frames[0])
-		
-		
-		//mix all frames additiv and send to tower
-			
-	}
+	var sendframenomaterwhatinterval=this.fps*10;
+	
+	this.frameCounter=0;
 	
 	this.startWatcher=function(){
 		setInterval(watcherTick, 1000 / that.fps);
 	}
-
-	this.sendFrameToTower=function(frame,animationId){
-		console.log(frame);
+	
+	//check clients for animations, delete finished animations, mix current animations, hand micex frame to tower
+	var watcherTick=function(){
+		that.frameCounter++;
+		console.log(that.frameCounter)
+		//get all frames of all clients
+		var frames=clientsManager.getCurrentFrames();
 		
-		//
+		var resultFrame=getBasicFrame();
+		//simply summ all color values of all current frames
+		var window;
+		for (var i=0;i<frames.length;i++){
+			for(var j=0;j<frames[i].length;j++){
+				window=frames[i][j];
+				if(window.length==3){
+					resultFrame[j][0]=Math.min(255,frames[i][j][0]+resultFrame[j][0]); //r
+					resultFrame[j][1]=Math.min(255,frames[i][j][1]+resultFrame[j][1]); //g
+					resultFrame[j][2]=Math.min(255,frames[i][j][2]+resultFrame[j][2]); //b
+				}
+			}	
+		}
+		that.sendFrameToTower(resultFrame)
+	}
+
+	this.sendFrameToTower=function(frame){
+		if(that.frameCounter>sendframenomaterwhatinterval){
+			that.frameCounter=0;
+		}
+	
+		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
+			console.log(frame);
+
+		that.lastSentFrame=frame;
 	}
 }
 
@@ -181,16 +195,27 @@ var clientsManagerObj=function(){
 	//gets all current frames of all animations in all clients and removes finished animations
 	this.getCurrentFrames=function(){
 		var frames=[];
-		for(var i in clients){
-			for(var j in clients[i].animations){
-				frame=clients[i].animations[j].getFrame();
-				//if getFrame returns false animation is finished, so remove it
-				if(!frame){
-					clients[i].animations.splice(j, 1);
-					j--;
-				}
-				else{
-					frames[frames.length]=frame;
+		for(var i=0;i<clients.length;i++){
+			if(clients[i].animations.length===0){
+				//if there are no animations to play
+				frame=getBasicFrame();
+				if(clients[i].window>-1&&clients[i].window<16)
+					frame[clients[i].window]=clients[i].color;
+				frames[frames.length]=frame;
+			}
+			else{
+				for(var j=0; j<clients[i].animations.length;j++){
+					frame=clients[i].animations[j].getFrame();
+					
+					//if getFrame returns false animation is finished, so remove it
+					if(!frame){	
+						//remove animation
+						clients[i].animations.splice(j, 1);
+						j--;
+					}
+					else{
+						frames[frames.length]=frame;
+					}
 				}
 			}
 		}
@@ -203,7 +228,7 @@ var clientsManagerObj=function(){
 	}
 	
 	this.addClient=function(id){
-		clients.push({"id":id,"window":-1,"color":"#000000","lastActivity":new Date(),"animations":[]});
+		clients.push({"id":id,"window":-1,"color":[0,0,0],"lastActivity":new Date(),"animations":[]});
 	}
 }
 
@@ -242,7 +267,8 @@ app.io.route('selectWindowNumber', function(req) {
 })
 
 app.io.route('selectWindowColor', function(req) {
-	clientsManager.setColor(req.socket.id,req.data);
+	var color=getRGB(req.data)
+	clientsManager.setColor(req.socket.id,color);
 	console.log(clientsManager.getClients());
 })
 
@@ -297,4 +323,26 @@ function getRGB(color) {
 
     // Look for #fff
     if (result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(color)) return [parseInt(result[1] + result[1], 16), parseInt(result[2] + result[2], 16), parseInt(result[3] + result[3], 16)];
+	
+	//if color is already the right format
+	if(Array.isArray(color)){
+		if(color.length=3)
+			return color;
+	}
 }
+function getBasicFrame(){
+	return [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
+ }
+ 
+function colorArraysIdentical(a, b) {
+    var i = a.length;
+    if (i != b.length) return false;
+    while (i--) {
+        if (a[i][0] !== b[i][0]) return false;
+		if (a[i][1] !== b[i][1]) return false;
+		if (a[i][2] !== b[i][2]) return false;
+    }
+    return true;
+};
+ 
+ 
