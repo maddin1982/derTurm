@@ -156,6 +156,37 @@ div {
 	background: #212124;
 }
 
+#gestureimg {
+	width: 100%;
+	height: 100%;
+	background: no-repeat center center;
+	/*
+	-webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+    */
+}
+
+#gestureimg.left {
+	background-image: url(../img/arrow_left.png);
+}
+
+#gestureimg.right {
+	background-image: url(../img/arrow_right.png);
+}
+
+#gestureimg.horizontal {
+	background-image: url(../img/arrow_horizontal.png);
+}
+
+#gestureimg.vertical {
+	background-image: url(../img/arrow_vertical.png);
+}
+
+#gestureimg.doubletap {
+	background-image: url(../img/doubletap.png);
+}
 
 /**
  * For modern browsers
