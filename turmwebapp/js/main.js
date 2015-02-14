@@ -3,6 +3,9 @@ io = io.connect()
 //process incomming io Events
 addIoEvents();
 
+//gesture feedback for action area
+var gf;
+
 $( document ).ready(function() {
 	
 	//prevent Map from dragging
@@ -21,6 +24,8 @@ $( document ).ready(function() {
 
 	//add Gesture Recognition on action area
 	startGestureRecognizer();
+
+	gf = new GestureFeedback();
 	
   });
 
@@ -156,10 +161,14 @@ function startGestureRecognizer(){
 				tmpVelo = 1.0;
 					
 			// send Gesture Events to SocketIO		
-			if( event.deltaX > 0)
+			if( event.deltaX > 0) {
 				ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
-			else
+				gf.rotate_right();
+			}
+			else {
 				ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
+				gf.rotate_left();
+			}
 		}
 	});
 	// DRAG UP / DOWN GESTURE!
@@ -172,6 +181,7 @@ function startGestureRecognizer(){
 		//send new WindowColors to Socket
 		ioSendCurrentWindowColor(tmpColor);
 		setActionAreaHighlight(tmpColor);
+		gf.updatecolor(tmpColor);
 	});
 	// DOUBLE TAP GESTURE!
 	mc.on("doubletap", function(event) {
@@ -185,6 +195,8 @@ function startGestureRecognizer(){
 		ioSendGesture(GESTURETYPES.DOUBLETAP);
 		ioSendCurrentWindowColor(prefered_user_color);
 		setActionAreaHighlight(prefered_user_color);
+		gf.updatecolor(prefered_user_color);
+		gf.blink();
 	});
 }	
 
@@ -313,6 +325,7 @@ function btn_weiter_step2() {
 	$( "#step3" ).fadeIn();
 	$( ".logocol").addClass("hidden");
 	setActionAreaHighlight(prefered_user_color);
+	gf.updatecolor(prefered_user_color);
 }
 
 function selectColor(e,inColor){
