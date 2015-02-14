@@ -78,7 +78,7 @@ var AnimationManagerObj=function(){
 			else{
 				var frame=getBasicFrame();	
 				//get current rotating Animation windowId
-				currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*16))));
+				currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*15))));
 				frame = setFrameWindowColor(frame,currWindowId,that.colorArray,zoom);
 				return frame;
 			}
@@ -167,9 +167,9 @@ var TcpSocketManagerObj=function(clientsManager){
 			for(var j=0;j<frames[i].length;j++){
 				window=frames[i][j];
 				if(window.length==3){
-					resultFrame[j][0]=Math.min(255,frames[i][j][0]+resultFrame[j][0]); //r
-					resultFrame[j][1]=Math.min(255,frames[i][j][1]+resultFrame[j][1]); //g
-					resultFrame[j][2]=Math.min(255,frames[i][j][2]+resultFrame[j][2]); //b
+					resultFrame[j][0]=Math.min(255,window[0]+resultFrame[j][0]); //r
+					resultFrame[j][1]=Math.min(255,window[1]+resultFrame[j][1]); //g
+					resultFrame[j][2]=Math.min(255,window[2]+resultFrame[j][2]); //b
 				}
 			}	
 		}
@@ -338,6 +338,8 @@ app.io.sockets.on('connection', function(socket) {
 
 app.io.route('selectWindowNumber', function(req) {
 	var freeWindow=clientsManager.setWindow(req.socket.id,req.data);
+	//set window to white
+	clientsManager.setColor(req.socket.id,[255,255,255]);
 	req.io.emit('windowAssigned', freeWindow);
 	//console.log(clientsManager.getClients());
 })
@@ -385,10 +387,14 @@ var server = app.listen(3003, function () {
 /**************************************************************
 * HELPERS
 **************************************************************/
+
+
+
 function myMod(x) {
 	//modulo fix for 16 windows
         return ((x % 16) + 16) % 16;
 }
+
 function getRGB(color) {
 
 	// Function used to determine the RGB colour value that was passed as HEX
