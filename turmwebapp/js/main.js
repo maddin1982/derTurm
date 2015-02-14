@@ -149,30 +149,55 @@ function startGestureRecognizer(){
 	mc = new Hammer(actionArea);
 
 	// SWIPE LEFT / RIGHT GESTURE!
-	mc.on("panleft panright", function(event) {
-		if(event.eventType == 4) // Gesture Ended
-		{
-			if( splash3_hint == 2)
-				setSplash3To(3);
-			//compute Velocity
-			var tmpVelo = event.velocity/8.0;
-			tmpVelo = Math.abs(tmpVelo); 
-			if(tmpVelo > 1.0)
-				tmpVelo = 1.0;
+	// mc.on("panleft panright", function(event) {
+		// if(event.eventType == 4) // Gesture Ended
+		// {
+			// if( splash3_hint == 2)
+				// setSplash3To(3);
+			// //compute Velocity
+			// var tmpVelo = event.velocity/8.0;
+			// tmpVelo = Math.abs(tmpVelo); 
+			// if(tmpVelo > 1.0)
+				// tmpVelo = 1.0;
 					
-			// send Gesture Events to SocketIO		
-			if( event.deltaX > 0) {
-				ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
-				gf.rotate_right();
-			}
-			else {
-				ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
-				gf.rotate_left();
-			}
+			// // send Gesture Events to SocketIO		
+			// if( event.deltaX > 0) {
+				// ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
+				// gf.rotate_right();
+			// }
+			// else {
+				// ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
+				// gf.rotate_left();
+			// }
+		// }
+	// });
+	
+	mc.on("swipeleft swiperight", function(event) {
+		if( splash3_hint == 2)
+			setSplash3To(3);
+		console.log(event)
+		//compute Velocity
+		 var tmpVelo = event.velocity/15;
+		 tmpVelo = Math.abs(tmpVelo); 
+		 if(tmpVelo > 1.0)
+			 tmpVelo = 1.0;
+		if(event.deltaX<0){
+			ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
+			gf.rotate_left();
 		}
-	});
+		else{
+			ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
+			gf.rotate_right();
+		}
+		
+	});	
+	
+	mc.get('tap').set({ taps:2,interval:200 });
+	mc.get('pan').set({ threshold: 0, pointers: 2,direction: Hammer.DIRECTION_VERTICAL });
+	//mc.add( new Hammer.Tap({ event: 'quadrupletap', taps: 4 }) );
+	
 	// DRAG UP / DOWN GESTURE!
-	mc.on("panup pandown", function(event) {
+	mc.on("pan", function(event) {
 		if( splash3_hint == 0)
 			setSplash3To(1);
 		//continous Color fading between prefered_color and Black ( 1.0 ) and White ( 0.0 )
@@ -183,8 +208,9 @@ function startGestureRecognizer(){
 		setActionAreaHighlight(tmpColor);
 		gf.updatecolor(tmpColor);
 	});
+	
 	// DOUBLE TAP GESTURE!
-	mc.on("doubletap", function(event) {
+	mc.on("tap", function(event) {
 		if(event.eventType == 4) // Gesture Ended
 		{
 			if( splash3_hint == 1)
