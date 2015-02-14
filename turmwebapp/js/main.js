@@ -245,6 +245,13 @@ function computeColor(){
 	}
 	return rgbToHex(init[0],init[1],init[2]);
 }
+function alignMapAndOverlay(){
+		$("#heightlimiter").css('height', $("#mapImg").width()-8 + 'px');
+		$("#overlay").css('top', '-'+$("#mapImg").height()+'px');
+	}
+$( window ).resize(function() {
+	alignMapAndOverlay();
+	});
 function startSituation(){
 	//STEP 1
 	current_step = 1
@@ -258,6 +265,7 @@ function startSituation(){
 	user_position = null;
 	user_dist = null;
 	prefered_user_window = null; 
+	alignMapAndOverlay();
 	//STEP 2
 	var prefered_user_color = null;
 	prohibit_btn_step2
@@ -353,7 +361,6 @@ function rotateOverlay(inAngle)
     $( "#overlay" ).css({ '-moz-transform': 'rotate(' + inAngle + 'deg)'});
 }
 function clickOnImage(e, inOffset){
-
 	if( app_error )
 		return;
 
@@ -366,7 +373,7 @@ function clickOnImage(e, inOffset){
 	$("#highlight").show();
     $("#highlight").css({position: "absolute", top: (e.pageY-10), left: (e.pageX-10)});
 
-	var angle = Math.atan2((onPicX-320),(onPicY-320));
+	var angle = Math.atan2((onPicX-$("#mapImg").width()/2),(onPicY-$("#mapImg").height()/2));
 	angle = angle*180/Math.PI;
 	angle+=90;
 
