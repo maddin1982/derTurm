@@ -140,7 +140,9 @@ var AnimationManagerObj=function(){
 
 //send data to tower over tcp socket
 var TcpSocketManagerObj=function(clientsManager){
-
+	
+	var Tube = require('tubemail').start( { port: 4889 } );
+	
 	var that=this;
 	this.lastSentFrame=[];
 	this.fps=20;
@@ -182,7 +184,10 @@ var TcpSocketManagerObj=function(clientsManager){
 		}
 		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
-			console.log(frame);
+		{
+			// send frame via tubemail (if connected)
+			Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
+		}
 
 		that.lastSentFrame=frame;
 	}
