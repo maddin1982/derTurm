@@ -27,6 +27,8 @@ $( document ).ready(function() {
 
 	gf = new GestureFeedback();
 	
+
+	
   });
 
 var TOO_FAR_AWAY = 10.0; //distance in KM where we ignore the user
@@ -139,6 +141,10 @@ function ioSendGesture (inGestureType,inVelocity) {
 
 function startGestureRecognizer(){
 
+	//1$recognizer
+	startDollarRecognizerOn($("#actionArea"));
+	
+	
 	//prevent site from scrolling when touching the actionarea
 	$("#actionArea").on('touchstart', function (evt) {
 		evt.preventDefault();
@@ -147,7 +153,9 @@ function startGestureRecognizer(){
 	//add Hammer JS to actionArea
 	var actionArea = document.getElementById('actionArea');
 	mc = new Hammer(actionArea);
-
+	mc.get('tap').set({ taps:2,interval:200 });
+	mc.get('pan').set({ threshold: 0, pointers: 2,direction: Hammer.DIRECTION_VERTICAL });
+	
 	// SWIPE LEFT / RIGHT GESTURE!
 	// mc.on("panleft panright", function(event) {
 		// if(event.eventType == 4) // Gesture Ended
@@ -171,6 +179,7 @@ function startGestureRecognizer(){
 			// }
 		// }
 	// });
+
 	
 	mc.on("swipeleft swiperight", function(event) {
 		if( splash3_hint == 2)
@@ -192,11 +201,7 @@ function startGestureRecognizer(){
 		
 	});	
 	
-	mc.get('tap').set({ taps:2,interval:200 });
-	mc.get('pan').set({ threshold: 0, pointers: 2,direction: Hammer.DIRECTION_VERTICAL });
-	//mc.add( new Hammer.Tap({ event: 'quadrupletap', taps: 4 }) );
-	
-	// DRAG UP / DOWN GESTURE!
+	// DOUBLE TOUCH PAN UP AND DOWN GESTURE!
 	mc.on("pan", function(event) {
 		if( splash3_hint == 0)
 			setSplash3To(1);
@@ -209,7 +214,7 @@ function startGestureRecognizer(){
 		gf.updatecolor(tmpColor);
 	});
 	
-	// DOUBLE TAP GESTURE!
+	// MODIFIED TAP GESTURE (doubletap)!
 	mc.on("tap", function(event) {
 		if(event.eventType == 4) // Gesture Ended
 		{
