@@ -7,7 +7,9 @@ var AnimationManagerObj=function(){
 		SWIPE_LEFT : 1,
 		SWIPE_RIGHT: 2,
 		DRAG_UP: 3,
-		DRAG_DOWN: 4
+		DRAG_DOWN: 4,
+		ZOOM_OUT: 5,
+		ZOOM_IN: 6
 	}
 
 	 //clone color and multiply by percent value
@@ -24,7 +26,7 @@ var AnimationManagerObj=function(){
 	 * @param {Array.<number>} color
 	 * @param {number} windowId
 	 */
-	var DoubleTapAnimation=function(color,windowId){
+	var DoubleTapAnimation=function(color,windowId,zoom){
 		var that=this;
 		this.colorArray=color;
 		var length=1000; //in milliseconds
@@ -43,10 +45,10 @@ var AnimationManagerObj=function(){
 				//umrechnung der zeit in einen sinus funktionsverlauf
 				var lightness=Math.sin(Math.PI*animationProgressInPercent)
 				//console.log("lightness "+lightness)
-				for(var i=windowId-range;i<windowId+range;i++){
+				for(var i=windowId-range-zoom;i<windowId+range+zoom;i++){
 					frame[myMod(i)]=getPercentualColor(that.colorArray,lightness);
 				}
-				frame[windowId]=that.colorArray;
+				frame = setFrameWindowColor(frame,windowId,that.colorArray,zoom);
 				return frame;
 			}
 		}
@@ -59,11 +61,11 @@ var AnimationManagerObj=function(){
 	 * @param {1|-1} direction, 
 	 * @param {number} speed 
 	 */
-	var SwipeAnimation=function(color,windowId,direction,speed){
+	var SwipeAnimation=function(color,windowId,zoom,direction,speed){
 		var that=this;
 		this.colorArray=color;
 
-		var length=Math.min(5000,100/speed); 
+		var length=Math.min(5000,100/speed);
 		var startTime=new Date();
 
 		//get frame for time
@@ -76,27 +78,61 @@ var AnimationManagerObj=function(){
 			else{
 				var frame=getBasicFrame();	
 				//get current rotating Animation windowId
-				currWindowId=myMod(windowId+(direction*(Math.round(animationProgressInPercent*15))));
-				frame[currWindowId]=that.colorArray;
+				currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*15))));
+				frame = setFrameWindowColor(frame,currWindowId,that.colorArray,zoom);
 				return frame;
 			}
 		}
 	}
-	
+
+	/**
+	 * ZoomAnimationObject
+	 * @param {Array.<number>} color
+	 * @param {number} windowId
+	 * @param {bool} in or out
+	 */
+	var ZoomAnimation=function(color,windowId,zoom){
+		var that=this;
+		this.colorArray=color;
+		var animation_done = false;
+		
+		//get frame for time
+		this.getFrame=function(){
+			if(animation_done){
+				return false; //animation finished
+			}
+			else{
+				var frame=getBasicFrame();
+				frame = setFrameWindowColor(frame,windowId,that.colorArray,zoom);
+				animation_done = true;
+				return frame;
+			}
+		}
+	}	
 	
 	this.createAnimation=function(gestureType,client,speed){
 		if(speed===null||speed===""||speed===undefined)
 			var speed=0.5;
 	
+		
+		if(GESTURETYPES.ZOOM_OUT==gestureType){
+			client.zoom = Math.max(0,client.zoom-1);
+			return new ZoomAnimation(client.color,client.window, client.zoom);
+		}
+		if(GESTURETYPES.ZOOM_IN==gestureType){
+			client.zoom = Math.min(8,client.zoom+1);
+			return new ZoomAnimation(client.color,client.window, client.zoom);
+		}
+		
 		if(GESTURETYPES.DOUBLETAP==gestureType){
-			return new DoubleTapAnimation(client.color,client.window)
+			return new DoubleTapAnimation(client.color,client.window, client.zoom)
 		}
 		if(GESTURETYPES.SWIPE_LEFT==gestureType){
 			
-			return new SwipeAnimation(client.color,client.window,-1,speed)
+			return new SwipeAnimation(client.color,client.window, client.zoom,-1,speed)
 		}
 		if(GESTURETYPES.SWIPE_RIGHT==gestureType){
-			return new SwipeAnimation(client.color,client.window,1,speed)
+			return new SwipeAnimation(client.color,client.window, client.zoom,1,speed)
 		}
 		return false;
 	}
@@ -238,8 +274,9 @@ var clientsManagerObj=function(){
 			if(clients[i].animations.length===0){
 				//if there are no animations to play
 				frame=getBasicFrame();
-				if(clients[i].window>-1&&clients[i].window<16)
-					frame[clients[i].window]=clients[i].color;
+				if(clients[i].window>-1&&clients[i].window<16) {
+					frame = setFrameWindowColor(frame, clients[i].window, clients[i].color, clients[i].zoom);
+				}
 				frames[frames.length]=frame;
 			}
 			else{
@@ -267,7 +304,7 @@ var clientsManagerObj=function(){
 	}
 	
 	this.addClient=function(id){
-		clients.push({"id":id,"window":-1,"color":[0,0,0],"lastActivity":new Date(),"animations":[]});
+		clients.push({"id":id,"window":-1,"color":[0,0,0],"lastActivity":new Date(),"animations":[], "zoom": 0});
 	}
 }
 
@@ -396,4 +433,11 @@ function colorArraysIdentical(a, b) {
     return true;
 };
  
- 
+function setFrameWindowColor(frame, windowId, color,zoom) {
+	var min_i = windowId-zoom;
+	var max_i = windowId+zoom;
+	for(var i = min_i; i <= max_i; i++) {
+		frame[myMod(i)]=color;
+	}
+	return frame;
+ }

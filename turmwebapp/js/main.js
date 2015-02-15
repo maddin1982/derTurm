@@ -4,7 +4,7 @@ io = io.connect()
 addIoEvents();
 
 //gesture feedback for action area
-var gf;
+var gfb;
 
 $( document ).ready(function() {
 	
@@ -25,7 +25,8 @@ $( document ).ready(function() {
 	//add Gesture Recognition on action area
 	startGestureRecognizer();
 
-	gf = new GestureFeedback();
+	gfb = new GestureFeedback();
+	gfb.init();
 	
 
 	
@@ -50,6 +51,13 @@ var	app_error = false;
 
 var color_percent = 0.5;
 var mc = null;
+
+var my_zoom = 0;
+var my_zoom_f = 0;
+var my_zoom_max_t = 4200;
+var my_zoom_stepback_t = 200;
+var my_zoom_stepback_to = null;
+var win_num = 16;
 
 function addIoEvents(){
 	//testMessage
@@ -130,7 +138,9 @@ GESTURETYPES = {
     SWIPE_LEFT : 1,
     SWIPE_RIGHT: 2,
     DRAG_UP: 3,
-    DRAG_DOWN: 4
+    DRAG_DOWN: 4,
+    ZOOM_OUT: 5,
+    ZOOM_IN: 6
 }
 
 function ioSendGesture (inGestureType,inVelocity) {
@@ -192,11 +202,11 @@ function startGestureRecognizer(){
 			 tmpVelo = 1.0;
 		if(event.deltaX<0){
 			ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
-			gf.rotate_left();
+			gfb.rotate_left();
 		}
 		else{
 			ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
-			gf.rotate_right();
+			gfb.rotate_right();
 		}
 		
 	});	
@@ -211,7 +221,7 @@ function startGestureRecognizer(){
 		//send new WindowColors to Socket
 		ioSendCurrentWindowColor(tmpColor);
 		setActionAreaHighlight(tmpColor);
-		gf.updatecolor(tmpColor);
+		gfb.updatecolor(tmpColor);
 	});
 	
 	// MODIFIED TAP GESTURE (doubletap)!
@@ -226,9 +236,21 @@ function startGestureRecognizer(){
 		ioSendGesture(GESTURETYPES.DOUBLETAP);
 		ioSendCurrentWindowColor(prefered_user_color);
 		setActionAreaHighlight(prefered_user_color);
-		gf.updatecolor(prefered_user_color);
-		gf.blink();
+		gfb.updatecolor(prefered_user_color);
+		gfb.blink();
 	});
+
+	//ZOOM GESTURE
+	// mc.get('pinch').set({ enable: true });
+	// mc.on("pinchin", function(event) {
+		// zoom_out(event.scale);
+	// });
+	// mc.on("pinchout", function(event) {
+		// zoom_in(event.scale);
+	// });
+	// mc.on("pinchend", function(event) {
+		// zoom_end();
+	// });
 }	
 
 function setActionAreaHighlight(inColor)
@@ -364,7 +386,7 @@ function btn_weiter_step2() {
 	$( "#step3" ).fadeIn();
 	$( ".logocol").addClass("hidden");
 	setActionAreaHighlight(prefered_user_color);
-	gf.updatecolor(prefered_user_color);
+	gfb.updatecolor(prefered_user_color);
 }
 
 function selectColor(e,inColor){
@@ -573,4 +595,41 @@ function setSplash3To(newState)
 		hideAlert();
 
 	splash3_hint = newState;
+}
+
+function zoom_out(scale) {
+	my_zoom_f -= 0.3;
+	var zoom_tmp = Math.max(0,Math.min(parseInt(my_zoom_f),parseInt(win_num/2)));
+	if(zoom_tmp !== my_zoom) {
+		my_zoom = zoom_tmp;
+		ioSendGesture(GESTURETYPES.ZOOM_OUT);
+		gfb.setZoom(my_zoom);
+	}
+}
+
+function zoom_in(scale) {
+	my_zoom_f += 0.3;
+	var zoom_tmp = Math.max(0,Math.min(parseInt(my_zoom_f),parseInt(win_num/2)));
+	if(zoom_tmp !== my_zoom) {
+		my_zoom = zoom_tmp;
+		ioSendGesture(GESTURETYPES.ZOOM_IN);
+		gfb.setZoom(my_zoom);
+	}
+}
+
+function zoom_end() {
+	setTimeout(function() {
+		clearTimeout(my_zoom_stepback_to);
+		zoom_stepback();
+	}, my_zoom_max_t);
+}
+
+function zoom_stepback() {
+	if(my_zoom > 0) {
+		my_zoom -= 1;
+		ioSendGesture(GESTURETYPES.ZOOM_OUT);
+		gfb.setZoom(my_zoom);
+		my_zoom_stepback_to = setTimeout(function() {zoom_stepback();}, my_zoom_stepback_t);
+	}
+	my_zoom_f = my_zoom;
 }
