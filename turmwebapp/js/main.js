@@ -32,7 +32,7 @@ $( document ).ready(function() {
 	
   });
 
-var TOO_FAR_AWAY = 10.0; //distance in KM where we ignore the user
+var TOO_FAR_AWAY = 2.0; //distance in KM where we ignore the user
 var WINDOW_OFFSET = -4; //max. 16! positive or negativ to shift the Start-Window away from East ( positive = towards north, negativ = towards south)
 	// Windownumber
   	// North    12(-4)
@@ -85,6 +85,7 @@ function addIoEvents(){
 
 			rotateOverlay(WINDOW_ANGLE+prefered_user_window*22.5);
 			showAlert("darkcolor","Das Fenster gehört nun Dir!");
+			allow_btn_step1();
 			return;
 		}
 		// kein Fenster zugewiesen
@@ -101,6 +102,7 @@ function addIoEvents(){
 		{
 			rotateOverlay(WINDOW_ANGLE+WindowId*22.5);
 			showAlert("darkcolor","Das Fenster welches in deine Richtung zeigt ist besetzt. Du hast Das daneben bekommen.");
+			allow_btn_step1();
 		}
 	});  
 
@@ -431,7 +433,6 @@ function clickOnImage(e, inOffset){
 	angle+=90;
 
 	prefered_user_window = computeWindowFromAngle(parseFloat(angle));
-	allow_btn_step1();
 	showAlert("darkcolor"," Mal sehen ob das Fenster frei ist.");
 	ioSendCurrentWindowNumber(prefered_user_window);
 }
@@ -484,9 +485,6 @@ function geoSuccess(p) {
   computeUserAndTower();
   if( user_dist != null )
   	setDistanceSplash();
-
-  if ( prefered_user_window != null )
-  	allow_btn_step1();
 }
 function geoError() {
 	showAlert("darkcolor","Deine Position konnte nicht ermittelt werden.");
