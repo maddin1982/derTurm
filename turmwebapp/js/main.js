@@ -3,6 +3,8 @@ io = io.connect()
 //process incomming io Events
 addIoEvents();
 
+var lastSecretGestureSend=new Date();
+
 //gesture feedback for action area
 var gfb;
 
@@ -134,6 +136,9 @@ function ioSendFinalWindowColor (inWindowcolor) {
 	console.log("final window color: "+inWindowcolor);
 	io.emit('selectWindowColorFinal',inWindowcolor);
 }
+
+
+
 // gesture type: tap
 GESTURETYPES = {
     DOUBLETAP : 0,
@@ -145,9 +150,16 @@ GESTURETYPES = {
     ZOOM_IN: 6
 }
 
+function sendHidden1DollarGesture(gesture){
+	lastSecretGestureSend=new Date();
+	io.emit('processHiddenGesture',{"gesture":gesture});
+}
+
 function ioSendGesture (inGestureType,inVelocity) {
-	console.log("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
-	io.emit('processGesture',{"type":inGestureType,"velocity":inVelocity});
+	if((new Date()-lastSecretGestureSend)>20){
+		console.log("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
+		io.emit('processGesture',{"type":inGestureType,"velocity":inVelocity});
+	}
 
 }
 

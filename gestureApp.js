@@ -355,6 +355,13 @@ app.io.route('selectWindowColor', function(req) {
 	//console.log(clientsManager.getClients());
 })
 
+app.io.route('processHiddenGesture', function(req){
+	console.log("processHiddenGesture: ");
+	console.log(req.data.gesture.Name)
+
+	
+});
+
 app.io.route('processGesture', function(req) {
 	
 	//client was active reset death-timeout
@@ -362,6 +369,8 @@ app.io.route('processGesture', function(req) {
 	
 	var gesture=req.data;
 	//console.log("gestureType: "+gesture.type+" "+"velocity: "+gesture.velocity)
+	console.log(req.data)
+	
 	
 	var client=clientsManager.getClientBy("id",req.socket.id)
 	
