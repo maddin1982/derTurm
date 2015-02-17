@@ -29,9 +29,9 @@ var AnimationManagerObj=function(){
 	var DoubleTapAnimation=function(color,windowId,zoom){
 		var that=this;
 		this.colorArray=color;
-		var length=1000; //in milliseconds
+		var length=700; //in milliseconds
 		var startTime=new Date();
-		var range=3;
+		var range=7;
 		
 		//get frame for time
 		this.getFrame=function(){
@@ -45,9 +45,13 @@ var AnimationManagerObj=function(){
 				//umrechnung der zeit in einen sinus funktionsverlauf
 				var lightness=Math.sin(Math.PI*animationProgressInPercent)
 				//console.log("lightness "+lightness)
-				for(var i=windowId-range-zoom;i<windowId+range+zoom;i++){
-					frame[myMod(i)]=getPercentualColor(that.colorArray,lightness);
+				for(var i=1;i<range;i++){
+					frame[myMod(windowId-i)]=getPercentualColor(that.colorArray,(lightness/i));
 				}
+				frame[windowId]=that.colorArray;
+				for(var i=1;i<range;i++){
+					frame[myMod(windowId+i)]=getPercentualColor(that.colorArray,(lightness/i));
+				}			
 				frame = setFrameWindowColor(frame,windowId,that.colorArray,zoom);
 				return frame;
 			}
@@ -65,8 +69,9 @@ var AnimationManagerObj=function(){
 		var that=this;
 		this.colorArray=color;
 
-		var length=Math.min(5000,100/speed);
+		var length=Math.min(8000,8000*speed);
 		var startTime=new Date();
+		var currPosition=windowId;
 
 		//get frame for time
 		this.getFrame=function(){
@@ -78,8 +83,11 @@ var AnimationManagerObj=function(){
 			else{
 				var frame=getBasicFrame();	
 				//get current rotating Animation windowId
-				currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*15))));
-				frame = setFrameWindowColor(frame,currWindowId,that.colorArray,zoom);
+				currPosition=currPosition+(direction*Math.max(0.2,(speed*2*(1-animationProgressInPercent))));
+				//console.log("currPosition "+currPosition)
+				//currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*15))));
+				//frame = setFrameWindowColor(frame,currWindowId,that.colorArray,zoom);
+				frame = setFrameWindowColor(frame,myMod(Math.floor(currPosition)),getPercentualColor(that.colorArray,(1-animationProgressInPercent)),zoom);
 				return frame;
 			}
 		}
@@ -179,12 +187,14 @@ var TcpSocketManagerObj=function(clientsManager){
 	}
 
 	this.sendFrameToTower=function(frame){
+	
 		if(that.frameCounter>sendframenomaterwhatinterval){
 			that.frameCounter=0;
 		}
 		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 		{
+			console.log(frame);
 			// send frame via tubemail (if connected)
 			Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
 		}
