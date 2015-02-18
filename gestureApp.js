@@ -396,8 +396,8 @@ app.io.route('processGesture', function(req) {
 	}
 })
 
-
-var server = app.listen(3003, function () {
+// start server, listen only to local requests
+var server = app.listen(4898, '127.0.0.1', function () {
 
   var host = server.address().address
   var port = server.address().port
