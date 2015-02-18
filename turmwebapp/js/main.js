@@ -1,5 +1,6 @@
-//enable socet io
-io = io.connect()
+// BEWARE! this call is for the old socket.io API (<1.0)
+io = io.connect( location.origin, { resource: location.pathname.replace( /\/(\w+)\/\w+\.html/, '$1/' ) + 'socket.io' } );
+
 //process incomming io Events
 addIoEvents();
 
