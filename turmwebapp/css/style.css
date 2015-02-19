@@ -46,9 +46,19 @@ body {
 	background-color: #525f62;
 	border-color: #32b0a1;
 	box-sizing:border-box;
-  -moz-box-sizing:border-box;
-  -webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	user-drag: none; 
+	-moz-user-select: none;
+	-webkit-user-drag: none;
 } 
+.noselect {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 #highlight{
 	position: absolute;

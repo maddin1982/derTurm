@@ -36,13 +36,14 @@ $( document ).ready(function() {
   });
 
 var TOO_FAR_AWAY = 2.0; //distance in KM where we ignore the user
-var WINDOW_OFFSET = 2; //max. 16! positive or negativ to shift the Start-Window away from East ( positive = towards north, negativ = towards south)
+var WINDOW_OFFSET = 7; //max. 16! positive or negativ to shift the Start-Window away from East ( positive = towards north, negativ = towards south)
 	// Windownumber
-  	// North    12(+2)
-	// West 8(+2) . 0(+2) East 
-	// South    4(+2)
+  	// North    0(+7)
+	// West 4(+7) . 12(+7) East 
+	// South    8(+7)
+var SPLASH2_TEXT = ["Gute Wahl.","Super.","Gefällt mir auch.","Schön.","Toll.","Klasse.","Wow.","Kräftig.","Gefällt.","Ja, die passt.","Sehr gut.","Gut gemacht.","Herrlich.","Sieht gut aus.", "Naja.", "Ok.","Perfekt."]
 var SPLASH3_TEXT = ["Bewege deinen Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Blinken auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
-var WINDOW_ANGLE = 146.25; // window = 0 has this Angle
+var WINDOW_ANGLE = -101.25; // window = 0 has this Angle
 
 var current_step = 1;
 var user_position = null;
@@ -66,10 +67,11 @@ function addIoEvents(){
 	//testMessage
 	// io.emit('processGesture',{"name":"myGesture","options":[]});
 	io.on("connect_failed", function(data) {
-		showAlert("specialcolor","Es konnte keine Socket Verbindung hergestellt werden. Internet Explorer Mobile ist nicht unterstützt.");
+		console.log(data);
+		/*showAlert("specialcolor","Es konnte keine Socket Verbindung hergestellt werden. Internet Explorer Mobile ist nicht unterstützt.");
 		app_error = true;
 		//Set all Elements faded out! execept the splash!
-		$("div[class*='col']:not(.splash)").css("opacity",0.2);
+		$("div[class*='col']:not(.splash)").css("opacity",0.2);*/
 		return;
 	});  
 	//generic error Message
@@ -96,7 +98,6 @@ function addIoEvents(){
 		//fenster konnte zugewiesen werden
 		if( prefered_user_window == WindowId)
 		{
-
 			rotateOverlay(WINDOW_ANGLE+prefered_user_window*-22.5);
 			showAlert("darkcolor","Das Fenster gehört nun Dir!");
 			allow_btn_step1();
@@ -189,7 +190,7 @@ function startGestureRecognizer(){
 	//add Hammer JS to actionArea
 	var actionArea = document.getElementById('actionArea');
 	mc = new Hammer(actionArea);
-	mc.get('tap').set({ taps:2,interval:200 });
+	mc.get('tap').set({ taps:2,interval:300 });
 	mc.get('pan').set({ threshold: 0, pointers: 2,direction: Hammer.DIRECTION_VERTICAL });
 	
 	// SWIPE LEFT / RIGHT GESTURE!
@@ -333,6 +334,7 @@ $( window ).resize(function() {
 	});
 function startSituation(){
 	//STEP 1
+	$( "#overlay" ).css({opacity: 0.0});
 	current_step = 1
 	app_error = false;
 	$( "#step1" ).fadeIn();
@@ -346,8 +348,8 @@ function startSituation(){
 	prefered_user_window = null; 
 	alignMapAndOverlay();
 	//STEP 2
-	var prefered_user_color = null;
-	prohibit_btn_step2
+	prefered_user_color = null;
+	prohibit_btn_step2();
 	hideAlert(2);
 	//STEP 3
 	splash3_hint = 0;
@@ -424,12 +426,12 @@ function selectColor(e,inColor){
 	var hexValue = rgbToHex(rgbArray[0],rgbArray[1],rgbArray[2])
 
 	// Show the Splash
-	showAlert("darkcolor","Gute Wahl.");
+	showAlert("darkcolor",SPLASH2_TEXT[Math.floor(Math.random()*SPLASH2_TEXT.length)]);
 	$( "#splash2" ).css({background: inColor});
 
 	// Set the Color als prefered
 	prefered_user_color = hexValue;
-
+	allow_btn_step2();
 	//Send Current prefered Color to Socket
 	ioSendCurrentWindowColor(prefered_user_color);
 }
@@ -463,7 +465,7 @@ function clickOnImage(e, inOffset){
 	prefered_user_window = computeWindowFromAngle(parseFloat(angle));
 	showAlert("darkcolor"," Mal sehen ob das Fenster frei ist.");
 	ioSendCurrentWindowNumber(prefered_user_window);
-	rotateOverlay(WINDOW_ANGLE+prefered_user_window*-22.5);
+	//rotateOverlay(WINDOW_ANGLE+prefered_user_window*-22.5);
 }
 function hideAlert(inSplashNumber)
 {
@@ -546,7 +548,7 @@ function computeUserAndTower()
 						tower_position.longitude,
 						tower_position.latitude);
   	prefered_user_window = computeWindowFromAngle(angle-90);
-  	rotateOverlay(WINDOW_ANGLE+prefered_user_window*-22.5);
+  	//rotateOverlay(WINDOW_ANGLE+prefered_user_window*-22.5);
 }
 
 function computeWindowFromAngle(inAngle){
