@@ -69,7 +69,7 @@ function addIoEvents(){
 	io.on("connect_failed", function(data) {
 		console.log(data);
 		showAlert("specialcolor","Es konnte keine Socket Verbindung hergestellt werden.");
-		$( "#error").html(data.toString());
+		$( "#error").html(JSON.stringify(data));
 		/*app_error = true;
 		//Set all Elements faded out! execept the splash!
 		$("div[class*='col']:not(.splash)").css("opacity",0.2);*/
@@ -80,7 +80,7 @@ function addIoEvents(){
 		console.log(data);
 		showAlert("specialcolor","Es ist ein unerwarteter Fehler aufgetreten.");
 		app_error = true;
-		$( "#error").html(data.toString());
+		$( "#error").html(JSON.stringify(data));
 		//Set all Elements faded out! execept the splash!
 		$("div[class*='col']:not(.splash)").css("opacity",0.2);
 		return;
