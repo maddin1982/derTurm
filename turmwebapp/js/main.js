@@ -68,8 +68,9 @@ function addIoEvents(){
 	// io.emit('processGesture',{"name":"myGesture","options":[]});
 	io.on("connect_failed", function(data) {
 		console.log(data);
-		/*showAlert("specialcolor","Es konnte keine Socket Verbindung hergestellt werden. Internet Explorer Mobile ist nicht unterstützt.");
-		app_error = true;
+		showAlert("specialcolor","Es konnte keine Socket Verbindung hergestellt werden.");
+		$( "#error").html(data.toString());
+		/*app_error = true;
 		//Set all Elements faded out! execept the splash!
 		$("div[class*='col']:not(.splash)").css("opacity",0.2);*/
 		return;
@@ -79,6 +80,7 @@ function addIoEvents(){
 		console.log(data);
 		showAlert("specialcolor","Es ist ein unerwarteter Fehler aufgetreten.");
 		app_error = true;
+		$( "#error").html(data.toString());
 		//Set all Elements faded out! execept the splash!
 		$("div[class*='col']:not(.splash)").css("opacity",0.2);
 		return;
@@ -89,7 +91,7 @@ function addIoEvents(){
 	});  
 
 	io.on('connectionToTowerFailed', function(data) {
-		showAlert("specialcolor","Ich habe gerade leichte Verbindungsprobleme.");
+		showAlert("specialcolor","Ich habe gerade leichte Verbindungsprobleme. "+data);
 		// irgendwas stimmt mit der tcp verbindung nicht
 	})
 
@@ -132,21 +134,25 @@ function addIoEvents(){
 // Io Calls When the User Made Selections
 function ioSendCurrentWindowNumber (inWindownumber) {
 	console.log("current window number: "+inWindownumber);
+	$( "#error").html("current window number: "+inWindownumber);
 	io.emit('selectWindowNumber',inWindownumber);
 }
 
 function ioSendFinalWindowNumber (inWindownumber) {
 	console.log("final window number: "+inWindownumber);
+	$( "#error").html("final window number: "+inWindownumber);
 	io.emit('selectWindowNumberFinal',inWindownumber);
 }
 
 function ioSendCurrentWindowColor (inWindowcolor) {
 	console.log("current window color: "+inWindowcolor);
+	$( "#error").html("current window color: "+inWindowcolor);
 	io.emit('selectWindowColor',inWindowcolor);
 }
 
 function ioSendFinalWindowColor (inWindowcolor) {
 	console.log("final window color: "+inWindowcolor);
+	$( "#error").html("final window color: "+inWindowcolor);
 	io.emit('selectWindowColorFinal',inWindowcolor);
 }
 
@@ -170,7 +176,7 @@ function sendHidden1DollarGesture(gesture){
 
 function ioSendGesture (inGestureType,inVelocity) {
 	if((new Date()-lastSecretGestureSend)>20){
-		console.log("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
+		$( "#error").html("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
 		io.emit('processGesture',{"type":inGestureType,"velocity":inVelocity});
 	}
 
@@ -282,7 +288,7 @@ function startGestureRecognizer(){
 
 function setActionAreaHighlight(inColor)
 {
-	$( ".actionarea").css('border-color', inColor);
+	$( "#.actionarea").css('border-color', inColor);
 }
 function computeColor(){
 	var init = getRGB(prefered_user_color);
