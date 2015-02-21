@@ -177,7 +177,7 @@ function startGestureRecognizer(){
 	//add Hammer JS to actionArea
 	var actionArea = document.getElementById('actionArea');
 	mc = new Hammer(actionArea);
-	mc.get('tap').set({ taps:2,interval:200 });
+	mc.get('tap').set({ taps:2,interval:400 });
 	mc.get('pan').set({ threshold: 0, pointers: 2,direction: Hammer.DIRECTION_VERTICAL });
 	
 	// SWIPE LEFT / RIGHT GESTURE!
