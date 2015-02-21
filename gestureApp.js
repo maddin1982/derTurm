@@ -149,7 +149,7 @@ var AnimationManagerObj=function(){
 //send data to tower over tcp socket
 var TcpSocketManagerObj=function(clientsManager){
 	
-	var Tube = require('tubemail').start( { port: 4889 } );
+	var Tube = require('tubemail').listen( { port: 4889 } );
 	
 	var that=this;
 	this.lastSentFrame=[];
@@ -396,8 +396,8 @@ app.io.route('processGesture', function(req) {
 	}
 })
 
-
-var server = app.listen(3003, function () {
+// start server, listen only to local requests
+var server = app.listen(3003, '127.0.0.1', function () {
 
   var host = server.address().address
   var port = server.address().port
