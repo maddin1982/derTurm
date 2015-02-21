@@ -288,7 +288,7 @@ function startGestureRecognizer(){
 
 function setActionAreaHighlight(inColor)
 {
-	$( "#.actionarea").css('border-color', inColor);
+	$( ".actionarea").css('border-color', inColor);
 }
 function computeColor(){
 	var init = getRGB(prefered_user_color);
