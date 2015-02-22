@@ -1,5 +1,18 @@
 // BEWARE! this call is for the old socket.io API (<1.0)
-io = io.connect( location.origin, { resource: location.pathname.replace( /\/(\w+)\/\w+\.html/, '$1/' ) + 'socket.io' } );
+// builds target URL for socket.io: take host and path, strip everything behind the last slash from path
+io = io.connect( '//'+location.host, { resource: location.pathname.replace( /\/(.*?)[^\/]+$/, '$1' )+'socket.io' } );
+
+// there are browsers without console – don't let them die
+if ( typeof console == 'undefined' )
+{
+	// define pseudo console with no-op functions
+	window.console = {
+		log: function(){},
+		info: function(){},
+		warn: function(){},
+		error: function(){}
+	};
+}
 
 //process incomming io Events
 addIoEvents();
@@ -30,8 +43,6 @@ $( document ).ready(function() {
 
 	gfb = new GestureFeedback();
 	gfb.init();
-	
-
 	
   });
 
@@ -64,6 +75,7 @@ var my_zoom_stepback_to = null;
 var win_num = 16;
 
 function addIoEvents(){
+	
 	//testMessage
 	// io.emit('processGesture',{"name":"myGesture","options":[]});
 	io.on("connect_failed", function(data) {
@@ -75,6 +87,7 @@ function addIoEvents(){
 		$("div[class*='col']:not(.splash)").css("opacity",0.2);*/
 		return;
 	});  
+	
 	//generic error Message
 	io.on('error', function(data) {
 		console.log(data);
@@ -457,7 +470,7 @@ function clickOnImage(e, inOffset){
 	
 	if( (Math.pow(320.0-onPicX,2)+Math.pow(320-onPicY,2))<900) //dont allow middle!
 		return; 
-
+	
 	$("#highlight").show();
     $("#highlight").css({position: "absolute", top: (e.pageY-10), left: (e.pageX-10)});
 
@@ -467,7 +480,7 @@ function clickOnImage(e, inOffset){
   	// North  -180
 	// West -90. 90 East 
 	// South   0
-
+	
 	prefered_user_window = computeWindowFromAngle(parseFloat(angle));
 	showAlert("darkcolor"," Mal sehen ob das Fenster frei ist.");
 	ioSendCurrentWindowNumber(prefered_user_window);
