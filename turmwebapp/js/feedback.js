@@ -1,9 +1,8 @@
 var GestureFeedback=function(){
-
 	var that = this;
 
 	var win_num = 16;
-	var rotation_t = 3333; //in ms
+	var rotation_t = 2000; //in ms
 	var blink_num = 3;
 	var blink_state = 0;
 	var blink_t = 1000; //in ms
@@ -117,5 +116,7 @@ var GestureFeedback=function(){
 		zoom = _zoom;
 		setActiveWindows(zoom, offset);
 	}
-
 }
+
+
+

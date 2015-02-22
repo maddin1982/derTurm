@@ -149,7 +149,7 @@ var AnimationManagerObj=function(){
 //send data to tower over tcp socket
 var TcpSocketManagerObj=function(clientsManager){
 	
-	var Tube = require('tubemail').listen( { port: 4889 } );
+	//var Tube = require('tubemail').listen( { port: 4889 } );
 	
 	var that=this;
 	this.lastSentFrame=[];
@@ -194,9 +194,9 @@ var TcpSocketManagerObj=function(clientsManager){
 		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 		{
-			//console.log(frame);
+			console.log(frame);
 			// send frame via tubemail (if connected)
-			Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
+			//Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
 		}
 
 		that.lastSentFrame=frame;
@@ -397,7 +397,7 @@ app.io.route('processGesture', function(req) {
 })
 
 // start server, listen only to local requests
-var server = app.listen(4898, '127.0.0.1', function () {
+var server = app.listen(4898,  function () {
 
   var host = server.address().address
   var port = server.address().port

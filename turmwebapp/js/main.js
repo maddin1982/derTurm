@@ -1,5 +1,10 @@
+
+
+
 // BEWARE! this call is for the old socket.io API (<1.0)
-io = io.connect( location.origin, { resource: location.pathname.replace( /\/(\w+)\/\w+\.html/, '$1/' ) + 'socket.io' } );
+//io = io.connect( location.origin, { resource: location.pathname.replace( /\/(\w+)\/\w+\.html/, '$1/' ) + 'socket.io' } );
+
+io=io.connect();
 
 //process incomming io Events
 addIoEvents();
@@ -24,13 +29,11 @@ $( document ).ready(function() {
 
 	//Set Start Situation of StepWizard
     startSituation();
-
-	//add Gesture Recognition on action area
 	startGestureRecognizer();
 
 	gfb = new GestureFeedback();
 	gfb.init();
-	
+
 
 	
   });
@@ -179,13 +182,14 @@ function ioSendGesture (inGestureType,inVelocity) {
 function startGestureRecognizer(){
 
 	//1$recognizer
-	startDollarRecognizerOn($("#actionArea"));
+	var dollarRecognizer= new my1DollarRecognizer();
+	dollarRecognizer.init($("#actionArea"));
 	
 	
 	//prevent site from scrolling when touching the actionarea
-	$("#actionArea").on('touchstart', function (evt) {
-		evt.preventDefault();
-	});
+	// $("#actionArea").on('touchstart', function (evt) {
+		// evt.preventDefault();
+	// });
 	
 	//add Hammer JS to actionArea
 	var actionArea = document.getElementById('actionArea');
@@ -231,11 +235,11 @@ function startGestureRecognizer(){
 			 tmpVelo = 1.0;
 		if(event.deltaX<0){
 			ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
-			gfb.rotate_left();
+			gfb.rotate_left(tmpVelo);
 		}
 		else{
 			ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
-			gfb.rotate_right();
+			gfb.rotate_right(tmpVelo);
 		}
 		
 	});	
