@@ -248,11 +248,11 @@ function startGestureRecognizer(){
 			 tmpVelo = 1.0;
 		if(event.deltaX<0){
 			ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
-			gfb.rotate_left();
+			gfb.rotate_left(tmpVelo);
 		}
 		else{
 			ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
-			gfb.rotate_right();
+			gfb.rotate_right(tmpVelo);
 		}
 		
 	});	
