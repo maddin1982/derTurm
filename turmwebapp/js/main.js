@@ -53,13 +53,14 @@ var WINDOW_OFFSET = 7; //max. 16! positive or negativ to shift the Start-Window 
 	// West 4(+7) . 12(+7) East 
 	// South    8(+7)
 var SPLASH2_TEXT = ["Gute Wahl.","Super.","Gefällt mir auch.","Schön.","Toll.","Klasse.","Wow.","Kräftig.","Gefällt.","Ja, die passt.","Sehr gut.","Gut gemacht.","Herrlich.","Sieht gut aus.", "Naja.", "Ok.","Perfekt."]
-var SPLASH3_TEXT = ["Bewege deinen Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Blinken auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
+var SPLASH3_TEXT = ["Bewege 2 Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Leuchten auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
 var WINDOW_ANGLE = -101.25; // window = 0 has this Angle
 
 var current_step = 1;
 var user_position = null;
 var user_dist = null;
 var prefered_user_window = null; 
+var final_user_window = null; 
 var prefered_user_color = null;
 var splash3_hint = 0;
 var	app_error = false;
@@ -116,6 +117,7 @@ function addIoEvents(){
 			rotateOverlay(WINDOW_ANGLE+prefered_user_window*-22.5);
 			showAlert("darkcolor","Das Fenster gehört nun Dir!");
 			allow_btn_step1();
+			final_user_window = WindowId;
 			return;
 		}
 		// kein Fenster zugewiesen
@@ -127,9 +129,11 @@ function addIoEvents(){
 			showAlert("specialcolor","Derzeit sind keine Fenster in deiner Richtung frei.");
 			user_position = tmpUP
 			user_dist = tmpDist;
+			final_user_window = null;
 		}
 		else 
 		{
+			final_user_window = WindowId;
 			rotateOverlay(WINDOW_ANGLE+WindowId*-22.5);
 			showAlert("darkcolor","Das Fenster welches in deine Richtung zeigt ist besetzt. Du hast Das daneben bekommen.");
 			allow_btn_step1();
@@ -365,6 +369,7 @@ function startSituation(){
 	user_position = null;
 	user_dist = null;
 	prefered_user_window = null; 
+	final_user_window = null;
 	alignMapAndOverlay();
 	//STEP 2
 	prefered_user_color = null;
@@ -405,13 +410,13 @@ function btn_weiter_step1() {
 	if( app_error )
 		return;
 
-	if( prefered_user_window == null)
+	if( final_user_window == null)
 	{
 		showAlert("specialcolor","Markiere deinen Standort auf der Karte oder klicke den GPS-Button.");
 		return;
 	}
 	current_step = 2;
-	ioSendFinalWindowNumber(prefered_user_window);
+	ioSendFinalWindowNumber(final_user_window);
 	$( "#step1" ).hide();
 	$( "#step2" ).fadeIn();
 	$( "#step3" ).hide();
@@ -518,9 +523,11 @@ function showAlert(inColor,inText,inSplashNumber)
 }
 /********************* GPS STUFF ************************/
 function getLocation() {
+	$( "#overlay" ).css({opacity: 0.0});
 	//set everything back
 	prohibit_btn_step1();
 	prefered_user_window = null;
+	final_user_window = null;
 	$("#highlight").hide();
 
 
@@ -542,7 +549,7 @@ function geoError() {
 function setDistanceSplash()
 {
 	if( user_dist > TOO_FAR_AWAY)
-		showAlert("darkcolor","Komm näher! Du bist "+parseFloat(user_dist).toFixed(1)+"km weit vom Turm entfernt.");
+		showAlert("specialcolor","Komm näher! Du bist "+parseFloat(user_dist).toFixed(1)+"km weit vom Turm entfernt.");
 	else
 	{
 		if ( user_dist < 1.0)
