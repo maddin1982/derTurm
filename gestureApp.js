@@ -9,7 +9,9 @@ var AnimationManagerObj=function(){
 		DRAG_UP: 3,
 		DRAG_DOWN: 4,
 		ZOOM_OUT: 5,
-		ZOOM_IN: 6
+		ZOOM_IN: 6,
+		CHECK: 7,
+		PIGTAIL: 8
 	}
 
 	 //clone color and multiply by percent value
@@ -26,12 +28,13 @@ var AnimationManagerObj=function(){
 	 * @param {Array.<number>} color
 	 * @param {number} windowId
 	 */
-	var DoubleTapAnimation=function(color,windowId,zoom){
+	var DoubleTapAnimation=function(color,windowId,zoom,range){
+		if(!range)
+			range=5;
 		var that=this;
 		this.colorArray=color;
 		var length=700; //in milliseconds
 		var startTime=new Date();
-		var range=7;
 		
 		//get frame for time
 		this.getFrame=function(){
@@ -69,7 +72,7 @@ var AnimationManagerObj=function(){
 		var that=this;
 		this.colorArray=color;
 
-		var length=Math.min(8000,8000*speed);
+		var length=Math.min(16000,5000*speed);
 		var startTime=new Date();
 		var currPosition=windowId;
 
@@ -118,6 +121,15 @@ var AnimationManagerObj=function(){
 		}
 	}	
 	
+	
+	var CheckAnimation=function(color,windowId,zoom){
+		return new DoubleTapAnimation(color,windowId,zoom,16);
+	}
+	
+	var PigTailAnimation=function(color,windowId,zoom){
+		return new SwipeAnimation(color,windowId,zoom,1,2);
+	}	
+	
 	this.createAnimation=function(gestureType,client,speed){
 		if(speed===null||speed===""||speed===undefined)
 			var speed=0.5;
@@ -130,6 +142,13 @@ var AnimationManagerObj=function(){
 		if(GESTURETYPES.ZOOM_IN==gestureType){
 			client.zoom = Math.min(8,client.zoom+1);
 			return new ZoomAnimation(client.color,client.window, client.zoom);
+		}
+		
+		if(GESTURETYPES.PIGTAIL==gestureType){
+			return new PigTailAnimation(client.color,client.window, client.zoom);
+		}
+		if(GESTURETYPES.CHECK==gestureType){
+			return new CheckAnimation(client.color,client.window, client.zoom);
 		}
 		
 		if(GESTURETYPES.DOUBLETAP==gestureType){
@@ -149,7 +168,7 @@ var AnimationManagerObj=function(){
 //send data to tower over tcp socket
 var TcpSocketManagerObj=function(clientsManager){
 	
-	//var Tube = require('tubemail').listen( { port: 4889 } );
+	var Tube = require('tubemail').listen( { port: 4889 } );
 	
 	var that=this;
 	this.lastSentFrame=[];
@@ -196,7 +215,7 @@ var TcpSocketManagerObj=function(clientsManager){
 		{
 			console.log(frame);
 			// send frame via tubemail (if connected)
-			//Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
+			Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
 		}
 
 		that.lastSentFrame=frame;
@@ -365,12 +384,10 @@ app.io.route('selectWindowColor', function(req) {
 	//console.log(clientsManager.getClients());
 })
 
-app.io.route('processHiddenGesture', function(req){
-	console.log("processHiddenGesture: ");
-	console.log(req.data.gesture.Name)
-
-	
-});
+// app.io.route('processHiddenGesture', function(req){
+	// console.log("processHiddenGesture: ");
+	// console.log(req.data.gesture.Name)
+// });
 
 app.io.route('processGesture', function(req) {
 	

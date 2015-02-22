@@ -61,7 +61,7 @@ var GestureFeedback=function(){
 	this.rotate_left = function(speed) {
 		rotate_state = 16;
 		rotate_dir = 1;
-		rotation_t = Math.min(5000,100/speed);
+		rotation_t = 100.0/speed;
 		$(gesture).removeClass();
 		$(gesture).addClass("left");
 		rotate_loop();
@@ -70,7 +70,7 @@ var GestureFeedback=function(){
 	this.rotate_right = function(speed) {
 		rotate_state = 16;
 		rotate_dir = -1;
-		rotation_t = Math.min(5000,100/speed);
+		rotation_t = 100.0/speed;
 		$(gesture).removeClass();
 		$(gesture).addClass("right");
 		rotate_loop();
@@ -80,7 +80,7 @@ var GestureFeedback=function(){
 		that.idle();
 		offset = rotate_dir*rotate_state;
 		setActiveWindows(zoom, offset);
-		if(rotate_state > 0) {
+		if(rotate_state > 0) {			
 			setTimeout(function(){rotate_loop()}, rotation_t / win_num);
 			rotate_state -= 1;
 		}

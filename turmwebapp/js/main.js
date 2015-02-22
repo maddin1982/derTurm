@@ -2,9 +2,22 @@
 
 
 // BEWARE! this call is for the old socket.io API (<1.0)
-//io = io.connect( location.origin, { resource: location.pathname.replace( /\/(\w+)\/\w+\.html/, '$1/' ) + 'socket.io' } );
 
-io=io.connect();
+// builds target URL for socket.io: take host and path, strip everything behind the last slash from path
+io = io.connect( '//'+location.host, { resource: location.pathname.replace( /\/(.*?)[^\/]+$/, '$1' )+'socket.io' } );
+
+// there are browsers without console – don't let them die
+if ( typeof console == 'undefined' )
+{
+	// define pseudo console with no-op functions
+	window.console = {
+		log: function(){},
+		info: function(){},
+		warn: function(){},
+		error: function(){}
+	};
+}
+
 
 //process incomming io Events
 addIoEvents();
@@ -33,8 +46,6 @@ $( document ).ready(function() {
 
 	gfb = new GestureFeedback();
 	gfb.init();
-
-
 	
   });
 
@@ -67,21 +78,25 @@ var my_zoom_stepback_to = null;
 var win_num = 16;
 
 function addIoEvents(){
+	
 	//testMessage
 	// io.emit('processGesture',{"name":"myGesture","options":[]});
 	io.on("connect_failed", function(data) {
 		console.log(data);
-		/*showAlert("specialcolor","Es konnte keine Socket Verbindung hergestellt werden. Internet Explorer Mobile ist nicht unterstützt.");
-		app_error = true;
+		showAlert("specialcolor","Es konnte keine Socket Verbindung hergestellt werden.");
+		$( "#error").html(JSON.stringify(data));
+		/*app_error = true;
 		//Set all Elements faded out! execept the splash!
 		$("div[class*='col']:not(.splash)").css("opacity",0.2);*/
 		return;
 	});  
+	
 	//generic error Message
 	io.on('error', function(data) {
 		console.log(data);
 		showAlert("specialcolor","Es ist ein unerwarteter Fehler aufgetreten.");
 		app_error = true;
+		$( "#error").html(JSON.stringify(data));
 		//Set all Elements faded out! execept the splash!
 		$("div[class*='col']:not(.splash)").css("opacity",0.2);
 		return;
@@ -92,7 +107,7 @@ function addIoEvents(){
 	});  
 
 	io.on('connectionToTowerFailed', function(data) {
-		showAlert("specialcolor","Ich habe gerade leichte Verbindungsprobleme.");
+		showAlert("specialcolor","Ich habe gerade leichte Verbindungsprobleme. "+data);
 		// irgendwas stimmt mit der tcp verbindung nicht
 	})
 
@@ -135,21 +150,25 @@ function addIoEvents(){
 // Io Calls When the User Made Selections
 function ioSendCurrentWindowNumber (inWindownumber) {
 	console.log("current window number: "+inWindownumber);
+	$( "#error").html("current window number: "+inWindownumber);
 	io.emit('selectWindowNumber',inWindownumber);
 }
 
 function ioSendFinalWindowNumber (inWindownumber) {
 	console.log("final window number: "+inWindownumber);
+	$( "#error").html("final window number: "+inWindownumber);
 	io.emit('selectWindowNumberFinal',inWindownumber);
 }
 
 function ioSendCurrentWindowColor (inWindowcolor) {
 	console.log("current window color: "+inWindowcolor);
+	$( "#error").html("current window color: "+inWindowcolor);
 	io.emit('selectWindowColor',inWindowcolor);
 }
 
 function ioSendFinalWindowColor (inWindowcolor) {
 	console.log("final window color: "+inWindowcolor);
+	$( "#error").html("final window color: "+inWindowcolor);
 	io.emit('selectWindowColorFinal',inWindowcolor);
 }
 
@@ -157,23 +176,26 @@ function ioSendFinalWindowColor (inWindowcolor) {
 
 // gesture type: tap
 GESTURETYPES = {
-    DOUBLETAP : 0,
-    SWIPE_LEFT : 1,
-    SWIPE_RIGHT: 2,
-    DRAG_UP: 3,
-    DRAG_DOWN: 4,
-    ZOOM_OUT: 5,
-    ZOOM_IN: 6
+		DOUBLETAP : 0,
+		SWIPE_LEFT : 1,
+		SWIPE_RIGHT: 2,
+		DRAG_UP: 3,
+		DRAG_DOWN: 4,
+		ZOOM_OUT: 5,
+		ZOOM_IN: 6,
+		CHECK: 7,
+		PIGTAIL: 8
 }
 
-function sendHidden1DollarGesture(gesture){
-	lastSecretGestureSend=new Date();
-	io.emit('processHiddenGesture',{"gesture":gesture});
-}
+// function sendHidden1DollarGesture(gesture){
+	// lastSecretGestureSend=new Date();
+	// $( "#error").html("we have a hidden gesture: "+gesture.Name);
+	// io.emit('processHiddenGesture',{"gesture":gesture});
+// }
 
 function ioSendGesture (inGestureType,inVelocity) {
 	if((new Date()-lastSecretGestureSend)>20){
-		console.log("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
+		$( "#error").html("we have a gesture:"+inGestureType+" velocity:"+inVelocity);
 		io.emit('processGesture',{"type":inGestureType,"velocity":inVelocity});
 	}
 
@@ -184,8 +206,7 @@ function startGestureRecognizer(){
 	//1$recognizer
 	var dollarRecognizer= new my1DollarRecognizer();
 	dollarRecognizer.init($("#actionArea"));
-	
-	
+
 	//prevent site from scrolling when touching the actionarea
 	// $("#actionArea").on('touchstart', function (evt) {
 		// evt.preventDefault();
@@ -195,39 +216,79 @@ function startGestureRecognizer(){
 	var actionArea = document.getElementById('actionArea');
 	mc = new Hammer(actionArea);
 
-	mc.get('tap').set({ taps:2,interval:400 });
+	//mc.get('tap').set({ taps:2,interval:500, time:500, posThreshold:50 });
 
 	mc.get('pan').set({ threshold: 0, pointers: 2,direction: Hammer.DIRECTION_VERTICAL });
 	
-	// SWIPE LEFT / RIGHT GESTURE!
-	// mc.on("panleft panright", function(event) {
-		// if(event.eventType == 4) // Gesture Ended
-		// {
-			// if( splash3_hint == 2)
-				// setSplash3To(3);
-			// //compute Velocity
-			// var tmpVelo = event.velocity/8.0;
-			// tmpVelo = Math.abs(tmpVelo); 
-			// if(tmpVelo > 1.0)
-				// tmpVelo = 1.0;
-					
-			// // send Gesture Events to SocketIO		
-			// if( event.deltaX > 0) {
-				// ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
-				// gf.rotate_right();
-			// }
-			// else {
-				// ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
-				// gf.rotate_left();
-			// }
-		// }
-	// });
-
 	
+	dollarRecognizer.on("pigtail",function(){
+		ioSendGesture(GESTURETYPES.PIGTAIL);
+	})
+
+	dollarRecognizer.on("check",function(){
+		ioSendGesture(GESTURETYPES.CHECK);
+	})
+
+	// mc.on("swipeleft swiperight", function(event) {
+		// if( splash3_hint == 2)
+			// setSplash3To(3);
+		// //console.log(event)
+		// //compute Velocity
+		 // var tmpVelo = event.velocity/15;
+		 // tmpVelo = Math.abs(tmpVelo); 
+		 // if(tmpVelo > 1.0)
+			 // tmpVelo = 1.0;
+		// if(event.deltaX<0){
+			// ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
+			// gfb.rotate_left(tmpVelo);
+		// }
+		// else{
+			// ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
+			// gfb.rotate_right(tmpVelo);
+		// }
+	// });	
+	
+	dollarRecognizer.on("swipe",function(data){
+		//console.log("dollar_swipe "+ speed)
+		
+		if( splash3_hint == 2)
+			setSplash3To(3);
+		//console.log(event)
+		//compute Velocity
+		 var tmpVelo = data.velocity/5;
+		 tmpVelo = Math.abs(tmpVelo); 
+		 if(tmpVelo > 1.0)
+			 tmpVelo = 1.0;
+		if(data.direction<0){
+			ioSendGesture(GESTURETYPES.SWIPE_LEFT,tmpVelo);
+			gfb.rotate_left(tmpVelo);
+		}
+		else{
+			ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
+			gfb.rotate_right(tmpVelo);
+		}
+	})
+	
+	dollarRecognizer.on("doubleTap",function(){
+		//console.log("dollar_doubleTap")
+	
+		if( splash3_hint == 1)
+			setSplash3To(2);
+
+		//Reset Color
+		color_percent = 0.5;
+		ioSendGesture(GESTURETYPES.DOUBLETAP);
+		ioSendCurrentWindowColor(prefered_user_color);
+		setActionAreaHighlight(prefered_user_color);
+		gfb.updatecolor(prefered_user_color);
+		gfb.blink();
+	})	
+	
+	/*
 	mc.on("swipeleft swiperight", function(event) {
 		if( splash3_hint == 2)
 			setSplash3To(3);
-		console.log(event)
+		//console.log(event)
 		//compute Velocity
 		 var tmpVelo = event.velocity/15;
 		 tmpVelo = Math.abs(tmpVelo); 
@@ -241,8 +302,9 @@ function startGestureRecognizer(){
 			ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
 			gfb.rotate_right(tmpVelo);
 		}
-		
 	});	
+	*/
+	
 	
 	// DOUBLE TOUCH PAN UP AND DOWN GESTURE!
 	mc.on("pan", function(event) {
@@ -257,6 +319,7 @@ function startGestureRecognizer(){
 		gfb.updatecolor(tmpColor);
 	});
 	
+	/*
 	// MODIFIED TAP GESTURE (doubletap)!
 	mc.on("tap", function(event) {
 		if(event.eventType == 4) // Gesture Ended
@@ -271,7 +334,7 @@ function startGestureRecognizer(){
 		setActionAreaHighlight(prefered_user_color);
 		gfb.updatecolor(prefered_user_color);
 		gfb.blink();
-	});
+	}); */
 
 	//ZOOM GESTURE
 	// mc.get('pinch').set({ enable: true });
@@ -457,7 +520,7 @@ function clickOnImage(e, inOffset){
 	
 	if( (Math.pow(320.0-onPicX,2)+Math.pow(320-onPicY,2))<900) //dont allow middle!
 		return; 
-
+	
 	$("#highlight").show();
     $("#highlight").css({position: "absolute", top: (e.pageY-10), left: (e.pageX-10)});
 
@@ -467,7 +530,7 @@ function clickOnImage(e, inOffset){
   	// North  -180
 	// West -90. 90 East 
 	// South   0
-
+	
 	prefered_user_window = computeWindowFromAngle(parseFloat(angle));
 	showAlert("darkcolor"," Mal sehen ob das Fenster frei ist.");
 	ioSendCurrentWindowNumber(prefered_user_window);
