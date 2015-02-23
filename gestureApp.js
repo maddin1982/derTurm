@@ -28,12 +28,13 @@ var AnimationManagerObj=function(){
 	 * @param {Array.<number>} color
 	 * @param {number} windowId
 	 */
-	var DoubleTapAnimation=function(color,windowId,zoom,range){
+	var DoubleTapAnimation=function(color,windowId,zoom,range,length){
 		if(!range)
 			range=5;
 		var that=this;
 		this.colorArray=color;
-		var length=700; //in milliseconds
+		if(!length)
+			length=600;
 		var startTime=new Date();
 		
 		//get frame for time
@@ -123,7 +124,7 @@ var AnimationManagerObj=function(){
 	
 	
 	var CheckAnimation=function(color,windowId,zoom){
-		return new DoubleTapAnimation(color,windowId,zoom,16);
+		return new DoubleTapAnimation(color,windowId,zoom,8.1000);
 	}
 	
 	var PigTailAnimation=function(color,windowId,zoom){
@@ -381,7 +382,7 @@ app.io.route('selectWindowNumber', function(req) {
 app.io.route('selectWindowColor', function(req) {
 	var color=getRGB(req.data)
 	clientsManager.setColor(req.socket.id,color);
-	//console.log(clientsManager.getClients());
+	console.log(clientsManager.getClients());
 })
 
 // app.io.route('processHiddenGesture', function(req){

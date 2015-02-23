@@ -226,10 +226,12 @@ function startGestureRecognizer(){
 	
 	
 	dollarRecognizer.on("pigtail",function(){
+	    console.log("pigtail");
 		ioSendGesture(GESTURETYPES.PIGTAIL);
 	})
 
 	dollarRecognizer.on("check",function(){
+	   console.log("check");
 		ioSendGesture(GESTURETYPES.CHECK);
 	})
 
@@ -252,7 +254,30 @@ function startGestureRecognizer(){
 		// }
 	// });	
 	
-	dollarRecognizer.on("swipe",function(data){
+	dollarRecognizer.on("verticalSwipe",function(data){
+		console.log("verticalSwipe");
+		console.log(data);
+		
+		//TODO: change color and send it to backend !!!
+		colorarray=["#97270e","#002ad1","#082f97","#00bfcc","#8f0e97","#630d8d","#330220","#d10052","#8d1800","#97270e","#8d520d","#cca20a","#f0d10c","#579e10","#1a8012","#043300","#008458","#bc5fd1","#759e4c","#404d84","#e5e5e4","#d9625e"]
+		
+		var position=$.inArray(prefered_user_color,colorarray);
+		position=position==-1?0:position;
+		
+		var newposition=position+data.direction;
+		if(newposition<0)newposition=colorarray.length-1;
+		if(newposition>(colorarray.length-1))newposition=0;
+		
+		prefered_user_color = colorarray[newposition];
+		ioSendCurrentWindowColor(prefered_user_color);
+		
+		
+		gfb.updatecolor(prefered_user_color);
+		setActionAreaHighlight(prefered_user_color);
+	});
+	
+	
+	dollarRecognizer.on("horizontalSwipe",function(data){
 		//console.log("dollar_swipe "+ speed)
 		
 		if( splash3_hint == 2)
@@ -271,7 +296,7 @@ function startGestureRecognizer(){
 			ioSendGesture(GESTURETYPES.SWIPE_RIGHT,tmpVelo);
 			gfb.rotate_right(tmpVelo);
 		}
-	})
+	});
 	
 	dollarRecognizer.on("doubleTap",function(){
 		//console.log("dollar_doubleTap")
@@ -286,7 +311,7 @@ function startGestureRecognizer(){
 		setActionAreaHighlight(prefered_user_color);
 		gfb.updatecolor(prefered_user_color);
 		gfb.blink();
-	})	
+	});
 	
 	/*
 	mc.on("swipeleft swiperight", function(event) {
@@ -357,6 +382,7 @@ function setActionAreaHighlight(inColor)
 {
 	$( ".actionarea").css('border-color', inColor);
 }
+
 function computeColor(){
 	var init = getRGB(prefered_user_color);
 	if ( color_percent == 0.5)

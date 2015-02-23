@@ -13,7 +13,13 @@ function my1DollarRecognizer() {
 	this.maxDoubleTapTime=400; //ms
 	this.maxTapDownTime=250; //ms
 	this.maxDoubleTapDistance=20; //px
+	
+	
 	this.minSwipeDistance=60; //px
+	//horizontal swipe
+	this.maxVerticalDistance=60; //px
+	//vertical swipe
+	this.maxHorizontalDistance=60; //px
 	
 	function getScrollY() {
 		var scrollY = 0;
@@ -180,6 +186,9 @@ function my1DollarRecognizer() {
 					var distance=lineDistance(_points[0],_points[_points.length-1]);
 					var time =gestureEnd-gestureBegin;
 					
+					var verticalDistance=Math.abs(_points[0].Y-_points[_points.length-1].Y);
+					var horizontalDistance=Math.abs(_points[0].X-_points[_points.length-1].X);
+					
 					if(distance<that.maxDoubleTapDistance&& time<that.maxTapDownTime){
 						//check for double tap
 						if(new Date()-lastTap<that.maxDoubleTapTime)
@@ -187,13 +196,22 @@ function my1DollarRecognizer() {
 						lastTap=new Date();
 					}
 					else{
-						if(distance>that.minSwipeDistance){
+						if(distance>that.minSwipeDistance&&verticalDistance<that.maxVerticalDistance){
 							//its probably a Swipe
 							velocity=distance/time;
 							direction=(_points[0].X-_points[_points.length-1].X)<0?1:-1;
 							//normalize velocity
 							console.log( " velocity " +velocity + "  direction "+direction );
-							that.callListeners("swipe",{"velocity":velocity,"direction":direction});
+							that.callListeners("horizontalSwipe",{"velocity":velocity,"direction":direction});
+							return;
+						}
+						if(distance>that.minSwipeDistance&&horizontalDistance<that.maxHorizontalDistance){
+							//its probably a Swipe
+							velocity=distance/time;
+							direction=(_points[0].Y-_points[_points.length-1].Y)<0?1:-1;
+							//normalize velocity
+							console.log( " velocity " +velocity + "  direction "+direction );
+							that.callListeners("verticalSwipe",{"velocity":velocity,"direction":direction});
 						}
 					}	
 				
