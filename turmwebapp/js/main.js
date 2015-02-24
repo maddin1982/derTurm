@@ -26,10 +26,10 @@ var lastSecretGestureSend=new Date();
 
 //gesture feedback for action area
 var gfb;
-/*$( window ).load(function() {
+$( window ).load(function() {
 	alignMapAndOverlay();
  });
-*/
+
 $( document ).ready(function() {
 	
 	//prevent Map from dragging
@@ -439,6 +439,7 @@ $( window ).resize(function() {
 	alignMapAndOverlay();
 	});
 function startSituation(){
+
 	//STEP 1
 	$( "#overlay" ).css({opacity: 0.0});
 	current_step = 1
@@ -464,6 +465,9 @@ function startSituation(){
 	color_percent = 0.5;
 	$( ".logocol").removeClass("hidden");
 
+	if( isMobile.iOS() ) {
+		showAlert("darkcolor","GPS funktioniert auf deinem Gerät nur wenn du in den Einstellungen unter \"Datenschutz\" die \"Ortungsdienste\" aktiviert hast!");
+	}
 }
 
 function allow_btn_step1(){
@@ -770,3 +774,24 @@ function zoom_stepback() {
 	}
 	my_zoom_f = my_zoom;
 }
+
+var isMobile = {
+    Android: function() {
+        return navigator.userAgent.match(/Android/i);
+    },
+    BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    },
+    iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    },
+    Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    },
+    Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+    },
+    any: function() {
+        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+    }
+};
