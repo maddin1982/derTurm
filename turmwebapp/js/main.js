@@ -26,7 +26,10 @@ var lastSecretGestureSend=new Date();
 
 //gesture feedback for action area
 var gfb;
-
+/*$( window ).load(function() {
+	alignMapAndOverlay();
+ });
+*/
 $( document ).ready(function() {
 	
 	//prevent Map from dragging
@@ -56,7 +59,7 @@ var WINDOW_OFFSET = 7; //max. 16! positive or negativ to shift the Start-Window 
 	// West 4(+7) . 12(+7) East 
 	// South    8(+7)
 var SPLASH2_TEXT = ["Gute Wahl.","Super.","Gefällt mir auch.","Schön.","Toll.","Klasse.","Wow.","Kräftig.","Gefällt.","Ja, die passt.","Sehr gut.","Gut gemacht.","Herrlich.","Sieht gut aus.", "Naja.", "Ok.","Perfekt."]
-var SPLASH3_TEXT = ["Bewege 2 Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Leuchten auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
+var SPLASH3_TEXT = ["Bewege deinen Finger vertikal um die Farbe umzustellen.","Bewege 2 Finger vertikal um die Helligkeit einzustellen.","Tappe 2 mal um ein Leuchten auszusenden.","Bewege deinen Finger horizontal um dein Pixel um den Turm laufen zu lassen."]
 var WINDOW_ANGLE = -101.25; // window = 0 has this Angle
 
 var current_step = 1;
@@ -259,7 +262,9 @@ function startGestureRecognizer(){
 		console.log(data);
 		
 		//TODO: change color and send it to backend !!!
-		colorarray=["#97270e","#002ad1","#082f97","#00bfcc","#8f0e97","#630d8d","#330220","#d10052","#8d1800","#97270e","#8d520d","#cca20a","#f0d10c","#579e10","#1a8012","#043300","#008458","#bc5fd1","#759e4c","#404d84","#e5e5e4","#d9625e"]
+		//var COLOR_SELECTION = ["#002AD1","#082F97","#03484D","#00BFCC","#8F0E97","#630D8D","#330220","#D10052","#8D1800","#97270E","#8D520D","#CCA20A","#F0D10C","#579E10","#1A8012","#043300","#008458","#BC5FD1","#759E4C","#404D84","#E5E5E4","#D9625E"];
+
+		colorarray=["#002AD1","#082F97","#03484D","#00bfcc","#8f0e97","#630d8d","#330220","#d10052","#8d1800","#97270e","#8d520d","#cca20a","#f0d10c","#579e10","#1a8012","#043300","#008458","#bc5fd1","#759e4c","#404d84","#e5e5e4","#d9625e"]
 		
 		var position=$.inArray(prefered_user_color,colorarray);
 		position=position==-1?0:position;
@@ -270,8 +275,10 @@ function startGestureRecognizer(){
 		
 		prefered_user_color = colorarray[newposition];
 		ioSendCurrentWindowColor(prefered_user_color);
-		
-		
+
+		if( splash3_hint == 0)
+			setSplash3To(1);
+
 		gfb.updatecolor(prefered_user_color);
 		setActionAreaHighlight(prefered_user_color);
 	});
@@ -280,8 +287,8 @@ function startGestureRecognizer(){
 	dollarRecognizer.on("horizontalSwipe",function(data){
 		//console.log("dollar_swipe "+ speed)
 		
-		if( splash3_hint == 2)
-			setSplash3To(3);
+		if( splash3_hint == 3)
+			setSplash3To(4);
 		//console.log(event)
 		//compute Velocity
 		 var tmpVelo = data.velocity/5;
@@ -301,8 +308,8 @@ function startGestureRecognizer(){
 	dollarRecognizer.on("doubleTap",function(){
 		//console.log("dollar_doubleTap")
 	
-		if( splash3_hint == 1)
-			setSplash3To(2);
+		if( splash3_hint == 2)
+			setSplash3To(3);
 
 		//Reset Color
 		color_percent = 0.5;
@@ -337,8 +344,8 @@ function startGestureRecognizer(){
 	
 	// DOUBLE TOUCH PAN UP AND DOWN GESTURE!
 	mc.on("pan", function(event) {
-		if( splash3_hint == 0)
-			setSplash3To(1);
+		if( splash3_hint == 1)
+			setSplash3To(2);
 		//continous Color fading between prefered_color and Black ( 1.0 ) and White ( 0.0 )
 		color_percent += parseFloat(event.deltaY)/8000.0;  
 		var tmpColor = computeColor();
@@ -453,7 +460,7 @@ function startSituation(){
 	hideAlert(2);
 	//STEP 3
 	splash3_hint = 0;
-	setSplash3To(0);
+	hideAlert(3);
 	color_percent = 0.5;
 	$( ".logocol").removeClass("hidden");
 
@@ -512,7 +519,9 @@ function btn_weiter_step2() {
 	$( "#step1" ).hide();
 	$( "#step2" ).hide();
 	$( "#step3" ).fadeIn();
-	$( ".logocol").addClass("hidden");
+	//$( ".logocol").addClass("hidden");
+	splash3_hint = 1;
+	setSplash3To(0);
 	setActionAreaHighlight(prefered_user_color);
 	gfb.updatecolor(prefered_user_color);
 }
@@ -717,7 +726,7 @@ function setSplash3To(newState)
 	if(splash3_hint == newState)
 		return;
 
-	if( newState >= 0 && newState<3) // 0,1,2,
+	if( newState >= 0 && newState<4) // 0,1,2,3
 	   showAlert("darkcolor",SPLASH3_TEXT[newState]);
 	else
 		hideAlert();
