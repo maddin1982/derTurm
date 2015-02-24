@@ -7,10 +7,6 @@ var GestureFeedback=function(){
 	var blink_state = 0;
 	var blink_t = 1000; //in ms
 	var zoom = 0;
-	// var zoom_f = 0;
-	// var zoom_max_t = 3000;
-	// var zoom_stepback_t = 200;
-	// var zoom_stepback_to;
 	var offset = 0;
 	var color = "black";
 	var color_idle = "#212124";

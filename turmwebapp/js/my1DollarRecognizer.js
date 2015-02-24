@@ -1,15 +1,20 @@
 
 function my1DollarRecognizer() {
-
+	var that=this;
 	var _points = new Array();
+	var _totalGestureDistance=0;
 	var _r = new DollarRecognizer();
 	var _isDown = false;
+	
+	this.oneFingerhold=false;
+	var minHoldTime=1000;
+	var maxHoldDistance=30;
+	var holdTimer;
 
 	var lastTap=new Date();
 	
 	var gestureBegin,gestureEnd; //time to calculate velocity
-	
-	
+
 	this.maxDoubleTapTime=400; //ms
 	this.maxTapDownTime=250; //ms
 	this.maxDoubleTapDistance=20; //px
@@ -51,6 +56,9 @@ function my1DollarRecognizer() {
 
 		element.on("touchstart mousedown", function (event) {
 			gestureBegin=new Date();
+			_totalGestureDistance=0;
+			
+			 holdTimer = setTimeout(function(){that.oneFingerhold=true;}, minHoldTime);
 			
 			//is mousedown event
 			var x,y;
@@ -61,8 +69,12 @@ function my1DollarRecognizer() {
 			}
 			else{
 				//two fingers, used for brighness gesture, return
-				if (event.originalEvent.touches.length > 1)
+				if (event.originalEvent.touches.length > 1){
+					if(that.oneFingerhold==true){
+						that.callListeners("morseDown");
+					}
 					return;
+				}
 				var touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
 				x = touch.pageX;
 				y = touch.pageY;
@@ -84,7 +96,8 @@ function my1DollarRecognizer() {
 
 			// if (_points.length > 0)
 			// _g.clearRect(0, 0, _rc.width, _rc.height);
-			_points.length = 1; // clear
+			//_points.length = 1; // clear
+			_points = new Array();
 			_points[0] = new Point(x, y);
 			console.log("Recording unistroke...");
 
@@ -94,7 +107,12 @@ function my1DollarRecognizer() {
 		element.on("touchmove mousemove", function (event) {
 			var x,y;
 			
-			if (_isDown) {
+			if(_totalGestureDistance>maxHoldDistance){
+				clearTimeout(holdTimer);
+				that.oneFingerhold=false;
+			}
+			
+			//if (_isDown) {			
 				if(event.type=="mousemove"){
 					x=event.clientX;
 					y=event.clientY;
@@ -102,8 +120,6 @@ function my1DollarRecognizer() {
 				else{
 					if (event.originalEvent.touches.length > 1) {
 						_isDown = false;
-						_points = new Array();
-						return;
 					}
 					var touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
 					x = touch.pageX;
@@ -113,18 +129,35 @@ function my1DollarRecognizer() {
 				x = x - elm.left;
 				y = y - elm.top - getScrollY();
 				_points[_points.length] = new Point(x, y);
-			}
+				if(_points.length>1)_totalGestureDistance+=lineDistance(_points[_points.length-1],_points[_points.length-2]);
+			//}
 			event.preventDefault();
 		});
 
 		$(document).on("touchend mouseup", function (event) {
+			
+			if(event.type=="touchend"){
+				if (event.originalEvent.touches.length == 1){
+				//second finger touchup while first finger hold
+						if(that.oneFingerhold==true){
+							that.callListeners("morseUp");
+							_totalGestureDistance=0;
+						}
+				}
+			
+				if (event.originalEvent.touches.length == 0){
+					//alert("last uo")
+					//last finger on surface, set hold gesture to false
+					that.oneFingerhold=false;
+				}
+			}
 			// document.onselectstart = function () {
 				// return true;
 			// } // enable drag-select
 			// document.onmousedown = function () {
 				// return true;
 			// } // enable drag-select
-			
+			clearTimeout(holdTimer);
 			gestureEnd=new Date();
 			
 			if (_isDown) {
@@ -176,6 +209,12 @@ function my1DollarRecognizer() {
 							   that.callListeners("pigtail");
 							if(result.Name=="check")
 							   that.callListeners("check");
+							if(result.Name=="circle")
+							   that.callListeners("circle");
+							if(result.Name=="rectangle")
+							   that.callListeners("rectangle");
+							if(result.Name=="triangle")
+							   that.callListeners("triangle");
 							return;
 						}
 					}

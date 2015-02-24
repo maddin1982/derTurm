@@ -8,10 +8,10 @@ var AnimationManagerObj=function(){
 		SWIPE_RIGHT: 2,
 		DRAG_UP: 3,
 		DRAG_DOWN: 4,
-		ZOOM_OUT: 5,
-		ZOOM_IN: 6,
-		CHECK: 7,
-		PIGTAIL: 8
+		CHECK: 5,
+		PIGTAIL: 6,
+		CIRCLE: 7,
+		RECTANGLE: 8
 	}
 
 	 //clone color and multiply by percent value
@@ -28,7 +28,7 @@ var AnimationManagerObj=function(){
 	 * @param {Array.<number>} color
 	 * @param {number} windowId
 	 */
-	var DoubleTapAnimation=function(color,windowId,zoom,range,length){
+	var DoubleTapAnimation=function(color,windowId,range,length){
 		if(!range)
 			range=5;
 		var that=this;
@@ -56,7 +56,7 @@ var AnimationManagerObj=function(){
 				for(var i=1;i<range;i++){
 					frame[myMod(windowId+i)]=getPercentualColor(that.colorArray,(lightness/i));
 				}			
-				frame = setFrameWindowColor(frame,windowId,that.colorArray,zoom);
+				frame[windowId]=that.colorArray
 				return frame;
 			}
 		}
@@ -69,7 +69,7 @@ var AnimationManagerObj=function(){
 	 * @param {1|-1} direction, 
 	 * @param {number} speed 
 	 */
-	var SwipeAnimation=function(color,windowId,zoom,direction,speed){
+	var SwipeAnimation=function(color,windowId,direction,speed){
 		var that=this;
 		this.colorArray=color;
 
@@ -89,78 +89,91 @@ var AnimationManagerObj=function(){
 				//get current rotating Animation windowId
 				currPosition=currPosition+(direction*Math.max(0.2,(speed*2*(1-animationProgressInPercent))));
 				//console.log("currPosition "+currPosition)
-				//currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*15))));
-				//frame = setFrameWindowColor(frame,currWindowId,that.colorArray,zoom);
-				frame = setFrameWindowColor(frame,myMod(Math.floor(currPosition)),getPercentualColor(that.colorArray,(1-animationProgressInPercent)),zoom);
+				frame[myMod(Math.floor(currPosition))]=getPercentualColor(that.colorArray,(1-animationProgressInPercent));
 				return frame;
 			}
 		}
 	}
 
-	/**
-	 * ZoomAnimationObject
-	 * @param {Array.<number>} color
-	 * @param {number} windowId
-	 * @param {bool} in or out
-	 */
-	var ZoomAnimation=function(color,windowId,zoom){
+
+	var CheckAnimation=function(color,windowId){
+		return new DoubleTapAnimation(color,windowId,8.1000);
+	}
+	
+	var PigTailAnimation=function(color,windowId){
+		return new SwipeAnimation(color,windowId,1,2);
+	}	
+	
+	var RectangleAnimation=function(color,windowId){
+		//strobo!!
 		var that=this;
+		var length=3000;
+		var laststrobe=1;
 		this.colorArray=color;
-		var animation_done = false;
-		
-		//get frame for time
+		var startTime=new Date();
+		var frame=getBasicFrame();
 		this.getFrame=function(){
-			if(animation_done){
+			animationProgressInPercent=(new Date()-startTime)/length;
+			if(animationProgressInPercent>1){
+				return false; //animation finished
+			}
+			else{
+				laststrobe*=-1;
+				frame[windowId]=laststrobe==-1?[0,0,0]:that.colorArray;
+				return frame;
+			}
+		}
+	}
+	
+	var CircleAnimation=function(color,windowId){
+		//wobble
+		var length=2000;
+		var range=4;
+		var that=this;
+		var startTime=new Date();
+		this.colorArray=color;
+
+		this.getFrame=function(){
+			animationProgressInPercent=(new Date()-startTime)/length;
+			if(animationProgressInPercent>1){
 				return false; //animation finished
 			}
 			else{
 				var frame=getBasicFrame();
-				frame = setFrameWindowColor(frame,windowId,that.colorArray,zoom);
-				animation_done = true;
+				for(var i=-range;i<range;i++){
+					frame[myMod(windowId+i)]=Math.random()<0.7?[0,0,0]:that.colorArray;
+				}
 				return frame;
 			}
 		}
 	}	
 	
 	
-	var CheckAnimation=function(color,windowId,zoom){
-		return new DoubleTapAnimation(color,windowId,zoom,8.1000);
-	}
-	
-	var PigTailAnimation=function(color,windowId,zoom){
-		return new SwipeAnimation(color,windowId,zoom,1,2);
-	}	
-	
 	this.createAnimation=function(gestureType,client,speed){
 		if(speed===null||speed===""||speed===undefined)
 			var speed=0.5;
-	
-		
-		if(GESTURETYPES.ZOOM_OUT==gestureType){
-			client.zoom = Math.max(0,client.zoom-1);
-			return new ZoomAnimation(client.color,client.window, client.zoom);
-		}
-		if(GESTURETYPES.ZOOM_IN==gestureType){
-			client.zoom = Math.min(8,client.zoom+1);
-			return new ZoomAnimation(client.color,client.window, client.zoom);
-		}
 		
 		if(GESTURETYPES.PIGTAIL==gestureType){
-			return new PigTailAnimation(client.color,client.window, client.zoom);
+			return new PigTailAnimation(client.color,client.window);
 		}
 		if(GESTURETYPES.CHECK==gestureType){
-			return new CheckAnimation(client.color,client.window, client.zoom);
+			return new CheckAnimation(client.color,client.window);
 		}
-		
+		if(GESTURETYPES.CIRCLE==gestureType){
+			return new CircleAnimation(client.color,client.window);
+		}
+		if(GESTURETYPES.RECTANGLE==gestureType){
+			return new RectangleAnimation(client.color,client.window);
+		}		
 		if(GESTURETYPES.DOUBLETAP==gestureType){
-			return new DoubleTapAnimation(client.color,client.window, client.zoom)
+			return new DoubleTapAnimation(client.color,client.window)
 		}
 		if(GESTURETYPES.SWIPE_LEFT==gestureType){
 			
-			return new SwipeAnimation(client.color,client.window, client.zoom,-1,speed)
+			return new SwipeAnimation(client.color,client.window,-1,speed)
 		}
 		if(GESTURETYPES.SWIPE_RIGHT==gestureType){
-			return new SwipeAnimation(client.color,client.window, client.zoom,1,speed)
+			return new SwipeAnimation(client.color,client.window,1,speed)
 		}
 		return false;
 	}
@@ -214,7 +227,7 @@ var TcpSocketManagerObj=function(clientsManager){
 		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 		{
-			//console.log(frame);
+			console.log(frame);
 			// send frame via tubemail (if connected)
 			Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
 		}
@@ -310,7 +323,7 @@ var clientsManagerObj=function(){
 				//if there are no animations to play
 				frame=getBasicFrame();
 				if(clients[i].window>-1&&clients[i].window<16) {
-					frame = setFrameWindowColor(frame, clients[i].window, clients[i].color, clients[i].zoom);
+				    frame[clients[i].window]=clients[i].color;
 				}
 				frames[frames.length]=frame;
 			}
@@ -339,7 +352,7 @@ var clientsManagerObj=function(){
 	}
 	
 	this.addClient=function(id){
-		clients.push({"id":id,"window":-1,"color":[0,0,0],"lastActivity":new Date(),"animations":[], "zoom": 0});
+		clients.push({"id":id,"window":-1,"color":[0,0,0],"lastActivity":new Date(),"animations":[]});
 	}
 }
 
@@ -382,7 +395,7 @@ app.io.route('selectWindowNumber', function(req) {
 app.io.route('selectWindowColor', function(req) {
 	var color=getRGB(req.data)
 	clientsManager.setColor(req.socket.id,color);
-	console.log(clientsManager.getClients());
+	//console.log(clientsManager.getClients());
 })
 
 // app.io.route('processHiddenGesture', function(req){
@@ -475,11 +488,7 @@ function colorArraysIdentical(a, b) {
     return true;
 };
  
-function setFrameWindowColor(frame, windowId, color,zoom) {
-	var min_i = windowId-zoom;
-	var max_i = windowId+zoom;
-	for(var i = min_i; i <= max_i; i++) {
-		frame[myMod(i)]=color;
-	}
+function setFrameWindowColor(frame, windowId, color) {
+	frame[windowId]=color;
 	return frame;
  }
