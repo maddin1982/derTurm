@@ -166,10 +166,11 @@ var AnimationManagerObj=function(){
 	}
 }
 
+// setup tubemail instance for connections from tower
+var Tube = require('tubemail').listen( { port: 4889 } );
+
 //send data to tower over tcp socket
 var TcpSocketManagerObj=function(clientsManager){
-	
-	var Tube = require('tubemail').listen( { port: 4889 } );
 	
 	var that=this;
 	this.lastSentFrame=[];
@@ -214,9 +215,8 @@ var TcpSocketManagerObj=function(clientsManager){
 		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 		{
-			//console.log(frame);
-			// send frame via tubemail (if connected)
-			Tube.connected && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
+			// send frame via tubemail (if ready, i.e. connected and not busy)
+			Tube.ready() && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
 		}
 
 		that.lastSentFrame=frame;
@@ -420,9 +420,18 @@ var server = app.listen(4898,  function () {
   var host = server.address().address
   var port = server.address().port
 
-  console.log('tower app listening at http://%s:%s', host, port)
+  console.log( '\n' + (new Date).toLocaleString()+'\n' + 'gestureApp listening at http://%s:%s/', host, port )
 
 })
+
+// handle tower connection status query
+app.get( '/status', function onRequest( request, response )
+{
+	// answer with JSON (active if connected from an IP different from localhost)
+	var status = JSON.stringify( { active: Tube.connected && Tube.remote.search(/^127\.0\.0\.1/) === -1 } );
+	response.setHeader( 'Content-Type', 'application/json' );
+	response.end( status );
+});
 
 
 

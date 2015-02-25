@@ -1,8 +1,4 @@
-
-
-
 // BEWARE! this call is for the old socket.io API (<1.0)
-
 // builds target URL for socket.io: take host and path, strip everything behind the last slash from path
 io = io.connect( '//'+location.host, { resource: location.pathname.replace( /\/(.*?)[^\/]+$/, '$1' )+'socket.io' } );
 
@@ -17,7 +13,6 @@ if ( typeof console == 'undefined' )
 		error: function(){}
 	};
 }
-
 
 //process incomming io Events
 addIoEvents();
@@ -70,6 +65,7 @@ var final_user_window = null;
 var prefered_user_color = null;
 var splash3_hint = 0;
 var	app_error = false;
+var debug = false;
 
 var color_percent = 0.5;
 var mc = null;
@@ -80,6 +76,30 @@ var my_zoom_max_t = 4200;
 var my_zoom_stepback_t = 200;
 var my_zoom_stepback_to = null;
 var win_num = 16;
+
+// activate debug mode on demand
+debug = !!location.hash.match( /debug$/ );
+
+// ask if backend is ready
+$.getJSON( './status', function( status )
+{
+	// log status response
+	console.log( "Backend Connectivity Status:", status );
+	
+	// skip break if in debug mode
+	if ( debug )  return;
+	
+	// if not ready
+	if ( !status || !status.active )
+	{
+		// remember error state and fade out GUI
+		app_error = true;
+		$( "div[class*='col']:not(.splash)" ).fadeTo( 200, 0.2 );
+		
+		// display alert dialog
+		setTimeout( function() { alert( "Der Turm ist gerade nicht zum Spielen bereit." ); }, 200 );
+	}
+});
 
 function addIoEvents(){
 	
