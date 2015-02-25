@@ -11,7 +11,8 @@ var AnimationManagerObj=function(){
 		CHECK: 5,
 		PIGTAIL: 6,
 		CIRCLE: 7,
-		RECTANGLE: 8
+		RECTANGLE: 8,
+		TRIANGLE: 9
 	}
 
 	 //clone color and multiply by percent value
@@ -96,6 +97,7 @@ var AnimationManagerObj=function(){
 	}
 
 
+
 	var CheckAnimation=function(color,windowId){
 		return new DoubleTapAnimation(color,windowId,8.1000);
 	}
@@ -124,6 +126,31 @@ var AnimationManagerObj=function(){
 			}
 		}
 	}
+	
+	
+	
+	var TriangleAnimation=function(color,windowId){
+		console.log("TRI")
+		var that=this;
+		var length=2500;
+		colorarray=["#002AD1","#082F97","#03484D","#00bfcc","#8f0e97","#630d8d","#330220","#d10052","#8d1800","#97270e","#8d520d","#cca20a","#f0d10c","#579e10","#1a8012","#043300","#008458","#bc5fd1","#759e4c","#404d84","#e5e5e4","#d9625e"]
+		this.colorArray=color;
+		var startTime=new Date();
+		var frame=getBasicFrame();
+		this.getFrame=function(){
+			animationProgressInPercent=(new Date()-startTime)/length;
+			if(animationProgressInPercent>1){
+				return false; //animation finished
+			}
+			else{
+				
+				colorId=Math.floor(animationProgressInPercent*(colorarray.length-1));
+				frame[windowId]=getRGB(colorarray[colorId]);
+				return frame;
+			}
+		}
+	}
+	
 	
 	var CircleAnimation=function(color,windowId){
 		//wobble
@@ -158,6 +185,9 @@ var AnimationManagerObj=function(){
 		}
 		if(GESTURETYPES.CHECK==gestureType){
 			return new CheckAnimation(client.color,client.window);
+		}
+		if(GESTURETYPES.TRIANGLE==gestureType){
+			return new TriangleAnimation(client.color,client.window);
 		}
 		if(GESTURETYPES.CIRCLE==gestureType){
 			return new CircleAnimation(client.color,client.window);

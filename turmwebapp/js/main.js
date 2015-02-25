@@ -186,7 +186,8 @@ GESTURETYPES = {
 		CHECK: 5,
 		PIGTAIL: 6,
 		CIRCLE: 7,
-		RECTANGLE: 8
+		RECTANGLE: 8,
+		TRIANGLE: 9
 }
 
 // function sendHidden1DollarGesture(gesture){
@@ -234,6 +235,10 @@ function startGestureRecognizer(){
 	dollarRecognizer.on("circle",function(){
 	   console.log("circle");
 		ioSendGesture(GESTURETYPES.CIRCLE);
+	});	
+	dollarRecognizer.on("triangle",function(){
+	   console.log("triangle");
+		ioSendGesture(GESTURETYPES.TRIANGLE);
 	});	
 	dollarRecognizer.on("rectangle",function(){
 	   console.log("rectangle");
