@@ -1,9 +1,10 @@
 /**
  * DMX-Controller für den Talking Tower
  * – wartet mit Betrieb auf Verbindung zur seriellen Schnittstelle
- * – lässt dem Host 20 Sekunden Zeit bis zum Timeout
+ * – erlaubt dem Host bis zu 20 Sekunden Ruhe, dann feuert der Timeout
  * – schaltet bei Timeout Pin 3 auf HIGH und hängt sich unwiderruflich auf
  *
+ * nick@bitfasching.de
  * 01/2015, v2.0
  */
 
@@ -38,7 +39,6 @@ const int channelCount = 64;
 
 
 // Timeout für Empfang [ms]
-// (kommen für diese Zeit keine Daten an, läuft eine Notfallanimation)
 const unsigned lastUpdateTimeout = 20000;
 
 
@@ -75,15 +75,15 @@ void setup()
     
     // Hallo sagen
     Serial.println( "TurmDMX v" VERSION );
-    Serial.print( lastUpdateTimeout );
-    Serial.println( "ms until timeout." );
+    Serial.print( lastUpdateTimeout/1000 );
+    Serial.println( " seconds until timeout." );
     
     // alle Strahler ausschalten
     DMX.null();
     
     // Notfallschalter zurücksetzen
-    pinMode( emergencyPin, OUTPUT );
     digitalWrite( emergencyPin, LOW );
+    pinMode( emergencyPin, OUTPUT );
     
     // Zeitpunkt für letzte Übertragung initialisieren
     lastUpdateTime = millis();
@@ -119,7 +119,7 @@ void loop()
             // Bescheid geben
             Serial.println( "Timeout!" );
             
-            // Relais betätigen
+            // Notschalter betätigen
             digitalWrite( emergencyPin, HIGH );
             
             // Zeitpunkt des Fehlers merken
@@ -128,10 +128,13 @@ void loop()
             // in Endlosschleife aufhängen
             while (true)
             {
-                // mit interner LED bei 1 Hz blinken
-                blinkLED( 13, 1000 );
+                for ( int i = 0; i < 5; i++ )
+                {
+                    // mit interner LED bei 1 Hz blinken
+                    blinkLED( 13, 1000 );
+                }
                 
-                // anzeigen, wie lange der Fehler schon besteht
+                // alle 5 Sekunden anzeigen, wie lange der Fehler schon besteht
                 Serial.print( "Locked since timeout " );
                 Serial.print( (millis()-errorTime)/1000 );
                 Serial.println( " seconds ago." );
