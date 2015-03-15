@@ -11,6 +11,7 @@
   "dependencies": {
     "express": "^4.10.1",
     "express.io": "^1.1.13",
-	"serialport": "^1.4.6"
+	"serialport": "^1.4.6",
+	"mjpeg-proxy" : "^0.1.0"
   }
 }
