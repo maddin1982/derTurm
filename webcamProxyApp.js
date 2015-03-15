@@ -32,7 +32,7 @@ var cam1 = "http://212.111.254.14:8080/?action=stream";
 app.set("view options", {layout: false});
 app.use(express.static(__dirname + '/public'));
 
-app.get('/index1.jpg', new MjpegProxy(cam1).proxyRequest);
+app.get('/live.jpg', new MjpegProxy(cam1).proxyRequest);
 app.listen(HTTP_PORT);
 
 console.log("Listening on port " + HTTP_PORT);
