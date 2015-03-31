@@ -11,7 +11,8 @@ var AnimationManagerObj=function(){
 		ZOOM_OUT: 5,
 		ZOOM_IN: 6,
 		CHECK: 7,
-		PIGTAIL: 8
+		PIGTAIL: 8,
+		BACKGROUND: 9
 	}
 
 	 //clone color and multiply by percent value
@@ -62,6 +63,39 @@ var AnimationManagerObj=function(){
 		}
 	}
 	
+	/**
+	 * BackgroundAnimationObject
+	 * @param {Array.<number>} color
+	 * @param {number} windowId
+	 * @param {1|-1} direction, 
+	 * @param {number} speed 
+	 */
+	var BackgroundAnimation=function(color,windowId,zoom,direction,speed){
+		var that=this;
+		this.colorArray=color;
+
+		var length=12800;
+		var startTime=new Date();
+		var currPosition=windowId;
+
+		//get frame for time
+		this.getFrame=function(){
+			animationProgressInPercent=(new Date()-startTime)/length;
+
+			//always have Progress-value between 0 and 0.99999, so this animation loops
+			animationProgressInPercent=animationProgressInPercent%1;
+			
+			var frame=getBackgroundFrame();	
+			//get current rotating Animation windowId
+			currPosition=currPosition+(direction*Math.max(0.2,(speed*2*(1-animationProgressInPercent))));
+			//console.log("currPosition "+currPosition)
+			//currWindowId=myMod(windowId+(direction*(Math.floor(animationProgressInPercent*15))));
+			//frame = setFrameWindowColor(frame,currWindowId,that.colorArray,zoom);
+			frame = setFrameWindowColor(frame,myMod(Math.floor(currPosition)),getPercentualColor(that.colorArray,(1-animationProgressInPercent)),zoom);
+			return frame;
+		}
+	}
+
 	/**
 	 * SwipeAnimationObject
 	 * @param {Array.<number>} color
@@ -162,6 +196,9 @@ var AnimationManagerObj=function(){
 		if(GESTURETYPES.SWIPE_RIGHT==gestureType){
 			return new SwipeAnimation(client.color,client.window, client.zoom,1,speed)
 		}
+		if(GESTURETYPES.BACKGROUND==gestureType){
+			return new BackgroundAnimation(client.color,client.window, client.zoom,1,speed)
+		}
 		return false;
 	}
 }
@@ -170,7 +207,9 @@ var AnimationManagerObj=function(){
 var TcpSocketManagerObj=function(clientsManager){
 	
 	var Tube = require('tubemail').listen( { port: 4889 } );
-	
+	var defaultBlendingScene=[{"duration":800,"type":1,"windows":[{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]}]},{"duration":800,"type":1,"windows":[{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]}]},{"duration":800,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]}]},{"duration":800,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]}]},{"duration":800,"type":1,"windows":[{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]}]},{"duration":800,"type":1,"windows":[{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]}]},{"duration":800,"type":1,"windows":[{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]}]},{"duration":800,"type":1,"windows":[{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]}]},{"duration":800,"type":1,"windows":[{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]}]},{"duration":800,"type":1,"windows":[{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]}]},{"duration":800,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]}]},{"duration":800,"type":1,"windows":[{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]}]},{"duration":800,"type":1,"windows":[{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]}]},{"duration":800,"type":1,"windows":[{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]}]},{"duration":800,"type":1,"windows":[{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]}]},{"duration":800,"type":1,"windows":[{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]},{"color":[102,102,102]},{"color":[150,150,150]},{"color":[102,102,102]},{"color":[68,68,68]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[0,0,0]},{"color":[68,68,68]}]}]
+
+
 	var that=this;
 	this.lastSentFrame=[];
 	this.fps=20;
@@ -190,7 +229,7 @@ var TcpSocketManagerObj=function(clientsManager){
 		
 		//get basic black frame
 		var resultFrame=getBasicFrame();
-		
+
 		//simply summ all color values of all current frames
 		var window;
 		for (var i=0;i<frames.length;i++){
@@ -228,6 +267,8 @@ var clientsManagerObj=function(){
 	
 	//array to hold all connected clients
 	var clients=[];
+	var emptyClient = {"id":0,"window":0,"color":[150,150,150],"lastActivity":new Date(),"animations":[], "zoom": 0};
+	var continousBackgroundAnimation=animationManager.createAnimation(GESTURETYPES.BACKGROUND,emptyClient,1.0);
 	
 	//check for inactive clients and reset Window id to -1
 	var checkForInactiveClients=function(){
@@ -329,6 +370,13 @@ var clientsManagerObj=function(){
 					}
 				}
 			}
+		}
+		// when no one is connected to the tower
+		if ( clients.length === 0)
+		{		
+			//play the BackgroundAnimation Scene	
+			var frame=continousBackgroundAnimation.getFrame();
+			frames[frames.length]=frame;
 		}
 		return frames;
 	}
@@ -463,7 +511,10 @@ function getRGB(color) {
 function getBasicFrame(){
 	return [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
  }
- 
+ function getBackgroundFrame(){
+	return [[68,68,68],[102,102,102],[150,150,150],[102,102,102],[68,68,68],[0,0,0],[0,0,0],[0,0,0],[68,68,68],[102,102,102],[150,150,150],[102,102,102],[68,68,68],[0,0,0],[0,0,0],[0,0,0]];
+ }
+
 function colorArraysIdentical(a, b) {
     var i = a.length;
     if (i != b.length) return false;
