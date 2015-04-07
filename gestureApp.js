@@ -1,4 +1,6 @@
-var debugMode=true;
+var DEBUGMODE=true;
+var CLIENTTIMEOUT=60000;
+
 
 var AnimationManagerObj=function(){
 
@@ -55,6 +57,51 @@ var AnimationManagerObj=function(){
 			return frame;
 		}
 	} 
+	 
+	/**
+	 * PlasmaAnimationObject
+	 * @param {Array.<number>} color
+	 * @param {number} windowId
+	 * @param {1|-1} direction, 
+	 * @param {number} speed 
+	 */
+	var PlasmaAnimation=function(){
+		var that=this;
+		var time=0;
+		var fadein=0;
+		
+		this.restart=function(){
+			fadein=0;
+			time=0;
+		}
+
+		this.getCollorArray=function(x,time,fadein){
+			var v1 = Math.sin((x+time));
+			var v2= Math.sin(x*Math.sin((x+time/2))+Math.cos((x+time/3))+time);
+			var v3= x+ 0.5*Math.sin(time/5);
+			var v4=  0.5*Math.cos(time/3);
+			var v5= Math.sin(Math.sqrt(100*(Math.pow(v3,2)+Math.pow(v4,2)))+time);
+			var v=v1+v2+v5;
+			var r=Math.floor((Math.sin(v*Math.PI)*122+122 )*fadein);
+			var g=Math.floor((Math.sin(v*Math.PI+2*Math.PI/3)*122+122) *fadein);
+			var b=Math.floor((Math.sin(v*Math.PI+4*Math.PI/3)*122+122) *fadein);
+			return [r,g,b];
+		}
+
+		//get frame for time
+		this.getFrame=function(){
+			time+=0.01;
+			if(fadein<1)
+				fadein+=0.01;
+			var frame=[];
+			for(var i=0;i<16;i++){
+				frame[i]=this.getCollorArray((i/16-0.5),time,fadein);
+			}
+			return frame;
+		}
+	} 	 
+	 
+	 
 	 
 	/**
 	 * DoubleTapAnimationObject
@@ -158,9 +205,7 @@ var AnimationManagerObj=function(){
 			}
 		}
 	}
-	
-	
-	
+
 	var TriangleAnimation=function(color,windowId){
 		console.log("TRI")
 		var that=this;
@@ -182,8 +227,7 @@ var AnimationManagerObj=function(){
 			}
 		}
 	}
-	
-	
+
 	var CircleAnimation=function(color,windowId){
 		//wobble
 		var length=2000;
@@ -206,8 +250,12 @@ var AnimationManagerObj=function(){
 			}
 		}
 	}	
-	
-	
+
+	this.getPlasmaAnimation=function(){
+		return new PlasmaAnimation();
+	}
+
+
 	this.createAnimation=function(gestureType,client,speed){
 		if(speed===null||speed===""||speed===undefined)
 			var speed=0.5;
@@ -293,8 +341,8 @@ var TcpSocketManagerObj=function(clientsManager){
 		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 		{
-			if(debugMode){
-				console.log(frame);
+			if(DEBUGMODE){
+				//console.log(frame);
 				app.io.broadcast('newFrame', frame);
 			}
 			else{
@@ -302,7 +350,6 @@ var TcpSocketManagerObj=function(clientsManager){
 				Tube.ready() && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
 			}
 		}
-
 		that.lastSentFrame=frame;
 	}
 }
@@ -313,13 +360,13 @@ var clientsManagerObj=function(){
 	//array to hold all connected clients
 	var clients=[];
 	
-	var emptyClient = {"id":0,"window":0,"color":[150,150,150],"lastActivity":new Date(),"animations":[], "zoom": 0};
-	var continousBackgroundAnimation=animationManager.createAnimation(GESTURETYPES.BACKGROUND,emptyClient,1.0);
-	
+	//var emptyClient = {"id":0,"window":0,"color":[150,150,150],"lastActivity":new Date(),"animations":[], "zoom": 0};
+	//var continousBackgroundAnimation=animationManager.createAnimation(GESTURETYPES.BACKGROUND,emptyClient,1.0);
+	var continuousAnimation=animationManager.getPlasmaAnimation();
 	
 	//check for inactive clients and reset Window id to -1
 	var checkForInactiveClients=function(){
-		var TimeOutInMilliseconds=60000;
+		var TimeOutInMilliseconds=CLIENTTIMEOUT;
 		var currentTime=new Date();
 		for (var i in clients) {
 			if (currentTime-clients[i].lastActivity>TimeOutInMilliseconds&&clients[i].window!=-1){ 
@@ -327,6 +374,9 @@ var clientsManagerObj=function(){
 				that.setClientAttr(clients[i].id,"window",-1);
 				app.io.sockets.socket(clients[i].id).emit("timeout");
 				console.log("reset Window for client "+clients[i].id+" due to "+TimeOutInMilliseconds/1000+" seconds inactivity");
+				
+				if(that.getActiveClientCount()==0)
+					continuousAnimation.restart();
 			}
 		}
 	}
@@ -337,6 +387,17 @@ var clientsManagerObj=function(){
 	this.getClients=function(){
 		return clients;
 	}	
+	
+	this.getActiveClientCount=function(){
+		var count=0;
+		for (var i in clients) {
+			if(clients[i].window>-1){
+				count++;
+			}
+		}
+		return count;
+	}
+	
 	
 	this.setWindow=function(id,window){
 	    //update timeout for client inactivity
@@ -418,10 +479,11 @@ var clientsManagerObj=function(){
 			}
 		}
 		// when no one is connected to the tower
-		if ( clients.length === 0)
-		{		
+		if ( this.getActiveClientCount() == 0)
+		{	
 			//play the BackgroundAnimation Scene	
-			var frame=continousBackgroundAnimation.getFrame();
+			//var frame=continousBackgroundAnimation.getFrame();
+			var frame=continuousAnimation.getFrame();
 			frames[frames.length]=frame;
 		}
 		return frames;
@@ -524,7 +586,7 @@ app.get( '/status', function onRequest( request, response )
 	var status = JSON.stringify( { active: Tube.connected && Tube.remote.search(/^127\.0\.0\.1/) === -1 } );
 	response.setHeader( 'Content-Type', 'application/json' );
 	
-	if(debugMode)
+	if(DEBUGMODE)
 		response.end( JSON.stringify( { active:true} ));
 	else
 		response.end( status );
