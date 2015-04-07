@@ -1,3 +1,5 @@
+var debugMode=true;
+
 var AnimationManagerObj=function(){
 
 	 var animations=[];
@@ -12,7 +14,8 @@ var AnimationManagerObj=function(){
 		PIGTAIL: 6,
 		CIRCLE: 7,
 		RECTANGLE: 8,
-		TRIANGLE: 9
+		TRIANGLE: 9,
+		BACKGROUND: 9
 	}
 
 	 //clone color and multiply by percent value
@@ -23,6 +26,35 @@ var AnimationManagerObj=function(){
 		}
 		return newRgbColorArray;
 	 }
+	 
+	/**
+	 * BackgroundAnimationObject
+	 * @param {Array.<number>} color
+	 * @param {number} windowId
+	 * @param {1|-1} direction, 
+	 * @param {number} speed 
+	 */
+	var BackgroundAnimation=function(color,windowId,direction,speed){
+		var that=this;
+		this.colorArray=color;
+
+		var length=12800;
+		var startTime=new Date();
+		var currPosition=windowId;
+
+		//get frame for time
+		this.getFrame=function(){
+			animationProgressInPercent=(new Date()-startTime)/length;
+
+			//always have Progress-value between 0 and 0.99999, so this animation loops
+			animationProgressInPercent=animationProgressInPercent%1;
+			
+			var frame=getBackgroundFrame();	
+			currPosition=currPosition+(direction*Math.max(0.2,(speed*2*(1-animationProgressInPercent))));
+			frame = setFrameWindowColor(frame,myMod(Math.floor(currPosition)),getPercentualColor(that.colorArray,(1-animationProgressInPercent)));
+			return frame;
+		}
+	} 
 	 
 	/**
 	 * DoubleTapAnimationObject
@@ -205,6 +237,9 @@ var AnimationManagerObj=function(){
 		if(GESTURETYPES.SWIPE_RIGHT==gestureType){
 			return new SwipeAnimation(client.color,client.window,1,speed)
 		}
+		if(GESTURETYPES.BACKGROUND==gestureType){
+			return new BackgroundAnimation(client.color,client.window,1,speed)
+		}
 		return false;
 	}
 }
@@ -258,8 +293,14 @@ var TcpSocketManagerObj=function(clientsManager){
 		//only send frame if its not identical with last frame or its a refresh/safety frame 
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 		{
-			// send frame via tubemail (if ready, i.e. connected and not busy)
-			Tube.ready() && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
+			if(debugMode){
+				console.log(frame);
+				app.io.broadcast('newFrame', frame);
+			}
+			else{
+				// send frame via tubemail (if ready, i.e. connected and not busy)
+				Tube.ready() && Tube.send( frame ) && console.log( "Send: "+JSON.stringify( frame ) );
+			}
 		}
 
 		that.lastSentFrame=frame;
@@ -272,6 +313,10 @@ var clientsManagerObj=function(){
 	//array to hold all connected clients
 	var clients=[];
 	
+	var emptyClient = {"id":0,"window":0,"color":[150,150,150],"lastActivity":new Date(),"animations":[], "zoom": 0};
+	var continousBackgroundAnimation=animationManager.createAnimation(GESTURETYPES.BACKGROUND,emptyClient,1.0);
+	
+	
 	//check for inactive clients and reset Window id to -1
 	var checkForInactiveClients=function(){
 		var TimeOutInMilliseconds=60000;
@@ -281,8 +326,7 @@ var clientsManagerObj=function(){
 				//free window due to inactivity
 				that.setClientAttr(clients[i].id,"window",-1);
 				app.io.sockets.socket(clients[i].id).emit("timeout");
-				console.log("reset Window for client "+clients[i].id+" due to "+TimeOutInMilliseconds/1000+" seconds inactivity")
-				console.log(that.getClients())
+				console.log("reset Window for client "+clients[i].id+" due to "+TimeOutInMilliseconds/1000+" seconds inactivity");
 			}
 		}
 	}
@@ -373,6 +417,13 @@ var clientsManagerObj=function(){
 				}
 			}
 		}
+		// when no one is connected to the tower
+		if ( clients.length === 0)
+		{		
+			//play the BackgroundAnimation Scene	
+			var frame=continousBackgroundAnimation.getFrame();
+			frames[frames.length]=frame;
+		}
 		return frames;
 	}
 	
@@ -400,8 +451,6 @@ app.http().io()
 
 //return static folder
 app.use('/', express.static(__dirname + '/turmwebapp'));
-
-
 
 app.io.sockets.on('connection', function(socket) {
 
@@ -470,10 +519,15 @@ var server = app.listen(4898,  function () {
 // handle tower connection status query
 app.get( '/status', function onRequest( request, response )
 {
+	
 	// answer with JSON (active if connected from an IP different from localhost)
 	var status = JSON.stringify( { active: Tube.connected && Tube.remote.search(/^127\.0\.0\.1/) === -1 } );
 	response.setHeader( 'Content-Type', 'application/json' );
-	response.end( status );
+	
+	if(debugMode)
+		response.end( JSON.stringify( { active:true} ));
+	else
+		response.end( status );
 });
 
 
@@ -515,6 +569,10 @@ function getRGB(color) {
 function getBasicFrame(){
 	return [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
  }
+ function getBackgroundFrame(){
+	return [[68,68,68],[102,102,102],[150,150,150],[102,102,102],[68,68,68],[0,0,0],[0,0,0],[0,0,0],[68,68,68],[102,102,102],[150,150,150],[102,102,102],[68,68,68],[0,0,0],[0,0,0],[0,0,0]];
+ } 
+ 
  
 function colorArraysIdentical(a, b) {
     var i = a.length;

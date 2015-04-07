@@ -23,7 +23,7 @@
 		</style>
 		<!-- socket io -->
 		<script src="/socket.io/socket.io.js"></script>
-		<script src="jquery-2.1.1.min.js"></script>
+		<script src="/js/lib/jquery-1.11.2.min.js"></script>
 		<script>
 
 		  var socket = io.connect();
@@ -36,9 +36,8 @@
 		  socket.on('newFrame', function (data) {
 			  //console.log(data)
 			  
-			  for(var i=0;i<data.length;i=i+3){
-				var currwindow=i/3;
-				$("#window"+currwindow).css("background-color","rgb("+data[i]+","+data[i+1]+","+data[i+2]+")")
+			  for(var i=0;i<data.length;i++){
+				$("#window"+i).css("background-color","rgb("+data[i][0]+","+data[i][1]+","+data[i][2]+")")
 			  }  
 		  })
 		  
