@@ -82,9 +82,12 @@ var AnimationManagerObj=function(){
 			var v4=  0.5*Math.cos(time/3);
 			var v5= Math.sin(Math.sqrt(100*(Math.pow(v3,2)+Math.pow(v4,2)))+time);
 			var v=v1+v2+v5;
-			var r=Math.floor((Math.sin(v*Math.PI)*122+122 )*fadein);
-			var g=Math.floor((Math.sin(v*Math.PI+2*Math.PI/3)*122+122) *fadein);
-			var b=Math.floor((Math.sin(v*Math.PI+4*Math.PI/3)*122+122) *fadein);
+			
+			var brightness=(Math.sin(v*Math.PI+6*Math.PI/5)+0.5);
+			
+			var r=Math.floor((Math.sin(v*Math.PI)*122+122 )*fadein*brightness);
+			var g=Math.floor((Math.sin(v*Math.PI+2*Math.PI/3)*122+122) *fadein*brightness);
+			var b=Math.floor((Math.sin(v*Math.PI+4*Math.PI/3)*122+122) *fadein*brightness);
 			return [r,g,b];
 		}
 
