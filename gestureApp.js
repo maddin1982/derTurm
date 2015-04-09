@@ -1,4 +1,4 @@
-var DEBUGMODE=true;
+var DEBUGMODE=false;
 var CLIENTTIMEOUT=60000;
 
 
@@ -76,14 +76,15 @@ var AnimationManagerObj=function(){
 		}
 
 		this.getCollorArray=function(x,time,fadein){
+			var brightnessRegulator=0.5;
+		
 			var v1 = Math.sin((x+time));
 			var v2= Math.sin(x*Math.sin((x+time/2))+Math.cos((x+time/3))+time);
 			var v3= x+ 0.5*Math.sin(time/5);
 			var v4=  0.5*Math.cos(time/3);
 			var v5= Math.sin(Math.sqrt(100*(Math.pow(v3,2)+Math.pow(v4,2)))+time);
 			var v=v1+v2+v5;
-			
-			var brightness=(Math.sin(v*Math.PI+6*Math.PI/5)+0.5);
+			var brightness=(Math.sin(v*Math.PI+6*Math.PI/5)+0.5)*brightnessRegulator;
 			
 			var r=Math.floor((Math.sin(v*Math.PI)*122+122 )*fadein*brightness);
 			var g=Math.floor((Math.sin(v*Math.PI+2*Math.PI/3)*122+122) *fadein*brightness);
@@ -98,7 +99,7 @@ var AnimationManagerObj=function(){
 				fadein+=0.01;
 			var frame=[];
 			for(var i=0;i<16;i++){
-				frame[i]=this.getCollorArray((i/16-0.5),time,fadein);
+				frame[i]=this.getCollorArray((i/15-0.5),time,fadein);
 			}
 			return frame;
 		}
