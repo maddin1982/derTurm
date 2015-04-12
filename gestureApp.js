@@ -84,7 +84,7 @@ var AnimationManagerObj=function(){
 			var v4=  0.5*Math.cos(time/3);
 			var v5= Math.sin(Math.sqrt(100*(Math.pow(v3,2)+Math.pow(v4,2)))+time);
 			var v=v1+v2+v5;
-			var brightness=(Math.sin(v*Math.PI+6*Math.PI/5)+0.5)*brightnessRegulator;
+			var brightness=Math.abs((Math.sin(v*Math.PI+6*Math.PI/5)+0.5)*brightnessRegulator);
 			
 			var r=Math.floor((Math.sin(v*Math.PI)*122+122 )*fadein*brightness);
 			var g=Math.floor((Math.sin(v*Math.PI+2*Math.PI/3)*122+122) *fadein*brightness);
@@ -346,7 +346,7 @@ var TcpSocketManagerObj=function(clientsManager){
 		if(!colorArraysIdentical(frame,that.lastSentFrame)||that.frameCounter==0)
 		{
 			if(DEBUGMODE){
-				//console.log(frame);
+				console.log(JSON.stringify( frame ));
 				app.io.broadcast('newFrame', frame);
 			}
 			else{
