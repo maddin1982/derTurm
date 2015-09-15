@@ -76,7 +76,7 @@ var AnimationManagerObj=function(){
 		}
 
 		this.getCollorArray=function(x,time,fadein){
-			var brightnessRegulator=0.5;
+			var brightnessRegulator=0.2;
 		
 			var v1 = Math.sin((x+time));
 			var v2= Math.sin(x*Math.sin((x+time/2))+Math.cos((x+time/3))+time);
@@ -94,7 +94,7 @@ var AnimationManagerObj=function(){
 
 		//get frame for time
 		this.getFrame=function(){
-			time+=0.01;
+			time+=0.005;
 			if(fadein<1)
 				fadein+=0.01;
 			var frame=[];
