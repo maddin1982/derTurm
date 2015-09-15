@@ -1,6 +1,15 @@
+
+/* debug mode for console output, ignoring tubemail*/
 var DEBUGMODE=false;
+
+/* timeout to kill inactive client*/
 var CLIENTTIMEOUT=60000;
 
+/*
+**************************************************************************************
+*	ANIMATIONS
+**************************************************************************************
+*/
 var AnimationManagerObj=function(){
 
 	 var animations=[];
@@ -103,9 +112,7 @@ var AnimationManagerObj=function(){
 			return frame;
 		}
 	} 	 
-	 
-	 
-	 
+
 	/**
 	 * DoubleTapAnimationObject
 	 * @param {Array.<number>} color
@@ -177,8 +184,6 @@ var AnimationManagerObj=function(){
 			}
 		}
 	}
-
-
 
 	var CheckAnimation=function(color,windowId){
 		return new DoubleTapAnimation(color,windowId,8.1000);
@@ -295,7 +300,14 @@ var AnimationManagerObj=function(){
 	}
 }
 
-// setup tubemail instance for connections from tower
+
+/*
+**************************************************************************************
+*	TUBEMAIL
+**************************************************************************************
+*/
+
+/* setup tubemail instance for connections from tower */
 var Tube = require('tubemail').listen( { port: 4889 } );
 
 //send data to tower over tcp socket
@@ -315,11 +327,20 @@ var TcpSocketManagerObj=function(clientsManager){
 	//check clients for animations, delete finished animations, mix current animations, hand micex frame to tower
 	var watcherTick=function(){
 		that.frameCounter++;
-		//get all frames of all clients
-		var frames=clientsManager.getCurrentFrames();
 		
 		//get basic black frame
-		var resultFrame=getBasicFrame();
+		var resultFrame=getBasicFrame();	
+		var frames=[];
+		//check if there was a recent udp message
+		if(udpMessageManager.active()){
+			//get recent udp frame
+			frames=[udpMessageManager.getLastValidFrameArray()];
+		}
+		else{
+			//get all frames of all clients
+			frames=clientsManager.getCurrentFrames();
+		}
+
 		
 		//simply summ all color values of all current frames
 		var window;
@@ -357,9 +378,16 @@ var TcpSocketManagerObj=function(clientsManager){
 	}
 }
 
+
+/*
+**************************************************************************************
+*	CLIENTSMANAGER
+**************************************************************************************
+*/
+
 var clientsManagerObj=function(){
 	var that=this;
-	
+
 	//array to hold all connected clients
 	var clients=[];
 	
@@ -400,7 +428,6 @@ var clientsManagerObj=function(){
 		}
 		return count;
 	}
-	
 	
 	this.setWindow=function(id,window){
 	    //update timeout for client inactivity
@@ -502,13 +529,109 @@ var clientsManagerObj=function(){
 	}
 }
 
+/*
+**************************************************************************************
+*	INCOMMING UDP CONNECTIONS (PHONE)
+**************************************************************************************
+*/
+var dgram = require('dgram');
+
+var udpMessageManager=function(){
+	var that=this;
+	var PORT = 33333;
+	var HOST = '0.0.0.0';
+	var server;
+	var lastValidMessageTime=0;
+	var colorValues,colorValue;
+	var udpActiveTimeInSeconds=10;
+	var lastValidFrameArray=[];
+
+	this.init=function(){
+		server = dgram.createSocket('udp4');
+		
+		server.on('message', function (message, remote) {
+			that.processMessage(''+message);
+		});
+		server.bind(PORT, HOST);
+	}
+	/* message format: [kazoosh]||100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255|100,200,255 */
+	this.processMessage=function(message){
+		var colorArrayResult=getBasicFrame();
+		if(message.indexOf('[kazoosh]')!==-1){
+			var messageValid=true;
+			var splitted=message.split('||');
+			if(splitted.length===2){
+				splitted=splitted[1].split('|')
+				if(splitted.length===16){
+					for(var i=0;i<16;i++){
+						
+						colorValues=splitted[i].split(',');
+						if(colorValues.length===3){
+							for(var j=0;j<3;j++){
+								colorValue=parseInt(colorValues[j]);
+								if(colorValue>=0&&colorValue<=255){
+									colorArrayResult[i][j]=colorValue;
+								}
+								else{
+									messageValid=false;
+								}
+							}
+						}
+						else{
+							messageValid=false;
+						}
+					}
+					if(messageValid){
+						lastValidFrameArray=colorArrayResult;
+						lastValidMessageTime=new Date().getTime();
+					}
+					else{
+						console.log("-------------- MESSAGE NOT VALID ------------------------")
+					}
+				}	
+			}
+			else{
+				console.log("udp message format not valid")
+			}
+			
+		}
+		else{
+			console.log("udp message does not contain secret header")
+		}
+	}
+	
+	this.active=function(){
+		var a = new Date();
+		var b = new Date(lastValidMessageTime);
+		if(Math.abs((a - b) / 1000) < udpActiveTimeInSeconds){
+			return true;
+		}
+		
+		return false;
+	}
+	
+	this.getLastValidFrameArray=function(){
+		return lastValidFrameArray;
+	}
+	
+}
+
+
+/*
+**************************************************************************************
+*	EXPRESS WEBAPP COMMUNICATION
+**************************************************************************************
+*/
+
 var express = require('express.io');
 var app = express();
 
 var animationManager=new AnimationManagerObj();
+var udpMessageManager= new udpMessageManager();
 //var player=new PlayerObj(tcpSocketManager,animationManager);
 var clientsManager=new clientsManagerObj();
 var tcpSocketManager=new TcpSocketManagerObj(clientsManager);
+udpMessageManager.init();
 tcpSocketManager.startWatcher();
 //open socket
 app.http().io()
@@ -593,6 +716,8 @@ app.get( '/status', function onRequest( request, response )
 	else
 		response.end( status );
 });
+
+
 
 
 
